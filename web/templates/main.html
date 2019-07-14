@@ -1,0 +1,48 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <!-- Ensures proper rendering and touch zooming -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Forces IE 8/9/10 to use its latest rendering engine -->
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Pixel Art Maker</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Helvetica">
+    <link rel="stylesheet" href="/static/css/styles.css">
+  </head>
+  <body>
+    <div class="row">
+      <div class="column">
+        <div class="inputs">
+          <h4>choose grid size</h4>
+          <!-- class names all lower case and delimited with hyphens per Udacity Frontend Nanodegree Style Guide (CSS page) -->
+          <form class="size-picker">
+            height:
+            <input type="number" class="input-height" name="height" min="1" max="200" value="50">
+            <br><br>
+            width:
+            <input type="number" class="input-width" name="width" min="1" max="200" value="80">
+            <input type="submit" class="submit-button" value="submit">
+            <p><em>also clears grid</em></p>
+          </form>
+          <h4>select color</h4>
+          <input type="color" class="color-picker" value="#6aa5b8">
+          <input type="button" class="quick-fill" value="fill">
+          <h4>mode</h4>
+          <input type="button" class="erase-mode" value="erase">
+          <p><em>or double-click to erase</em></p>
+          <input type="button" class="draw-mode" value="draw">
+           <p><em>Submit drawing</em></p>
+          <form class="draw-submit">
+            <input type="submit" class="submit-button" value="Submit drawing">
+          </form>
+        </div>
+      </div>
+      <div class="column">
+        <h1>Pixel Art Maker</h1>
+        <table class="pixel-canvas"></table>
+        <br>
+      </div>
+    </div>
+    <script src="/static/js/designs.js"></script>
+  </body>
+</html>

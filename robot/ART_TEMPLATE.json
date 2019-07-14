@@ -1,0 +1,358 @@
+{
+    "protocol-schema": "1.0.0",
+    "metadata": {
+        "protocol-name": "ART",
+        "author": "Tim Dobbs, Counter Culture Labs, and artists",
+        "description": "Recipe to make agar art from submissions",
+        "category": null,
+        "subcategory": null,
+        "tags": []
+    },
+    "default-values": {
+        "aspirate-flow-rate": {
+            "p10_single": 5,
+            "p10_multi": 5,
+            "p50_single": 25,
+            "p50_multi": 25,
+            "p300_single": 150,
+            "p300_multi": 150,
+            "p1000_single": 500
+        },
+        "dispense-flow-rate": {
+            "p10_single": 10,
+            "p10_multi": 10,
+            "p50_single": 50,
+            "p50_multi": 50,
+            "p300_single": 300,
+            "p300_multi": 300,
+            "p1000_single": 1000
+        },
+        "aspirate-mm-from-bottom": 1,
+        "dispense-mm-from-bottom": 0.5,
+        "touch-tip-mm-from-top": -1
+    },
+    "designer-application": {
+        "application-name": "opentrons/protocol-designer",
+        "application-version": "1.1.1",
+        "applicationVersion": "1.1.1",
+        "_internalAppBuildDate": "Wed, 03 Apr 2019 17:23:10 GMT",
+        "data": {
+            "pipetteTiprackAssignments": {
+                "23640da0-a26f-11e9-8748-cb13efd2b3c1": "tiprack-200ul"
+            },
+            "dismissedWarnings": {
+                "form": {
+                    "c6b5bee0-a26f-11e9-8748-cb13efd2b3c1": [
+                        "BELOW_PIPETTE_MINIMUM_VOLUME",
+                        "BELOW_MIN_DISPOSAL_VOLUME"
+                    ],
+                    "fa8fabe0-a26f-11e9-8748-cb13efd2b3c1": [
+                        "BELOW_PIPETTE_MINIMUM_VOLUME",
+                        "BELOW_MIN_DISPOSAL_VOLUME"
+                    ]
+                },
+                "timeline": {}
+            },
+            "ingredients": {
+                "0": {
+                    "name": "green",
+                    "description": "Green Dye",
+                    "serialize": false,
+                    "liquidGroupId": "0"
+                },
+                "1": {
+                    "name": "blue",
+                    "description": "Blue Dye",
+                    "serialize": false,
+                    "liquidGroupId": "1"
+                }
+            },
+            "ingredLocations": {
+                "5440e740-a26f-11e9-8748-cb13efd2b3c1:12-well-plate": {
+                    "A1": {
+                        "0": {
+                            "volume": 6900
+                        }
+                    },
+                    "A2": {
+                        "1": {
+                            "volume": 6900
+                        }
+                    }
+                }
+            },
+            "savedStepForms": {
+                "__INITIAL_DECK_SETUP_STEP__": {
+                    "stepType": "manualIntervention",
+                    "id": "__INITIAL_DECK_SETUP_STEP__",
+                    "labwareLocationUpdate": {
+                        "trashId": "12",
+                        "23663080-a26f-11e9-8748-cb13efd2b3c1:tiprack-200ul": "6",
+                        "5440e740-a26f-11e9-8748-cb13efd2b3c1:12-well-plate": "3",
+                        "a28f9860-a26f-11e9-8748-cb13efd2b3c1:384-plate": "5"
+                    },
+                    "pipetteLocationUpdate": {
+                        "23640da0-a26f-11e9-8748-cb13efd2b3c1": "left"
+                    }
+                },
+                "c6b5bee0-a26f-11e9-8748-cb13efd2b3c1": {
+                    "id": "c6b5bee0-a26f-11e9-8748-cb13efd2b3c1",
+                    "stepType": "moveLiquid",
+                    "stepName": "transfer",
+                    "stepDetails": "",
+                    "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                    "volume": "5",
+                    "changeTip": "once",
+                    "path": "multiDispense",
+                    "aspirate_wells_grouped": false,
+                    "aspirate_labware": "5440e740-a26f-11e9-8748-cb13efd2b3c1:12-well-plate",
+                    "aspirate_wells": [
+                        "A1"
+                    ],
+                    "aspirate_wellOrder_first": "t2b",
+                    "aspirate_wellOrder_second": "l2r",
+                    "aspirate_mix_checkbox": false,
+                    "aspirate_mix_times": null,
+                    "aspirate_mix_volume": null,
+                    "aspirate_mmFromBottom": 1,
+                    "aspirate_touchTip_checkbox": false,
+                    "dispense_labware": "a28f9860-a26f-11e9-8748-cb13efd2b3c1:384-plate",
+                    "dispense_wells": [
+                        "O24",
+                        "P24"
+                    ],
+                    "dispense_wellOrder_first": "t2b",
+                    "dispense_wellOrder_second": "l2r",
+                    "dispense_mix_checkbox": false,
+                    "dispense_mix_times": null,
+                    "dispense_mix_volume": null,
+                    "dispense_mmFromBottom": 0.5,
+                    "dispense_touchTip_checkbox": false,
+                    "disposalVolume_checkbox": true,
+                    "disposalVolume_volume": "10",
+                    "blowout_checkbox": false,
+                    "blowout_location": "trashId",
+                    "preWetTip": false
+                },
+                "fa8fabe0-a26f-11e9-8748-cb13efd2b3c1": {
+                    "id": "fa8fabe0-a26f-11e9-8748-cb13efd2b3c1",
+                    "stepType": "moveLiquid",
+                    "stepName": "transfer",
+                    "stepDetails": "",
+                    "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                    "volume": "5",
+                    "changeTip": "once",
+                    "path": "multiDispense",
+                    "aspirate_wells_grouped": false,
+                    "aspirate_labware": "5440e740-a26f-11e9-8748-cb13efd2b3c1:12-well-plate",
+                    "aspirate_wells": [
+                        "A2"
+                    ],
+                    "aspirate_wellOrder_first": "t2b",
+                    "aspirate_wellOrder_second": "l2r",
+                    "aspirate_mix_checkbox": false,
+                    "aspirate_mix_times": null,
+                    "aspirate_mix_volume": null,
+                    "aspirate_mmFromBottom": 1,
+                    "aspirate_touchTip_checkbox": false,
+                    "dispense_labware": "a28f9860-a26f-11e9-8748-cb13efd2b3c1:384-plate",
+                    "dispense_wells": [
+                        "O23",
+                        "P23",
+                        "M24",
+                        "N24"
+                    ],
+                    "dispense_wellOrder_first": "t2b",
+                    "dispense_wellOrder_second": "l2r",
+                    "dispense_mix_checkbox": false,
+                    "dispense_mix_times": null,
+                    "dispense_mix_volume": null,
+                    "dispense_mmFromBottom": 0.5,
+                    "dispense_touchTip_checkbox": false,
+                    "disposalVolume_checkbox": true,
+                    "disposalVolume_volume": "10",
+                    "blowout_checkbox": false,
+                    "blowout_location": "trashId",
+                    "preWetTip": false
+                }
+            },
+            "orderedStepIds": [
+                "c6b5bee0-a26f-11e9-8748-cb13efd2b3c1",
+                "fa8fabe0-a26f-11e9-8748-cb13efd2b3c1"
+            ]
+        }
+    },
+    "robot": {
+        "model": "OT-2 Standard"
+    },
+    "pipettes": {
+        "main_pipette": {
+            "mount": "left",
+            "model": "p300_single_v1.3",
+            "name": "p300_single"
+        }
+    },
+    "labware": {
+        "trashId": {
+            "slot": "12",
+            "display-name": "Trash",
+            "model": "fixed-trash"
+        },
+        "tips": {
+            "slot": "6",
+            "display-name": "tiprack 200ul",
+            "model": "tiprack-200ul"
+        },
+        "pallete": {
+            "slot": "3",
+            "display-name": "6 well \"pallete\" plate",
+            "model": "6-well-plate"
+        }
+    },
+    "procedure": [
+        {
+            "annotation": {
+                "name": "TODO Name 0",
+                "description": "todo description"
+            },
+            "subprocedure": [
+                {
+                    "command": "pick-up-tip",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "labware": "23663080-a26f-11e9-8748-cb13efd2b3c1:tiprack-200ul",
+                        "well": "A1"
+                    }
+                },
+                {
+                    "command": "aspirate",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "volume": 20,
+                        "labware": "5440e740-a26f-11e9-8748-cb13efd2b3c1:12-well-plate",
+                        "well": "A1",
+                        "offsetFromBottomMm": 1
+                    }
+                },
+                {
+                    "command": "dispense",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "volume": 5,
+                        "labware": "a28f9860-a26f-11e9-8748-cb13efd2b3c1:384-plate",
+                        "well": "O24",
+                        "offsetFromBottomMm": 0.5
+                    }
+                },
+                {
+                    "command": "dispense",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "volume": 5,
+                        "labware": "a28f9860-a26f-11e9-8748-cb13efd2b3c1:384-plate",
+                        "well": "P24",
+                        "offsetFromBottomMm": 0.5
+                    }
+                },
+                {
+                    "command": "blowout",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "labware": "trashId",
+                        "well": "A1"
+                    }
+                },
+                {
+                    "command": "drop-tip",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "labware": "trashId",
+                        "well": "A1"
+                    }
+                }
+            ]
+        },
+        {
+            "annotation": {
+                "name": "TODO Name 1",
+                "description": "todo description"
+            },
+            "subprocedure": [
+                {
+                    "command": "pick-up-tip",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "labware": "23663080-a26f-11e9-8748-cb13efd2b3c1:tiprack-200ul",
+                        "well": "B1"
+                    }
+                },
+                {
+                    "command": "aspirate",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "volume": 30,
+                        "labware": "5440e740-a26f-11e9-8748-cb13efd2b3c1:12-well-plate",
+                        "well": "A2",
+                        "offsetFromBottomMm": 1
+                    }
+                },
+                {
+                    "command": "dispense",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "volume": 5,
+                        "labware": "a28f9860-a26f-11e9-8748-cb13efd2b3c1:384-plate",
+                        "well": "O23",
+                        "offsetFromBottomMm": 0.5
+                    }
+                },
+                {
+                    "command": "dispense",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "volume": 5,
+                        "labware": "a28f9860-a26f-11e9-8748-cb13efd2b3c1:384-plate",
+                        "well": "P23",
+                        "offsetFromBottomMm": 0.5
+                    }
+                },
+                {
+                    "command": "dispense",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "volume": 5,
+                        "labware": "a28f9860-a26f-11e9-8748-cb13efd2b3c1:384-plate",
+                        "well": "M24",
+                        "offsetFromBottomMm": 0.5
+                    }
+                },
+                {
+                    "command": "dispense",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "volume": 5,
+                        "labware": "a28f9860-a26f-11e9-8748-cb13efd2b3c1:384-plate",
+                        "well": "N24",
+                        "offsetFromBottomMm": 0.5
+                    }
+                },
+                {
+                    "command": "blowout",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "labware": "trashId",
+                        "well": "A1"
+                    }
+                },
+                {
+                    "command": "drop-tip",
+                    "params": {
+                        "pipette": "23640da0-a26f-11e9-8748-cb13efd2b3c1",
+                        "labware": "trashId",
+                        "well": "A1"
+                    }
+                }
+            ]
+        }
+    ]
+}

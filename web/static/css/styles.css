@@ -1,0 +1,133 @@
+body {
+  text-align: center;
+  font-family: Arial;
+  background-color: #ececec;
+}
+
+* {
+  font-family: Arial;
+  color: grey;
+}
+
+/* Styles title */
+h1 {
+  font-size: 2em;
+  text-transform: uppercase;
+}
+
+/* First margin value is top, second is right and left sides, third is bottom */
+h4 {
+  margin: 1em 0 0.75em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+/* Applies to italicized text */
+em {
+  font-size: 13px;
+  color: #bfbfbf;
+}
+
+table,
+tr,
+td {
+  border: silver 1px dotted;
+}
+
+.pixel-canvas {
+  background-color : white;
+}
+
+/* 'border-collapse' CSS property specifies whether a table's cells have shared or separate borders; 'collapse' value causes cells to have shared borders */
+table {
+  border-collapse: collapse;
+}
+
+tr {
+  height: 10px;
+}
+
+td {
+  min-width: 10px;
+  box-sizing: border-box;
+}
+
+/* Styles height and width input boxes */
+input[type=number] {
+  width: 3em;
+  border: 1px solid #dcdcdc;
+}
+
+/* Styles buttons, including a change of displayed mouse cursor to inform user he/she is hovering over something clickable */
+.submit-button, .quick-fill, .erase-mode, .draw-mode {
+  box-shadow: inset 0px 1px 0 0 #fff;
+	background: linear-gradient(#f9f9f9 5%, #e9e9e9 100%);
+  /* creates rounded edges (more pixels -> more rounded) */
+	border-radius: 7px;
+	border: 1px solid #dcdcdc;
+	font-weight: bold;
+  /* Padding is space between element's content and border. First value sets top and bottom padding; second value sets right and left */
+	padding: 6px 24px;
+	text-decoration: none;
+	/* text-shadow: 0 1px #fff; */
+  cursor: pointer;
+  /* Places button on its own line */
+  display: block;
+  margin-top: 1em;
+}
+
+.color-picker {
+	border: 1px solid #dcdcdc;
+  -webkit-appearance: none;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.color-picker::-webkit-color-swatch {
+  border: none;
+  border-radius: 10px;
+  padding: 0;
+}
+.color-picker::-webkit-color-swatch-wrapper {
+  border: none;
+  border-radius: 10px;
+  padding: 0;
+}
+
+/* Styles content to left of grid */
+.inputs {
+  text-align: left;
+  margin-left: 8em;
+  margin-top: 5.35em;
+  border-radius: 7px;
+  border: 1px solid #dcdcdc;
+  padding-left: 2em;
+  padding-top: 0.5em;
+  padding-bottom: 1.5em;
+  width: 200px;
+  background-color : white;
+}
+
+/* Part of two-column layout implementation */
+.column {
+  float: left;
+  width: 35%;
+}
+
+/* Ensures title ('Pixel Art Maker') is centered above grid */
+.column:last-of-type {
+  width: auto;
+}
+
+/* Part of two-column layout implementation. :after' is a pseudo element, affecting display of generated content */
+.row:after {
+  /* You can't style generated content without defining what that content should be. If content not needed, just add extra 'invisible element' to style, and style that. Without this, default value of content: none is assumed, meaning there is nothing for style to be applied to */
+  content: "";
+  display: table;
+  /* Cleared elements are pushed below the corresponding floated elements; 'clear: both' pushes element below all floated elements */
+  clear: both;
+}
