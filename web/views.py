@@ -12,22 +12,21 @@ from flask_login import login_required
 def index():
     return render_template('main.html')
 
-@app.route('/receive_art', methods=['GET','POST'])
+@app.route('/receive_art', methods=['POST'])
 def receive_art():
+    print(request.headers)
     art = request.json
 
     art_data = dict()
     art_data['title'] = 'My Cool Test Art'
     art_data['email'] = 'raddude88@chillmail.com'
     art_data['submit_date'] = datetime.datetime.now()
-    art_data['art'] = art
+    art_data['art'] = str(art)
     art_data['status'] = 'Submitted'
-
-    print(art_data)
 
     db.session.add(models.artpieces(**art_data))
     db.session.commit()
-    return 200
+    return 'Robot Art Loaded'
 
 
 @app.errorhandler(404)

@@ -36,33 +36,6 @@ sizePicker.addEventListener('submit', function(e) {
   makeGrid();
 });
 
-drawSubmit.addEventListener('submit', function(e) {
-  var canvasCoord = new Object();
-  e.preventDefault();
-  document.querySelector('.draw-submit').innerHTML = '<input type="submit" class="submit-button" value="Submit drawing">';
-  var table = document.querySelector(".pixel-canvas");
-  for (var i = 0, row; row = table.rows[i]; i++) {
-    for (var j = 0, col; col = row.cells[j]; j++) {
-     if (col.style.backgroundColor != "") {
-      if (canvasCoord[col.style.backgroundColor]) {
-       canvasCoord[col.style.backgroundColor].push([i,j]);
-      } else {
-        canvasCoord[col.style.backgroundColor] = [[i,j]];
-      }
-     }
-   }
-}
-
-var xhr = new XMLHttpRequest();
-xhr.open("POST", '/receive_art', true);
-xhr.setRequestHeader('Content-type', 'application/json');
-xhr.send(JSON.stringify(
-    canvasCoord
-));
-
-document.querySelector('.draw-submit').innerHTML += JSON.stringify(canvasCoord)
-
-});
 
 // Enables color dragging with selected color (code for filling in single cell is above). (No click on 'draw' mode needed; this is default mode)
 let down = false; // Tracks whether or not mouse pointer is pressed
