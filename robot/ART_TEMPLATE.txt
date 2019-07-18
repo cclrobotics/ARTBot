@@ -1,0 +1,51 @@
+from opentrons import labware, instruments
+
+metadata = {
+    'protocolName': 'CCL ARTBot',
+    'author': 'Tim Dobbs and Counter Culture Labs',
+    'source': 'ARTBot Protocol Builder'
+    }
+
+
+# a 6-well plate for all of the colors in our pallette
+palette = labware.load('CCL_pipette_box_top', 11)
+palette2 = labware.load('CCL_pipette_box_top', 7)
+palette3 = labware.load('CCL_pipette_box_top', 4)
+
+# a tip rack for our pipette
+p200rack = labware.load('tiprack-200ul', 10)
+
+# red solution location
+red = palette.wells('A1')
+# blue solution location
+blue = palette2.wells('A1')
+# green solution location
+green = palette3.wells('A1')
+
+
+# plate to create art in
+plate = labware.load('CCL_ARTBot_canvas', 8)
+
+# wells to dispense each color material to
+red_wells = [
+    well.top() for well in plate.wells(%%RED WELLS GO HERE%%)]
+blue_wells = [
+    well.top() for well in plate.wells(%%BLUE WELLS GO HERE%%)]
+green_wells = [
+    well.top() for well in plate.wells(%%GREEN WELLS GO HERE%%)]
+
+
+def run_custom_protocol(
+        pipette_axis: 'StringSelection...'='left'):
+
+    p300 = instruments.P300_Single(
+        mount=pipette_axis,
+        tip_racks=[p200rack]
+    )
+
+    p300.distribute(10, red, red_wells, disposal_vol=0, blow_out=True)
+    p300.distribute(10, blue, blue_wells, disposal_vol=0, blow_out=True)
+    p300.distribute(10, green, green_wells, disposal_vol=0, blow_out=True)
+
+
+run_custom_protocol(**{'pipette_axis': 'left'})
