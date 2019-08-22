@@ -6,11 +6,35 @@ metadata = {
     'source': 'ARTBot Protocol Builder'
     }
 
+class AgarBrush('Pipette'): #maybe don't subclass it at all. Might just be complicating things
+
+    def distribute_to_agar(self, vol, source, destination, disposal_vol):
+        #todo: check if tip is on already
+
+        dest = list(destination) #allows for non-lists
+
+        for cnt, well in enumerate(dest):
+            if self.VOLUME_IN_PIPETTE < vol: #TODO
+                remaining_wells = len(dest) - cnt
+                remaining_vol = remaining_wells * vol
+
+                if remaining_vol > self.PIPETTE_SIZE: #TODO
+                    asp_vol = math.floor(self.PIPETTE_SIZE / vol) * vol #TODO
+                else:
+                    asp_vol =  remaining_vol
+
+                self.aspirate(asp_vol, source)
+
+            self.dispense(vol, well.top(),0.25)
+
+            dip_position = robot._driver.position
+            dip_position['Z'] = dip_position['Z'] - 7
+            robot._driver.move(dip_position)
+
+        self.TRASH_TIP #TODO
 
 # a 6-well plate for all of the colors in our pallette
-palette = labware.load('CCL_pipette_box_top', 11)
-palette2 = labware.load('CCL_pipette_box_top', 7)
-palette3 = labware.load('CCL_pipette_box_top', 4)
+palette = labware.load('falcon_6_wellplate_15.5ml_flat', 1)
 
 # a tip rack for our pipette
 p200rack = labware.load('tiprack-200ul', 10)
@@ -18,13 +42,13 @@ p200rack = labware.load('tiprack-200ul', 10)
 # red solution location
 red = palette.wells('A1')
 # blue solution location
-blue = palette2.wells('A1')
+blue = palette.wells('A2')
 # green solution location
-green = palette3.wells('A1')
+green = palette.wells('A3')
 
 
 # plate to create art in
-plate = labware.load('CCL_ARTBot_canvas', 8)
+plate = labware.load('CCL_ARTBot_canvas', 5)
 
 # wells to dispense each color material to
 red_wells = [
@@ -34,18 +58,19 @@ blue_wells = [
 green_wells = [
     well.top() for well in plate.wells(%%GREEN WELLS GO HERE%%)]
 
-
 def run_custom_protocol(
         pipette_axis: 'StringSelection...'='left'):
 
-    p300 = instruments.P300_Single(
-        mount=pipette_axis,
-        tip_racks=[p200rack]
+    p300 = AgarBrush(
+        instruments.P300_Single(
+            mount=pipette_axis,
+            tip_racks=[p200rack]
+        )
     )
 
-    p300.distribute(10, red, red_wells, disposal_vol=0, blow_out=True)
-    p300.distribute(10, blue, blue_wells, disposal_vol=0, blow_out=True)
-    p300.distribute(10, green, green_wells, disposal_vol=0, blow_out=True)
+    p300.distribute_to_agar(5, red, red_wells, disposal_vol=0)
+    p300.distribute_to_agar(5, blue, blue_wells, disposal_vol=0)
+    p300.distribute_to_agar(5, green, green_wells, disposal_vol=0)
 
 
-run_custom_protocol(**{'pipette_axis': 'left'})
+if __name__ == '__main__': run_custom_protocol(**{'pipette_axis': 'left'})
