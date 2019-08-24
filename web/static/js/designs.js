@@ -4,6 +4,27 @@ const quickFill = document.querySelector('.quick-fill');
 const eraseMode = document.querySelector('.erase-mode');
 const drawMode = document.querySelector('.draw-mode');
 const drawSubmit = document.querySelector('.draw-submit');
+const colorContainer = document.querySelector('#color-container');
+
+function makeColorPicker() {
+  let colors = [
+      "red", 
+      "blue", 
+      "yellow", 
+      "green"
+  ];
+  colors.forEach(function(color) {
+    let colorCircle = document.createElement('div');
+    colorCircle.id = color;
+    colorCircle.className = "color-picker";
+    colorCircle.style.display = "inline-block";
+    colorCircle.style.backgroundColor = color;
+    colorCircle.style.margin = "5px";
+    colorContainer.appendChild(colorCircle);
+  }); 
+}
+
+makeColorPicker();
 
 function makeGrid() {
   let gridHeight = document.querySelector('.input-height').value;

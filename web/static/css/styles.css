@@ -135,17 +135,3 @@ input[type=number] {
 #color-container {
     display: inline-block;
 }
-
-/* change the color palette here */
-#red {
-    display: inline-block;
-    background-color: red;
-}
-#blue {
-    display: inline-block;
-    background-color: blue;
-}
-#yellow {
-    display: inline-block;
-    background-color: yellow;
-}
