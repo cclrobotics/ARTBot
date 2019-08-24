@@ -131,3 +131,21 @@ input[type=number] {
   /* Cleared elements are pushed below the corresponding floated elements; 'clear: both' pushes element below all floated elements */
   clear: both;
 }
+
+#color-container {
+    display: inline-block;
+}
+
+/* change the color palette here */
+#red {
+    display: inline-block;
+    background-color: red;
+}
+#blue {
+    display: inline-block;
+    background-color: blue;
+}
+#yellow {
+    display: inline-block;
+    background-color: yellow;
+}
