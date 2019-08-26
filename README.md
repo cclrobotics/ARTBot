@@ -9,3 +9,7 @@ as a JSON into a protocol to draw that picture on an agar art tray.
 - Install the Python packages to the virtual environment: ```pip3 install -r requirements.txt```
 - Run the server: ```python3 web/run.py```
 - Go to ```127.0.0.1:5000``` in your browser.
+Note: don't forget to add your virtual environment to the gitignore before you push.
+
+## Screenshot
+![ARTBot Screenshot](/ARTBotScreenShot.png?raw=true "ARTBot Screenshot")
