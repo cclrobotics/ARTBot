@@ -23,6 +23,10 @@ function makeColorPicker() {
     colorCircle.style.backgroundColor = color;
     colorCircle.style.margin = "5px";
     colorContainer.appendChild(colorCircle);
+
+    if (color === "red") {
+      colorCircle.classList.add("selected-color");
+    }
   }); 
 }
 
@@ -87,11 +91,15 @@ pixelCanvas.addEventListener('mousedown', function(e) {
   });
 });
 
-//
+// Listens for clicks on the color-container.  If the target has color-picker class then update colorChoice
+// variable with its background color and add border to selected element (remove border on previous).
 colorContainer.addEventListener('click', function(e) {
   e.preventDefault();
   if (e.target.className === 'color-picker') {
+    let selected = document.querySelector('.selected-color');
+    selected.classList.remove("selected-color");
     colorChoice = e.target.style.backgroundColor;
+    e.target.classList.add("selected-color");
   }   
 });
 

@@ -139,3 +139,7 @@ input[type=number] {
 	border-radius: 7px;
     border: 1px solid #dcdcdc;
 }
+
+.selected-color {
+    border: 3px solid #000000;
+}
