@@ -9,7 +9,8 @@ metadata = {
 class AgarBrush('Pipette'): #maybe don't subclass it at all. Might just be complicating things
 
     def distribute_to_agar(self, vol, source, destination, disposal_vol):
-        #todo: check if tip is on already
+        if not self.current_tip():
+            raise ValueError("%s does not have a pipette tip attached" % self)
 
         dest = list(destination) #allows for non-lists
 
@@ -18,8 +19,8 @@ class AgarBrush('Pipette'): #maybe don't subclass it at all. Might just be compl
                 remaining_wells = len(dest) - cnt
                 remaining_vol = remaining_wells * vol
 
-                if remaining_vol > self.PIPETTE_SIZE: #TODO
-                    asp_vol = math.floor(self.PIPETTE_SIZE / vol) * vol #TODO
+                if remaining_vol > self.max_volume:
+                    asp_vol = math.floor(self.max_volume / vol) * vol
                 else:
                     asp_vol =  remaining_vol
 
