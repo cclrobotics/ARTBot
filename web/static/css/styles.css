@@ -106,6 +106,7 @@ input[type=number] {
   border-radius: 7px;
   border: 1px solid #dcdcdc;
   padding-left: 2em;
+  padding-right: 2em;
   padding-top: 0.5em;
   padding-bottom: 1.5em;
   width: 200px;
@@ -134,4 +135,7 @@ input[type=number] {
 
 #color-container {
     display: inline-block;
+	background-color: #dcdcdc;;
+	border-radius: 7px;
+    border: 1px solid #dcdcdc;
 }
