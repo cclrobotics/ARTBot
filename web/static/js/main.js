@@ -169,3 +169,35 @@ drawMode.addEventListener('click', function() {
     e.target.style.backgroundColor = colorChoice;
   });
 });
+
+drawSubmit.addEventListener('submit', function(e) {
+  var canvasCoord = new Object();
+  e.preventDefault();
+  document.querySelector('.draw-submit').innerHTML = '<input type="submit" class="submit-button" value="Submit drawing">';
+  var table = document.querySelector(".pixel-canvas");
+  for (var i = 0, row; row = table.rows[i]; i++) {
+    for (var j = 0, col; col = row.cells[j]; j++) {
+     if (col.style.backgroundColor != "") {
+      if (canvasCoord[col.style.backgroundColor]) {
+       canvasCoord[col.style.backgroundColor].push([i,j]);
+      } else {
+        canvasCoord[col.style.backgroundColor] = [[i,j]];
+      }
+     }
+   }
+  }
+
+  var xhr = new XMLHttpRequest();
+  var csrf_token = document.querySelector("#csrf").value;
+  xhr.open("POST", '/receive_art', true);
+  xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+  xhr.setRequestHeader('X-CSRFToken', csrf_token);
+  xhr.send(JSON.stringify(
+    canvasCoord
+  ));
+
+  xhr.onloadend = function () {
+    document.querySelector('.draw-submit').innerHTML += xhr.responseText;
+  };
+
+});
