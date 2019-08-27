@@ -49,7 +49,7 @@
 
           <hr>
           <h4>Donate!</h4>
-          <p><em>Please donate.  It costs money produce the art and your donation help Counter Culture Labs continue!</em></p>
+          <p><em>Please donate.  It costs money to produce the art and your donation helps Counter Culture Labs continue!</em></p>
           <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
             <input type="hidden" name="cmd" value="_donations" />
             
@@ -71,6 +71,56 @@
         <br>
       </div>
     </div>
+
+    <!-- success modal -->
+    <div id="success-modal" class="modal">
+
+      <!-- modal content -->
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="close">&times;</span>
+          <h2>Success</h2>
+        </div>
+        <div class="modal-body">
+          <p class="response-text"></p>
+          <p><em>If you haven't, please consider donating.  It costs money to produce the art and your donation helps Counter Culture Labs continue!</em></p>
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+            <input type="hidden" name="cmd" value="_donations" />
+            
+            <!-- Update the email address here -->
+            <input type="hidden" name="business" value="example@example.com" />
+            
+            <input type="hidden" name="item_name" value="Counter Culture Lab Oakland ARTRobot public donations." />
+            <input type="hidden" name="currency_code" value="USD" />
+            <input type="hidden" name="amount" value="5" />
+            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+            <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+          </form>
+        </div>
+        <div class="modal-footer">
+          <h3>Thank you!</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- error modal -->
+    <div id="error-modal" class="modal">
+
+      <!-- modal content -->
+      <div id="error-content" class="modal-content">
+        <div class="modal-header">
+          <span class="close">&times;</span>
+          <h2>Error</h2>
+        </div>
+        <div class="modal-body">
+          <p class="response-text"></p>
+        </div>
+        <div class="modal-footer">
+          <h3>Please try again later!</h3>
+        </div>
+      </div>
+    </div>
+
     <script src="/static/js/main.js"></script>
   </body>
 </html>
