@@ -13,30 +13,42 @@
     <div class="row">
       <div class="column">
         <div class="inputs">
-          <h4>choose grid size</h4>
+          <h4>Choose grid size</h4>
           <!-- class names all lower case and delimited with hyphens per Udacity Frontend Nanodegree Style Guide (CSS page) -->
           <form class="size-picker">
-            height:
+            Height:
             <input type="number" class="input-height" name="height" min="1" max="200" value="50">
             <br><br>
-            width:
+            Width:
             <input type="number" class="input-width" name="width" min="1" max="200" value="70">
             <input type="submit" class="submit-button" value="submit">
             <p><em>also clears grid</em></p>
           </form>
 
           <hr>
-          <h4>select color</h4>
+          <h4>Select color</h4>
           <div id="color-container">
           </div>
           <input type="button" class="quick-fill" value="fill">
           <br>
           
           <hr>
-          <h4>mode</h4>
+          <h4>Mode</h4>
           <input type="button" class="erase-mode" value="erase">
           <p><em>or double-click to erase</em></p>
           <input type="button" class="draw-mode" value="draw">
+          <br>
+
+          <hr>
+          <h4>Art title</h4>
+          <p><em>Give your art a title</em></p>
+          <input type="text" id="title" class="draw-mode">
+          <br>
+
+          <hr>
+          <h4>Contact info</h4>
+          <p><em>Give us an email so we can confirm your submission and let you know when it's ready</em></p>
+          <input type="email" id="email" class="draw-mode">
           <br>
           
           <hr>

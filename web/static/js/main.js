@@ -199,6 +199,10 @@ drawSubmit.addEventListener('submit', function(e) {
 
   var xhr = new XMLHttpRequest();
   var csrf_token = document.querySelector("#csrf").value;
+  var email = document.querySelector("#email").value;
+  var title = document.querySelector("#title").value;
+  canvasCoord['email'] = email;
+  canvasCoord['title'] = title;
 
   xhr.open("POST", '/receive_art', true);
   xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
