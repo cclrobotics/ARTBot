@@ -15,7 +15,7 @@ class AgarBrush('Pipette'): #maybe don't subclass it at all. Might just be compl
         dest = list(destination) #allows for non-lists
 
         for cnt, well in enumerate(dest):
-            if self.VOLUME_IN_PIPETTE < vol: #TODO
+            if self.current_volume < vol:
                 remaining_wells = len(dest) - cnt
                 remaining_vol = remaining_wells * vol
 
@@ -32,7 +32,7 @@ class AgarBrush('Pipette'): #maybe don't subclass it at all. Might just be compl
             dip_position['Z'] = dip_position['Z'] - 7
             robot._driver.move(dip_position)
 
-        self.TRASH_TIP #TODO
+        self.drop_tip()
 
 # a 6-well plate for all of the colors in our pallette
 palette = labware.load('falcon_6_wellplate_15.5ml_flat', 1)
