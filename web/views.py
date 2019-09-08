@@ -7,16 +7,6 @@ from flask import render_template, flash, redirect, url_for, request, Response
 from sqlalchemy import desc, extract, sql
 from flask_login import login_required
 
-def parse_rgb(rgb_str):
-    #converts an rgb string into a list and returns which color is biggest
-    str_list = rgb_str[rgb_str.find('(') + 1: rgb_str.find(')')
-                 ].split(',')
-    int_list = [int(color.replace(" ","")) for color in str_list]
-    max_position = int_list.index(max(int_list))
-    max_color = ['red','green','blue'][max_position]
-    return max_color
-
-
 #Home page
 @app.route('/', methods=('GET', 'POST'))
 @app.route('/index', methods=('GET', 'POST'))
