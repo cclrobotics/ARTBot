@@ -66,9 +66,9 @@ def run_custom_protocol(
             tip_racks=[p200rack]
     )
 
-    distribute_to_agar(p300, 5, red, red_wells, disposal_vol=0)
-    distribute_to_agar(p300, 5, blue, blue_wells, disposal_vol=0)
-    distribute_to_agar(p300, 5, green, green_wells, disposal_vol=0)
+    distribute_to_agar(p300, 1, red, red_wells, disposal_vol=0)
+    distribute_to_agar(p300, 1, blue, blue_wells, disposal_vol=0)
+    distribute_to_agar(p300, 1, green, green_wells, disposal_vol=0)
 
 
 run_custom_protocol(**{'pipette_axis': 'left'})
