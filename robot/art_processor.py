@@ -35,9 +35,11 @@ def make_procedure(artpiece):
     for color in art:
         art[color] = [well_map(well) for well in art[color]]
     #This works for one canvas. Jinja templating might actually be a better way to do this for multiple canvases
-    canvas_string = template_string.replace('%%RED WELLS GO HERE%%',str(art['red'])[1:-1])
+    canvas_string = template_string.replace('%%PINK WELLS GO HERE%%',str(art['pink'])[1:-1])
     canvas_string = canvas_string.replace('%%BLUE WELLS GO HERE%%', str(art['blue'])[1:-1])
-    canvas_string = canvas_string.replace('%%GREEN WELLS GO HERE%%', str(art['green'])[1:-1])
+    canvas_string = canvas_string.replace('%%TEAL WELLS GO HERE%%', str(art['teal'])[1:-1])
+    canvas_string = canvas_string.replace('%%ORANGE WELLS GO HERE%%', str(art['orange'])[1:-1])
+    canvas_string = canvas_string.replace('%%YELLOW WELLS GO HERE%%', str(art['yellow'])[1:-1])
 
     return canvas_string
 

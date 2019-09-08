@@ -20,7 +20,7 @@ def receive_art():
     allowed_colors = [
       "pink",
       "orange",
-      "green",
+      "teal",
       "yellow",
       "blue"
     ]

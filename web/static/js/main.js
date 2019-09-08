@@ -19,7 +19,7 @@ function makeColorPicker() {
   let colors = [
       "pink",
       "orange",
-      "green",
+      "teal",
       "yellow",
       "blue"
   ];
