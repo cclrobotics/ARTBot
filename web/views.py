@@ -15,22 +15,26 @@ def index():
 
 @app.route('/receive_art', methods=['POST'])
 def receive_art():
-    art = request.json
+    data = request.json
 
-    standardized_art = {'red':[]
-                       ,'green':[]
-                       ,'blue':[]}
+    allowed_colors = [
+      "pink",
+      "orange",
+      "green",
+      "yellow",
+      "blue"
+    ]
 
-    for color in art:
-        if ((color != 'email') and (color != 'title')): 
-            max_col = parse_rgb(color)
-            standardized_art[max_col] += art[color]
+    title = data.pop('title')
+    email = data.pop('email')
+    for key in data:
+        if key not in allowed_colors: data.pop(key)
 
     art_data = dict()
-    art_data['title'] = art['title']
-    art_data['email'] = art['email']
+    art_data['title'] = title
+    art_data['email'] = email
     art_data['submit_date'] = datetime.datetime.now()
-    art_data['art'] = json.dumps(standardized_art)
+    art_data['art'] = json.dumps(data)
     art_data['status'] = 'Submitted'
 
     db.session.add(models.artpieces(**art_data))
