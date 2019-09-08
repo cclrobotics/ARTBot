@@ -48,7 +48,7 @@ function makeGrid() {
   // If grid already present, clears any cells that have been filled in
   while (pixelCanvas.firstChild) {
     pixelCanvas.removeChild(pixelCanvas.firstChild);
-    }
+  }
   // Creates rows and cells
   for (let i = 1; i <= gridHeight; i++) {
     let gridRow = document.createElement('tr');
@@ -60,8 +60,8 @@ function makeGrid() {
       gridCell.addEventListener('mousedown', function() {
         const color = document.querySelector('.color-picker').value;
         this.style.backgroundColor = color;
-      })
-     }
+      });
+    }
   }
 }
 
@@ -182,6 +182,7 @@ drawSubmit.addEventListener('submit', function(e) {
   e.preventDefault();
 
   var canvasCoord = new Object();
+  var data = new Object();
   var table = document.querySelector(".pixel-canvas");
 
   for (var i = 0, row; row = table.rows[i]; i++) {
@@ -200,14 +201,15 @@ drawSubmit.addEventListener('submit', function(e) {
   var csrf_token = document.querySelector("#csrf").value;
   var email = document.querySelector("#email").value;
   var title = document.querySelector("#title").value;
-  canvasCoord['email'] = email;
-  canvasCoord['title'] = title;
+  data['email'] = email;
+  data['title'] = title;
+  data['art'] = canvasCoord;
 
   xhr.open("POST", '/receive_art', true);
   xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
   xhr.setRequestHeader('X-CSRFToken', csrf_token);
   xhr.send(JSON.stringify(
-    canvasCoord
+    data
   ));
 
   xhr.onloadend = function () {
