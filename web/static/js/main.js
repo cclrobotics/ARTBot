@@ -182,6 +182,7 @@ drawSubmit.addEventListener('submit', function(e) {
   e.preventDefault();
 
   var canvasCoord = new Object();
+  var data = new Object();
   var table = document.querySelector(".pixel-canvas");
 
   for (var i = 0, row; row = table.rows[i]; i++) {
@@ -200,14 +201,15 @@ drawSubmit.addEventListener('submit', function(e) {
   var csrf_token = document.querySelector("#csrf").value;
   var email = document.querySelector("#email").value;
   var title = document.querySelector("#title").value;
-  canvasCoord['email'] = email;
-  canvasCoord['title'] = title;
+  data['email'] = email;
+  data['title'] = title;
+  data['art'] = canvasCoord;
 
   xhr.open("POST", '/receive_art', true);
   xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
   xhr.setRequestHeader('X-CSRFToken', csrf_token);
   xhr.send(JSON.stringify(
-    canvasCoord
+    data
   ));
 
   xhr.onloadend = function () {
