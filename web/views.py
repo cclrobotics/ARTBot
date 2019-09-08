@@ -27,8 +27,15 @@ def receive_art():
 
     title = data.pop('title')
     email = data.pop('email')
+
+    if not title:
+        return ('Error: please enter a title.', 400)
+    elif not email:
+        return ('Error: please enter an email.', 400)
+
     for key in data:
-        if key not in allowed_colors: data.pop(key)
+        if key not in allowed_colors: 
+            return ('Error: bad request.', 400)
 
     art_data = dict()
     art_data['title'] = title
