@@ -6,6 +6,15 @@ const drawMode = document.querySelector('.draw-mode');
 const drawSubmit = document.querySelector('.draw-submit');
 const colorContainer = document.querySelector('#color-container');
 
+const successModal = document.getElementById("success-modal");
+const successClose = document.getElementsByClassName("close")[0];
+const successText = document.getElementsByClassName("response-text")[0];
+
+const errorModal = document.getElementById("error-modal");
+const errorClose = document.getElementsByClassName("close")[1];
+const errorText = document.getElementsByClassName("response-text")[1];
+
+
 function makeColorPicker() {
   let colors = [
       "red", 
@@ -168,4 +177,74 @@ drawMode.addEventListener('click', function() {
     if (e.target.tagName !== 'TD') return;
     e.target.style.backgroundColor = colorChoice;
   });
+});
+
+drawSubmit.addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  var canvasCoord = new Object();
+  var table = document.querySelector(".pixel-canvas");
+
+  for (var i = 0, row; row = table.rows[i]; i++) {
+    for (var j = 0, col; col = row.cells[j]; j++) {
+     if (col.style.backgroundColor != "") {
+      if (canvasCoord[col.style.backgroundColor]) {
+       canvasCoord[col.style.backgroundColor].push([i,j]);
+      } else {
+        canvasCoord[col.style.backgroundColor] = [[i,j]];
+      }
+     }
+   }
+  }
+
+  var xhr = new XMLHttpRequest();
+  var csrf_token = document.querySelector("#csrf").value;
+  var email = document.querySelector("#email").value;
+  var title = document.querySelector("#title").value;
+  canvasCoord['email'] = email;
+  canvasCoord['title'] = title;
+
+  xhr.open("POST", '/receive_art', true);
+  xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+  xhr.setRequestHeader('X-CSRFToken', csrf_token);
+  xhr.send(JSON.stringify(
+    canvasCoord
+  ));
+
+  xhr.onloadend = function () {
+    let status = xhr.status;
+    let response = xhr.responseText;
+    let modal;
+    let text;
+    let closer;
+    
+
+    if ((status < 300) && (status >= 200)) {
+      modal = successModal;
+      text = successText;
+      closer = successClose;
+    } else {
+      modal = errorModal;
+      text = errorText;
+      closer = errorClose;
+    }
+
+    // update modal text
+    text.innerHTML = response;
+
+    // When we get a response, open the modal 
+    modal.style.display = "block";
+
+    // close the modal
+    function closeModal(e) {
+      if ((e.target == modal) || (e.target == closer)){
+        modal.style.display = "none";
+        // remove listener since we're done with modal
+        e.target.removeEventListener(e.type, arguments.callee);
+      }
+    }
+
+    window.addEventListener('click', closeModal);
+  };
+
 });
