@@ -27,17 +27,18 @@ def index():
 def receive_art():
     art = request.json
 
-
     standardized_art = {'red':[]
                        ,'green':[]
                        ,'blue':[]}
+
     for color in art:
-        max_col = parse_rgb(color)
-        standardized_art[max_col] += art[color]
+        if ((color != 'email') and (color != 'title')): 
+            max_col = parse_rgb(color)
+            standardized_art[max_col] += art[color]
 
     art_data = dict()
-    art_data['title'] = 'My Cool Test Art'
-    art_data['email'] = 'raddude88@chillmail.com'
+    art_data['title'] = art['title']
+    art_data['email'] = art['email']
     art_data['submit_date'] = datetime.datetime.now()
     art_data['art'] = json.dumps(standardized_art)
     art_data['status'] = 'Submitted'

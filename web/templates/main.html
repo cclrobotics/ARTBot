@@ -13,28 +13,68 @@
     <div class="row">
       <div class="column">
         <div class="inputs">
-          <h4>choose grid size</h4>
+          <h4>Choose grid size</h4>
           <!-- class names all lower case and delimited with hyphens per Udacity Frontend Nanodegree Style Guide (CSS page) -->
           <form class="size-picker">
-            height:
+            Height:
             <input type="number" class="input-height" name="height" min="1" max="200" value="50">
             <br><br>
-            width:
+            Width:
             <input type="number" class="input-width" name="width" min="1" max="200" value="70">
             <input type="submit" class="submit-button" value="submit">
             <p><em>also clears grid</em></p>
           </form>
-          <h4>select color</h4>
-          <input type="color" class="color-picker" value="#6aa5b8">
+
+          <hr>
+          <h4>Select color</h4>
+          <div id="color-container">
+          </div>
           <input type="button" class="quick-fill" value="fill">
-          <h4>mode</h4>
+          <br>
+          
+          <hr>
+          <h4>Mode</h4>
           <input type="button" class="erase-mode" value="erase">
           <p><em>or double-click to erase</em></p>
           <input type="button" class="draw-mode" value="draw">
-           <p><em>Submit drawing</em></p>
+          <br>
+
+          <hr>
+          <h4>Art title</h4>
+          <p><em>Give your art a title</em></p>
+          <input type="text" id="title" class="draw-mode">
+          <br>
+
+          <hr>
+          <h4>Contact info</h4>
+          <p><em>Give us an email so we can confirm your submission and let you know when it's ready</em></p>
+          <input type="email" id="email" class="draw-mode">
+          <br>
+          
+          <hr>
+          <h4>Submit drawing</h4>
           <form class="draw-submit">
+            <input id="csrf" type="hidden" name="csrf" value="{{ csrf_token() }}" />
             <input type="submit" class="submit-button" value="Submit drawing">
           </form>
+          <br>
+
+          <hr>
+          <h4>Donate!</h4>
+          <p><em>Please donate.  It costs money to produce the art and your donation helps Counter Culture Labs continue!</em></p>
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+            <input type="hidden" name="cmd" value="_donations" />
+            
+            <!-- Update the email address here -->
+            <input type="hidden" name="business" value="example@example.com" />
+            
+            <input type="hidden" name="item_name" value="Counter Culture Lab Oakland ARTRobot public donations." />
+            <input type="hidden" name="currency_code" value="USD" />
+            <input type="hidden" name="amount" value="5" />
+            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+            <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+          </form>
+
         </div>
       </div>
       <div class="column">
@@ -43,39 +83,56 @@
         <br>
       </div>
     </div>
-    <script src="/static/js/designs.js"></script>
-    <script type="text/javascript">
-     drawSubmit.addEventListener('submit', function(e) {
-          var canvasCoord = new Object();
-          e.preventDefault();
-          document.querySelector('.draw-submit').innerHTML = '<input type="submit" class="submit-button" value="Submit drawing">';
-          var table = document.querySelector(".pixel-canvas");
-          for (var i = 0, row; row = table.rows[i]; i++) {
-            for (var j = 0, col; col = row.cells[j]; j++) {
-             if (col.style.backgroundColor != "") {
-              if (canvasCoord[col.style.backgroundColor]) {
-               canvasCoord[col.style.backgroundColor].push([i,j]);
-              } else {
-                canvasCoord[col.style.backgroundColor] = [[i,j]];
-              }
-             }
-           }
-          }
 
-          var xhr = new XMLHttpRequest();
-          var csrf_token = "{{ csrf_token() }}"
-          xhr.open("POST", '/receive_art', true);
-          xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
-          xhr.setRequestHeader('X-CSRFToken', csrf_token);
-          xhr.send(JSON.stringify(
-              canvasCoord
-          ));
+    <!-- success modal -->
+    <div id="success-modal" class="modal">
 
-          xhr.onloadend = function () {
-              document.querySelector('.draw-submit').innerHTML += xhr.responseText;
-            };
+      <!-- modal content -->
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="close">&times;</span>
+          <h2>Success</h2>
+        </div>
+        <div class="modal-body">
+          <p class="response-text"></p>
+          <p><em>If you haven't, please consider donating.  It costs money to produce the art and your donation helps Counter Culture Labs continue!</em></p>
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+            <input type="hidden" name="cmd" value="_donations" />
+            
+            <!-- Update the email address here -->
+            <input type="hidden" name="business" value="example@example.com" />
+            
+            <input type="hidden" name="item_name" value="Counter Culture Lab Oakland ARTRobot public donations." />
+            <input type="hidden" name="currency_code" value="USD" />
+            <input type="hidden" name="amount" value="5" />
+            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+            <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+          </form>
+        </div>
+        <div class="modal-footer">
+          <h3>Thank you!</h3>
+        </div>
+      </div>
+    </div>
 
-    });
-</script>
+    <!-- error modal -->
+    <div id="error-modal" class="modal">
+
+      <!-- modal content -->
+      <div id="error-content" class="modal-content">
+        <div class="modal-header">
+          <span class="close">&times;</span>
+          <h2>Error</h2>
+        </div>
+        <div class="modal-body">
+          <p class="response-text"></p>
+        </div>
+        <div class="modal-footer">
+          <h3>Please try again later!</h3>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
   </body>
 </html>

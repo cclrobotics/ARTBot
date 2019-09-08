@@ -4,6 +4,44 @@ const quickFill = document.querySelector('.quick-fill');
 const eraseMode = document.querySelector('.erase-mode');
 const drawMode = document.querySelector('.draw-mode');
 const drawSubmit = document.querySelector('.draw-submit');
+const colorContainer = document.querySelector('#color-container');
+
+const successModal = document.getElementById("success-modal");
+const successClose = document.getElementsByClassName("close")[0];
+const successText = document.getElementsByClassName("response-text")[0];
+
+const errorModal = document.getElementById("error-modal");
+const errorClose = document.getElementsByClassName("close")[1];
+const errorText = document.getElementsByClassName("response-text")[1];
+
+
+function makeColorPicker() {
+  let colors = [
+      "red", 
+      "orange",
+      "yellow",
+      "green",
+      "blue", 
+      "purple"
+  ];
+  colors.forEach(function(color) {
+    let colorCircle = document.createElement('div');
+    colorCircle.id = color;
+    colorCircle.className = "color-picker";
+    colorCircle.style.display = "inline-block";
+    colorCircle.style.backgroundColor = color;
+    colorCircle.style.margin = "5px";
+    colorContainer.appendChild(colorCircle);
+
+    if (color === "red") {
+      colorCircle.classList.add("selected-color");
+    }
+  }); 
+}
+
+let colorChoice = "red"; // Tracks the current color
+
+makeColorPicker();
 
 function makeGrid() {
   let gridHeight = document.querySelector('.input-height').value;
@@ -52,23 +90,32 @@ pixelCanvas.addEventListener('mousedown', function(e) {
   });
 
   pixelCanvas.addEventListener('mouseover', function(e) {
-    // 'color' defined here rather than globally so JS checks whether user has changed color with each new mouse press on cell
-    const color = document.querySelector('.color-picker').value;
     // While mouse pointer is pressed and within grid boundaries, fills cell with selected color. Inner if statement fixes bug that fills in entire grid
   	if (down) {
       // 'TD' capitalized because element.tagName returns upper case for DOM trees that represent HTML elements
       if (e.target.tagName === 'TD') {
-      	e.target.style.backgroundColor = color;
+      	e.target.style.backgroundColor = colorChoice;
       }
     }
   });
 });
 
+// Listens for clicks on the color-container.  If the target has color-picker class then update colorChoice
+// variable with its background color and add border to selected element (remove border on previous).
+colorContainer.addEventListener('click', function(e) {
+  e.preventDefault();
+  if (e.target.className === 'color-picker') {
+    let selected = document.querySelector('.selected-color');
+    selected.classList.remove("selected-color");
+    colorChoice = e.target.style.backgroundColor;
+    e.target.classList.add("selected-color");
+  }   
+});
+
 // Adds color-fill functionality. e.preventDefault(); intercepts page refresh on button click
 quickFill.addEventListener('click', function(e) {
   e.preventDefault();
-  const color = document.querySelector('.color-picker').value;
-  pixelCanvas.querySelectorAll('td').forEach(td => td.style.backgroundColor = color);
+  pixelCanvas.querySelectorAll('td').forEach(td => td.style.backgroundColor = colorChoice);
 });
 
 // Removes color from cell upon double-click
@@ -117,11 +164,10 @@ drawMode.addEventListener('click', function() {
       down = false;
     });
     pixelCanvas.addEventListener('mouseover', function(e) {
-      const color = document.querySelector('.color-picker').value;
       // While mouse pointer is pressed and within grid boundaries, fills cell with selected color. Inner if statement fixes bug that fills in entire grid
     	if (down) {
         if (e.target.tagName === 'TD') {
-        	e.target.style.backgroundColor = color;
+        	e.target.style.backgroundColor = colorChoice;
         }
       }
     });
@@ -129,7 +175,76 @@ drawMode.addEventListener('click', function() {
   // Enables single-cell coloring while in draw mode
   pixelCanvas.addEventListener('mousedown', function(e) {
     if (e.target.tagName !== 'TD') return;
-    const color = document.querySelector('.color-picker').value;
-    e.target.style.backgroundColor = color;
+    e.target.style.backgroundColor = colorChoice;
   });
+});
+
+drawSubmit.addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  var canvasCoord = new Object();
+  var table = document.querySelector(".pixel-canvas");
+
+  for (var i = 0, row; row = table.rows[i]; i++) {
+    for (var j = 0, col; col = row.cells[j]; j++) {
+     if (col.style.backgroundColor != "") {
+      if (canvasCoord[col.style.backgroundColor]) {
+       canvasCoord[col.style.backgroundColor].push([i,j]);
+      } else {
+        canvasCoord[col.style.backgroundColor] = [[i,j]];
+      }
+     }
+   }
+  }
+
+  var xhr = new XMLHttpRequest();
+  var csrf_token = document.querySelector("#csrf").value;
+  var email = document.querySelector("#email").value;
+  var title = document.querySelector("#title").value;
+  canvasCoord['email'] = email;
+  canvasCoord['title'] = title;
+
+  xhr.open("POST", '/receive_art', true);
+  xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+  xhr.setRequestHeader('X-CSRFToken', csrf_token);
+  xhr.send(JSON.stringify(
+    canvasCoord
+  ));
+
+  xhr.onloadend = function () {
+    let status = xhr.status;
+    let response = xhr.responseText;
+    let modal;
+    let text;
+    let closer;
+    
+
+    if ((status < 300) && (status >= 200)) {
+      modal = successModal;
+      text = successText;
+      closer = successClose;
+    } else {
+      modal = errorModal;
+      text = errorText;
+      closer = errorClose;
+    }
+
+    // update modal text
+    text.innerHTML = response;
+
+    // When we get a response, open the modal 
+    modal.style.display = "block";
+
+    // close the modal
+    function closeModal(e) {
+      if ((e.target == modal) || (e.target == closer)){
+        modal.style.display = "none";
+        // remove listener since we're done with modal
+        e.target.removeEventListener(e.type, arguments.callee);
+      }
+    }
+
+    window.addEventListener('click', closeModal);
+  };
+
 });
