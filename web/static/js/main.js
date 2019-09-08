@@ -17,12 +17,11 @@ const errorText = document.getElementsByClassName("response-text")[1];
 
 function makeColorPicker() {
   let colors = [
-      "red", 
+      "pink",
       "orange",
-      "yellow",
       "green",
-      "blue", 
-      "purple"
+      "yellow",
+      "blue"
   ];
   colors.forEach(function(color) {
     let colorCircle = document.createElement('div');
@@ -33,13 +32,13 @@ function makeColorPicker() {
     colorCircle.style.margin = "5px";
     colorContainer.appendChild(colorCircle);
 
-    if (color === "red") {
+    if (color === "pink") {
       colorCircle.classList.add("selected-color");
     }
   }); 
 }
 
-let colorChoice = "red"; // Tracks the current color
+let colorChoice = "pink"; // Tracks the current color
 
 makeColorPicker();
 
