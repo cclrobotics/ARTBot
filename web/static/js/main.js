@@ -49,7 +49,7 @@ function makeGrid() {
   // If grid already present, clears any cells that have been filled in
   while (pixelCanvas.firstChild) {
     pixelCanvas.removeChild(pixelCanvas.firstChild);
-    }
+  }
   // Creates rows and cells
   for (let i = 1; i <= gridHeight; i++) {
     let gridRow = document.createElement('tr');
@@ -61,8 +61,8 @@ function makeGrid() {
       gridCell.addEventListener('mousedown', function() {
         const color = document.querySelector('.color-picker').value;
         this.style.backgroundColor = color;
-      })
-     }
+      });
+    }
   }
 }
 
