@@ -2,6 +2,7 @@
 
 import datetime
 import json
+from utilities import check_failed_validation
 from __init__ import app, db, models, csrf
 from flask import render_template, flash, redirect, url_for, request, Response
 from sqlalchemy import desc, extract, sql
@@ -17,27 +18,17 @@ def index():
 def receive_art():
     data = request.json
 
-    allowed_colors = [
-      "pink",
-      "orange",
-      "teal",
-      "yellow",
-      "blue"
-    ]
-
     title = data.pop('title')
     email = data.pop('email')
     art = data.pop('art')
 
-    if not title:
-        return ('Error: please enter a title.', 400)
-    elif not email:
-        return ('Error: please enter an email.', 400)
+    # perform string validations
+    failed_validation = check_failed_validation(title, email, art)
+    
+    if failed_validation:
+        return failed_validation
 
-    for key in art:
-        if key not in allowed_colors: 
-            return ('Error: bad request.', 400)
-
+    # passed validation so commit to DB
     art_data = dict()
     art_data['title'] = title
     art_data['email'] = email
