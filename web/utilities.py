@@ -32,7 +32,7 @@ def check_strings(string, name):
 
     charErr = 'Error: ' + name + ' has invalid characters. Must be alphanumeric only.'
 
-    if not re.match(r"", string):
+    if not re.match(r"^[a-zA-Z0-9]$", string):
         return (charErr, 400)
 
     return False
