@@ -6,7 +6,7 @@ import re
 #
 ##
 def check_existence(string, name):
-    strErr = 'Error: please enter a ' + name
+    strErr = 'Error: please enter a' + name
 
     if not string:
         return (strErr, 400)
@@ -32,7 +32,7 @@ def check_strings(string, name):
 
     charErr = 'Error: ' + name + ' has invalid characters. Must be alphanumeric only.'
 
-    if not re.match(r"^[a-zA-Z0-9]$", string):
+    if not re.match(r"^[a-zA-Z0-9]+$", string):
         return (charErr, 400)
 
     return False
@@ -53,8 +53,8 @@ def check_colors(colors):
 
 def check_failed_validation(title, email, art):
     
-    check_one = check_existence(title, 'title')
-    check_two = check_existence(email, 'email')
+    check_one = check_existence(title, ' title')
+    check_two = check_existence(email, 'n email')
     
     check_three = check_strings(title, 'title')
     check_four = check_email(email)
