@@ -9,8 +9,24 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
 SQL_ENGINE = db.create_engine(SQLALCHEMY_DATABASE_URI)
-artpieces = pd.read_sql("SELECT * FROM artpieces WHERE status = 'Submitted'",SQL_ENGINE, parse_dates = ['submit_date'])
+
+num_pieces = 0
+while num_pieces not in range(1,10):
+    try:
+        num_pieces = int(input("How much art? (1-9)"))
+    except:
+        num_pieces = 0
+query = """SELECT * FROM artpieces
+           WHERE status = 'Submitted'
+           ORDER BY submit_date ASC
+           LIMIT %s
+        """ % num_pieces
+
+artpieces = pd.read_sql(query, SQL_ENGINE, parse_dates = ['submit_date'])
 artpieces['art'] = artpieces.art.apply(json.loads)
+
+print("Loaded %s pieces of art")
+print(artpieces[['title','email','submit_date']])
 
 #Lists slots that should typically be available
 def canvas_slot_generator():
@@ -25,7 +41,7 @@ def well_map(well):
     return letter + str(number)
 
 
-#Get JSON template
+#Get Python art procedure template
 template_file = open('ART_TEMPLATE.txt')
 template_string = template_file.read()
 template_file.close()
