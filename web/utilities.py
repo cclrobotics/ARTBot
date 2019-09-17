@@ -5,10 +5,10 @@ import re
 # String validations
 #
 ##
-def check_existence(string, name):
-    strErr = 'Error: please enter a ' + name
+def check_existence(data, name):
+    strErr = 'Error: please enter a' + name
 
-    if not string:
+    if not data:
         return (strErr, 400)
 
     return False
@@ -32,7 +32,7 @@ def check_strings(string, name):
 
     charErr = 'Error: ' + name + ' has invalid characters. Must be alphanumeric only.'
 
-    if not re.match(r"^[a-zA-Z0-9]$", string):
+    if not re.match(r"^[a-zA-Z0-9]+$", string):
         return (charErr, 400)
 
     return False
@@ -51,15 +51,27 @@ def check_colors(colors):
             return ('Error: bad request.', 400)
     return False
 
+def check_coords(art):
+    max_coords = (39, 26)
+
+    for color in art:
+        for coords in art[color]:
+            if coords[0] > max_coords[0] or coords[1] > max_coords[1]:
+                return ('Error: bad request.', 400)
+
+    return False
+
 def check_failed_validation(title, email, art):
     
-    check_one = check_existence(title, 'title')
-    check_two = check_existence(email, 'email')
+    check_one = check_existence(title, ' title')
+    check_two = check_existence(email, 'n email')
+    check_three = check_existence(art, 'n art design')
     
-    check_three = check_strings(title, 'title')
-    check_four = check_email(email)
+    check_four = check_strings(title, 'title')
+    check_five = check_email(email)
 
-    check_five = check_colors(art)
+    check_six = check_colors(art)
+    check_seven = check_coords(art)
 
     if check_one:
         return check_one
@@ -71,5 +83,9 @@ def check_failed_validation(title, email, art):
         return check_four
     elif check_five:
         return check_five
+    elif check_six:
+        return check_six
+    elif check_seven:
+        return check_seven
     else:
         return False
