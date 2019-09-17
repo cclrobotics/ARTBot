@@ -43,8 +43,8 @@ let colorChoice = "pink"; // Tracks the current color
 makeColorPicker();
 
 function makeGrid() {
-  let gridHeight = document.querySelector('.input-height').value;
-  let gridWidth = document.querySelector('.input-width').value;
+  let gridHeight = 26
+  let gridWidth = 39
   // If grid already present, clears any cells that have been filled in
   while (pixelCanvas.firstChild) {
     pixelCanvas.removeChild(pixelCanvas.firstChild);
@@ -65,14 +65,12 @@ function makeGrid() {
   }
 }
 
-makeGrid(70, 50);
+makeGrid(26, 39);
 
-// Upon user's submitting height and width selections, callback function (inside method) calls makeGrid function. But event method preventDefault() first intercepts the 'submit' event, which would normally submit the form and refresh the page, preventing makeGrid() from being processed
-sizePicker.addEventListener('submit', function(e) {
-  e.preventDefault();
-  makeGrid();
-});
-
+pixelCanvas.addEventListener('mousedown', function(e) {
+    if (e.target.tagName !== 'TD') return;
+    e.target.style.backgroundColor = colorChoice;
+  });
 
 // Enables color dragging with selected color (code for filling in single cell is above). (No click on 'draw' mode needed; this is default mode)
 let down = false; // Tracks whether or not mouse pointer is pressed

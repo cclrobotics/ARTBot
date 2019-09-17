@@ -44,11 +44,11 @@ table {
 }
 
 tr {
-  height: 10px;
+  height: 20px;
 }
 
 td {
-  min-width: 10px;
+  min-width: 20px;
   box-sizing: border-box;
 }
 
