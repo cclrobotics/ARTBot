@@ -40,27 +40,24 @@ palette = labware.load('falcon_6_wellplate_15.5ml_flat', 1)
 p200rack = labware.load('tiprack-200ul', 10)
 
 # colored culture locations
-pink = palette.wells('A1')
-blue = palette.wells('A2')
-teal = palette.wells('A3')
-orange = palette.wells('B1')
-yellow = palette.wells('B2')
+palette_colors = dict(
+    pink = palette.wells('A1')
+    ,blue = palette.wells('A2')
+    ,teal = palette.wells('A3')
+    ,orange = palette.wells('B1')
+    ,yellow = palette.wells('B2')
+    )
 
+color_locations = %%WELLS GO HERE%%
 
 # plate to create art in
 plate = labware.load('CCL_ARTBot_canvas', 5)
 
 # wells to dispense each color material to
-pink_wells = [
-    well.top() for well in plate.wells(%%PINK WELLS GO HERE%%)]
-blue_wells = [
-    well.top() for well in plate.wells(%%BLUE WELLS GO HERE%%)]
-teal_wells = [
-    well.top() for well in plate.wells(%%TEAL WELLS GO HERE%%)]
-orange_wells = [
-    well.top() for well in plate.wells(%%ORANGE WELLS GO HERE%%)]
-yellow_wells = [
-    well.top() for well in plate.wells(%%YELLOW WELLS GO HERE%%)]
+canvas_wells = dict()
+for color in color_locations:
+    canvas_wells[color] = [well.top() for well in plate.wells(color_locations[color])]
+
 
 def run_custom_protocol(
         pipette_axis: 'StringSelection...'='left'):
@@ -70,12 +67,8 @@ def run_custom_protocol(
             tip_racks=[p200rack]
     )
 
-    distribute_to_agar(p300, 1, pink, pink_wells, disposal_vol=0)
-    distribute_to_agar(p300, 1, blue, blue_wells, disposal_vol=0)
-    distribute_to_agar(p300, 1, teal, teal_wells, disposal_vol=0)
-    distribute_to_agar(p300, 1, orange, orange_wells, disposal_vol=0)
-    distribute_to_agar(p300, 1, yellow, yellow_wells, disposal_vol=0)
-
+    for color in color_wells:
+        distribute_to_agar(p300, 1, palette_colors[color], canvas_wells[color], disposal_vol=0)
 
 run_custom_protocol(**{'pipette_axis': 'left'})
 

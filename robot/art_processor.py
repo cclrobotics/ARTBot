@@ -16,16 +16,16 @@ while num_pieces not in range(1,10):
         num_pieces = int(input("How much art? (1-9)"))
     except:
         num_pieces = 0
-query = """SELECT * FROM artpieces
+query = f"""SELECT * FROM artpieces
            WHERE status = 'Submitted'
            ORDER BY submit_date ASC
-           LIMIT %s
-        """ % num_pieces
+           LIMIT {num_pieces}
+        """
 
 artpieces = pd.read_sql(query, SQL_ENGINE, parse_dates = ['submit_date'])
 artpieces['art'] = artpieces.art.apply(json.loads)
 
-print("Loaded %s pieces of art")
+print(f'Loaded {len(artpieces)} pieces of art')
 print(artpieces[['title','email','submit_date']])
 
 #Lists slots that should typically be available
@@ -48,22 +48,20 @@ template_file.close()
 
 def make_procedure(artpiece):
     art = artpiece.art
+    canvas_string = template_string
+    ot_art = dict()
     for color in art:
-        art[color] = [well_map(well) for well in art[color]]
+        ot_art[color] = [well_map(well) for well in art[color]]
+    canvas_string = canvas_string.replace('%%WELLS GO HERE%%', str(ot_art))
     #This works for one canvas. Jinja templating might actually be a better way to do this for multiple canvases
-    canvas_string = template_string.replace('%%PINK WELLS GO HERE%%',str(art['pink'])[1:-1])
-    canvas_string = canvas_string.replace('%%BLUE WELLS GO HERE%%', str(art['blue'])[1:-1])
-    canvas_string = canvas_string.replace('%%TEAL WELLS GO HERE%%', str(art['teal'])[1:-1])
-    canvas_string = canvas_string.replace('%%ORANGE WELLS GO HERE%%', str(art['orange'])[1:-1])
-    canvas_string = canvas_string.replace('%%YELLOW WELLS GO HERE%%', str(art['yellow'])[1:-1])
 
     return canvas_string
 
+canvas_procedures = artpieces.apply(make_procedure, axis=1).iloc[5]
+final_procedure_string = canvas_procedures
 
-canvas_procedures = artpieces.iloc[:1].apply(make_procedure, axis=1)
-final_procedure_string = '\n\n'.join(canvas_procedures.tolist())
-
-unique_file_name = 'ARTISTIC_PROCEDURE_%s.py' % datetime.now().strftime("%Y%m%d-%H%M%S")
+now = datetime.now().strftime("%Y%m%d-%H%M%S")
+unique_file_name = f'ARTISTIC_PROCEDURE_{now}.py'
 output_file = open(os.path.join(basedir,'procedures',unique_file_name),'w')
 output_file.write(final_procedure_string)
 output_file.close()
