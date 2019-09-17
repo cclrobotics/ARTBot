@@ -67,6 +67,11 @@ function makeGrid() {
 
 makeGrid(26, 39);
 
+pixelCanvas.addEventListener('mousedown', function(e) {
+    if (e.target.tagName !== 'TD') return;
+    e.target.style.backgroundColor = colorChoice;
+  });
+
 // Enables color dragging with selected color (code for filling in single cell is above). (No click on 'draw' mode needed; this is default mode)
 let down = false; // Tracks whether or not mouse pointer is pressed
 
