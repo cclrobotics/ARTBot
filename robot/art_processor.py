@@ -55,7 +55,7 @@ def add_pixel_locations(template_string, artpieces):
             if color not in pixels_by_color:
                 pixels_by_color[color] = dict()
             pixels_by_color[color][artpiece.title] = artpiece.art[color]
-    procedure = procedure.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
+    procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
 
     return procedure
 
