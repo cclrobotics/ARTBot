@@ -28,7 +28,7 @@ def distribute_to_agar(self, vol, source, destination, disposal_vol):
         self.dispense(vol, well, 0.25)
 
         dip_position = robot._driver.position
-        dip_position['Z'] = dip_position['Z'] - 7
+        dip_position['Z'] = dip_position['Z'] - 12 #tweek number to just pierce agar surface
         robot._driver.move(dip_position)
 
     self.drop_tip()
