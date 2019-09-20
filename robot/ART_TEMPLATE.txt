@@ -34,7 +34,7 @@ def distribute_to_agar(self, vol, source, destination, disposal_vol):
     self.drop_tip()
 
 # a 6-well plate for all of the colors in our pallette
-palette = labware.load('falcon_6_wellplate_15.5ml_flat', 1)
+palette = labware.load('falcon_6_wellplate_15.5ml_flat', 11)
 
 # a tip rack for our pipette
 p200rack = labware.load('tiprack-200ul', 10)

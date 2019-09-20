@@ -48,13 +48,13 @@ def add_canvas_locations(template_string, artpieces):
     return procedure
 
 def add_pixel_locations(template_string, artpieces):
-    #write where to draw pixels on each plate into code. Listed by color to reduce
+    #write where to draw pixels on each plate into code. Listed by color to reduce contamination
     pixels_by_color = dict()
     for index, artpiece in artpieces.iterrows():
         for color in artpiece.art:
             if color not in pixels_by_color:
                 pixels_by_color[color] = dict()
-            pixels_by_color[color][artpiece.title] = artpiece.art[color]
+            pixels_by_color[color][artpiece.title] = [well_map(pixel) for pixel in artpiece.art[color]]
     procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
 
     return procedure
