@@ -40,29 +40,40 @@ def well_map(well):
     number = well[1] + 1
     return letter + str(number)
 
+def add_canvas_locations(template_string, artpieces):
+    #write where canvas plates are to be placed into code
+    canvas_locations = dict(zip(artpieces.title,get_canvas_slot))
+    procedure = template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
+
+    return procedure
+
+def add_pixel_locations(template_string, artpieces):
+    #write where to draw pixels on each plate into code. Listed by color to reduce
+    pixels_by_color = dict()
+    for index, artpiece in artpieces.iterrows():
+        for color in artpiece.art:
+            if color not in pixels_by_color:
+                pixels_by_color[color] = dict()
+            pixels_by_color[color][artpiece.title] = artpiece.art[color]
+    procedure = procedure.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
+
+    return procedure
+
 
 #Get Python art procedure template
 template_file = open('ART_TEMPLATE.txt')
 template_string = template_file.read()
 template_file.close()
 
-def make_procedure(artpiece):
-    art = artpiece.art
-    canvas_string = template_string
-    ot_art = dict()
-    for color in art:
-        ot_art[color] = [well_map(well) for well in art[color]]
-    canvas_string = canvas_string.replace('%%WELLS GO HERE%%', str(ot_art))
-    #This works for one canvas. Jinja templating might actually be a better way to do this for multiple canvases
 
-    return canvas_string
+procedure = add_canvas_locations(template_string, artpieces)
 
-canvas_procedures = artpieces.apply(make_procedure, axis=1).iloc[5]
-final_procedure_string = canvas_procedures
+procedure = add_pixel_locations(procedure, artpieces)
+
 
 now = datetime.now().strftime("%Y%m%d-%H%M%S")
 unique_file_name = f'ARTISTIC_PROCEDURE_{now}.py'
 output_file = open(os.path.join(basedir,'procedures',unique_file_name),'w')
-output_file.write(final_procedure_string)
+output_file.write(procedure)
 output_file.close()
 
