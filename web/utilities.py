@@ -52,7 +52,7 @@ def check_colors(colors):
     return False
 
 def check_coords(art):
-    max_coords = (39, 26)
+    max_coords = (26, 39)
 
     for color in art:
         for coords in art[color]:
