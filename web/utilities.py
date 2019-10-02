@@ -61,7 +61,26 @@ def check_coords(art):
 
     return False
 
-def check_failed_validation(title, email, art):
+def check_submission_limit(submission_cnt, submission_limit, email, prev_emails):
+    limitErr = """We're a small volunteer-run, non-profit lab and there's a limit to how many works of art we can
+                   help make. We're full-up this month, but come back on the 1st and we'll be open for art-making again!
+                """
+
+    if submission_cnt >= submission_limit:
+        return (limitErr, 400)
+
+    userLimitErr = """Easy there, speed demon! We're a small volunteer-run, non-profit lab and there's a limit to how
+                    many works of art we can help make. Once we make your previous submission, submit another one! \n
+                    If there's an issue with your previou submission and you want to withdraw it, send us an email:
+                    ccl-artbot@gmail.com
+                """
+
+    if email in [email_obj[0] for email_obj in prev_emails]:
+        return (userLimitErr, 400)
+
+    return False
+
+def check_failed_validation(title, email, art, sub_cnt, sub_lim, prev_emails):
     
     check_one = check_existence(title, ' title')
     check_two = check_existence(email, 'n email')
@@ -72,6 +91,8 @@ def check_failed_validation(title, email, art):
 
     check_six = check_colors(art)
     check_seven = check_coords(art)
+
+    check_eight = check_submission_limit(sub_cnt, sub_lim, email, prev_emails)
 
     if check_one:
         return check_one
@@ -87,5 +108,7 @@ def check_failed_validation(title, email, art):
         return check_six
     elif check_seven:
         return check_seven
+    elif check_eight:
+        return check_eight
     else:
         return False
