@@ -8,6 +8,8 @@ from flask import render_template, flash, redirect, url_for, request, Response
 from sqlalchemy import desc, extract, sql
 from flask_login import login_required
 
+from config import SUBMISSION_LIMIT
+
 #Home page
 @app.route('/', methods=('GET', 'POST'))
 @app.route('/index', methods=('GET', 'POST'))
@@ -16,6 +18,7 @@ def index():
 
 @app.route('/receive_art', methods=['POST'])
 def receive_art():
+    SUBMISSION_COUNT = models.site_vars.query.filter_by(var='SUBMISSION_CNT').first()
     data = request.json
 
     title = data.pop('title')
@@ -23,7 +26,8 @@ def receive_art():
     art = data.pop('art')
 
     # perform string validations
-    failed_validation = check_failed_validation(title, email, art)
+    prev_emails = db.session.query(models.artpieces.email).filter_by(status='Submitted').all()
+    failed_validation = check_failed_validation(title, email, art, SUBMISSION_COUNT.val, SUBMISSION_LIMIT, prev_emails)
     
     if failed_validation:
         return failed_validation
@@ -37,6 +41,7 @@ def receive_art():
     art_data['status'] = 'Submitted'
 
     db.session.add(models.artpieces(**art_data))
+    SUBMISSION_COUNT.val += 1
     db.session.commit()
     return 'Robot Art Loaded'
 
