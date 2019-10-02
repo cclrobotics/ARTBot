@@ -71,7 +71,7 @@ def check_submission_limit(submission_cnt, submission_limit, email, prev_emails)
 
     userLimitErr = """Easy there, speed demon! We're a small volunteer-run, non-profit lab and there's a limit to how
                     many works of art we can help make. Once we make your previous submission, submit another one! \n
-                    If there's an issue with your previou submission and you want to withdraw it, send us an email:
+                    If there's an issue with your previous submission and you want to withdraw it, send us an email:
                     ccl-artbot@gmail.com
                 """
 
