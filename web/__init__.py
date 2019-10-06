@@ -5,14 +5,13 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
-import sys, os
 
 app = Flask(__name__)
 
-app.config.from_object('config')
+app.config.from_object('web.config')
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 csrf = CSRFProtect(app)
 
-import models, views
+import web.models, web.views
