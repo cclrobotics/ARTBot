@@ -12,7 +12,7 @@ SECRET_KEY = 'my_secret'
 #This accounts for if the static images and audio need to be saved somewhere besides the directory where the code is stored.
 #It checks the parent directory of the code directory for a folder that matches alternate_path. If it exists, it uses
 #it. Otherwise it uses the basedir
-alternate_path = "public_html/eb"
+alternate_path = "public_html"
 if os.path.exists(os.path.join(os.path.split(basedir)[0],alternate_path)):
     static_basedir = os.path.join(os.path.split(basedir)[0],alternate_path)
 else:
