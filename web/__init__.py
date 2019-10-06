@@ -8,7 +8,7 @@ from flask_wtf.csrf import CsrfProtect
 
 app = Flask(__name__)
 
-app.config.from_object('config')
+app.config.from_object('web.config')
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
