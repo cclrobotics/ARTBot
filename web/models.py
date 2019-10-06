@@ -21,14 +21,3 @@ class site_vars(db.Model):
 
     def __repr__(self):
         return '<%r: %r>' % (self.var, self.val)
-
-
-def model_exists(name):
-    engine = db.get_engine()
-    return engine.dialect.has_table(engine, name)
-
-if not model_exists('site_vars'):
-    print('No site_vars table found. Adding it.')
-    db.create_all()
-    db.session.add(site_vars(**{'var':'SUBMISSION_CNT','val':0}))
-    db.session.commit()
