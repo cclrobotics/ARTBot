@@ -4,10 +4,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from flask_wtf.csrf import CsrfProtect
-import sys.path
-
-sys.path.append('web') #adding web module to path
+from flask_wtf.csrf import CSRFProtect
+import sys, os
 
 app = Flask(__name__)
 
@@ -15,6 +13,6 @@ app.config.from_object('config')
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-csrf = CsrfProtect(app)
+csrf = CSRFProtect(app)
 
 import models, views
