@@ -135,6 +135,7 @@ def convert_bytes_to_image(im):
 
 #function to pull image off of database
 def pull_picture(id):
+    #environment vars should be removed when implementing - they are already set at app config
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
     SQL_ENGINE = db.create_engine(SQLALCHEMY_DATABASE_URI)
 
