@@ -14,4 +14,4 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 csrf = CsrfProtect(app)
 
-import models, views
+import web.models, web.views
