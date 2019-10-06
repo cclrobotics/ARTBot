@@ -2,8 +2,8 @@
 
 import datetime
 import json
-from utilities import check_failed_validation, rebuild_art
-from __init__ import app, db, models, csrf
+from web.utilities import check_failed_validation
+from web import app, db, models, csrf
 from flask import render_template, flash, redirect, url_for, request, Response
 from sqlalchemy import desc, extract, sql
 from flask_login import login_required

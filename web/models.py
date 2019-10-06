@@ -1,6 +1,6 @@
 #models.py - Defines the database tables used in the website.
 
-from __init__ import db
+from web import db
 
 
 #Stores all submitted art and allows it to be referenced later by the robot interface
