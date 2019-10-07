@@ -2,12 +2,11 @@
 
 import datetime
 import json
-from web.utilities import check_failed_validation
+from web.utilities import check_failed_validation, rebuild_art
 from web import app, db, models, csrf
 from flask import render_template, flash, redirect, url_for, request, Response
 from sqlalchemy import desc, extract, sql
 from flask_login import login_required
-from utilities import rebuild_art
 
 #Home page
 @app.route('/', methods=('GET', 'POST'))
