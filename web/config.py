@@ -6,6 +6,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 try:
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
 except:
+    print('No database connection provided. Using local SQLite database')
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
