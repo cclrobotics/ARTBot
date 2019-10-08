@@ -2,7 +2,6 @@
 
 from web import db
 
-
 #Stores all submitted art and allows it to be referenced later by the robot interface
 class artpieces(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -15,3 +14,11 @@ class artpieces(db.Model):
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.title)
+
+#Tracks some ongoing website variables
+class site_vars(db.Model):
+    var = db.Column(db.String(), primary_key=True)
+    val = db.Column(db.Integer())
+
+    def __repr__(self):
+        return '<%r: %r>' % (self.var, self.val)

@@ -3,9 +3,17 @@ import sqlalchemy as db
 import pandas as pd #pandas is overkill, but it makes the database work really really easy, and that's nice
 import string
 from datetime import datetime
-import os
+import os, argparse
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--notebook'
+                    ,action='store_true'
+                    ,help='Set this flag to output to a Jupyter Notebook instead of a .py file'
+                    )
+NOTEBOOK = parser.parse_args().notebook
 
 try:
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
@@ -64,7 +72,8 @@ def add_pixel_locations(template_string, artpieces):
 
 
 #Get Python art procedure template
-template_file = open('ART_TEMPLATE.txt')
+file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
+template_file = open(f'ART_TEMPLATE.{file_extension}')
 template_string = template_file.read()
 template_file.close()
 
@@ -75,7 +84,7 @@ procedure = add_pixel_locations(procedure, artpieces)
 
 
 now = datetime.now().strftime("%Y%m%d-%H%M%S")
-unique_file_name = f'ARTISTIC_PROCEDURE_{now}.py'
+unique_file_name = f'ARTISTIC_PROCEDURE_{now}.{file_extension}'
 output_file = open(os.path.join(basedir,'procedures',unique_file_name),'w')
 output_file.write(procedure)
 output_file.close()
