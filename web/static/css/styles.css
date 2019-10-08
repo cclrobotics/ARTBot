@@ -270,6 +270,11 @@ hr.section-break:before {
   color: gray;
 }
 
+.limit-reached {
+    color: red;
+    max-width: 780px;
+}
+
 #error-content {
   border: 3px solid red;
 }

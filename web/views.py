@@ -8,13 +8,18 @@ from flask import render_template, flash, redirect, url_for, request, Response
 from sqlalchemy import desc, extract, sql
 from flask_login import login_required
 
-from web.config import SUBMISSION_LIMIT
+from web.config import SUBMISSION_LIMIT, LIMIT_MESSAGE
 
 #Home page
 @app.route('/', methods=('GET', 'POST'))
 @app.route('/index', methods=('GET', 'POST'))
 def index():
-    return render_template('main.html')
+    SUBMISSION_COUNT = models.site_vars.query.filter_by(var='SUBMISSION_CNT').first()
+    if SUBMISSION_COUNT.val > SUBMISSION_LIMIT:
+        limit_message = LIMIT_MESSAGE
+    else:
+        limit_message = None
+    return render_template('main.html', limit_message=limit_message)
 
 @app.route('/receive_art', methods=['POST'])
 def receive_art():
