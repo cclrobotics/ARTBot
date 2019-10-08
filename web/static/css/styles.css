@@ -134,7 +134,7 @@ hr.section-break:before {
 /* Styles content to left of grid */
 .inputs {
   text-align: left;
-  margin-left: 8em;
+  margin-left: 2em;
   border-radius: 7px;
   border: 1px solid #dcdcdc;
   padding-left: 2em;
@@ -148,7 +148,7 @@ hr.section-break:before {
 /* Part of two-column layout implementation */
 .column {
   float: left;
-  width: 35%;
+  width: 25%;
 }
 
 /* Ensures title ('Pixel Art Maker') is centered above grid */
