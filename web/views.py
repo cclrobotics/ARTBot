@@ -8,7 +8,7 @@ from flask import render_template, flash, redirect, url_for, request, Response
 from sqlalchemy import desc, extract, sql
 from flask_login import login_required
 
-from config import SUBMISSION_LIMIT
+from web.config import SUBMISSION_LIMIT
 
 #Home page
 @app.route('/', methods=('GET', 'POST'))
