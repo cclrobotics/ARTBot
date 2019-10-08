@@ -117,7 +117,6 @@ def rebuild_art(art):
                  ,ratio[1] * scale / num_pixels[1])
     total_size = (math.ceil(ratio[0] * scale + pixel_size[0])
                  ,math.ceil(ratio[1] * scale + pixel_size[1]))
-    print(total_size)
     im = Image.new('RGBA',total_size,(255,255,255,1))
     draw = ImageDraw.Draw(im)
 
@@ -128,7 +127,7 @@ def rebuild_art(art):
             draw.rectangle(origin + far_corner,  fill = colors[art_color])
     return (im.tobytes())
 
-#convert s the image to bytres fro database
+#converts the image to bytes from database
 def convert_bytes_to_image(im):
     art = Image.open(im, 'rb')
     im.show()

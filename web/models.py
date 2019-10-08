@@ -11,7 +11,7 @@ class artpieces(db.Model):
     submit_date = db.Column(db.DateTime())
     art = db.Column(db.String())
     status = db.Column(db.String())
-    picture = db.Column(db.BLOB())
+    picture = db.Column(db.LargeBinary())
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.title)

@@ -7,7 +7,10 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
+try:
+    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+except:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
 SQL_ENGINE = db.create_engine(SQLALCHEMY_DATABASE_URI)
 
 num_pieces = 0
