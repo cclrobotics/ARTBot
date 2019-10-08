@@ -95,6 +95,7 @@ pixelCanvas.addEventListener('mousedown', function(e) {
     }
   });
 });
+drawMode.style.background='linear-gradient(#f9f9f9 5%, #c5ddb5 100%)'
 
 // Listens for clicks on the color-container.  If the target has color-picker class then update colorChoice
 // variable with its background color and add border to selected element (remove border on previous).
@@ -146,6 +147,8 @@ eraseMode.addEventListener('click', function() {
   pixelCanvas.addEventListener('mousedown', function(e) {
     e.target.style.backgroundColor = null;
   });
+  eraseMode.style.background='linear-gradient(#f9f9f9 5%, #c5ddb5 100%)';
+  drawMode.style.background='linear-gradient(#f9f9f9 5%, #e9e9e9 100%)';
 });
 
 // Allows user to return to (default) draw mode after using 'erase' button. Note 'down' was set to false in variable above
@@ -173,6 +176,8 @@ drawMode.addEventListener('click', function() {
     if (e.target.tagName !== 'TD') return;
     e.target.style.backgroundColor = colorChoice;
   });
+  drawMode.style.background='linear-gradient(#f9f9f9 5%, #c5ddb5 100%)';
+  eraseMode.style.background='linear-gradient(#f9f9f9 5%, #e9e9e9 100%)';
 });
 
 drawSubmit.addEventListener('submit', function(e) {
