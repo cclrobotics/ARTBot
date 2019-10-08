@@ -106,8 +106,6 @@ hr.section-break:before {
 	text-decoration: none;
 	/* text-shadow: 0 1px #fff; */
   cursor: pointer;
-  /* Places button on its own line */
-  /*display: block;*/
   margin-top: 0.1em;
 }
 
