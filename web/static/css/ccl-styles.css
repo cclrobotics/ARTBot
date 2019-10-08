@@ -15,8 +15,8 @@ ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, body, html, p, blockquote, fields
  }
  a { color: #a1a1a1; }
  h2 { font-size: 1.75em; font-weight: 300; color: #2b2b2b; margin: 0 auto .75em; }
- .paragraph, div.paragraph { margin: 0 auto 1.7em; line-height: 1.5; }
- .paragraph, p { margin: 0 auto 1.7em; line-height: 1.5; }
+ .paragraph, div.paragraph { margin: 0 auto 0.5em; line-height: 1.5; }
+ .paragraph, p { margin: 0 auto 0.2em; line-height: 1.5; }
  .paragraph a:hover { color: #888888; }
  blockquote { background: none; font-size: 1.25em; line-height: 1.25; font-weight: lighter; color: #8e8e8e; padding: 15px 0px 15px 26px; margin: 0 auto 1em !important; border-left: 15px solid #ededed !important; font-style: normal !important; }
  hr.styled-hr { height: 2px; background: #ededed; }

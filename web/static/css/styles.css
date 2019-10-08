@@ -100,13 +100,15 @@ hr.section-break:before {
 	border: 1px solid #dcdcdc;
 	font-weight: bold;
   /* Padding is space between element's content and border. First value sets top and bottom padding; second value sets right and left */
-	padding: 6px 24px;
+	padding: 6px 20px;
+  margin-right: 6px;
+  margin-bottom: 6px;
 	text-decoration: none;
 	/* text-shadow: 0 1px #fff; */
   cursor: pointer;
   /* Places button on its own line */
-  display: block;
-  margin-top: 1em;
+  /*display: block;*/
+  margin-top: 0.1em;
 }
 
 .color-picker {
@@ -170,6 +172,7 @@ hr.section-break:before {
 	background-color: #dcdcdc;;
 	border-radius: 7px;
     border: 1px solid #dcdcdc;
+    margin-bottom: 0.75em;
 }
 
 .selected-color {
