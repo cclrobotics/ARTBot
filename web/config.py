@@ -21,4 +21,4 @@ else:
 IMAGE_UPLOAD_FOLDER = os.path.join(static_basedir,'static','img')
 ALLOWED_IMAGE_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'svg'])
 
-SUBMISSION_LIMIT = 30
+SUBMISSION_LIMIT = 27
