@@ -3,14 +3,41 @@ import sqlalchemy as db
 import pandas as pd #pandas is overkill, but it makes the database work really really easy, and that's nice
 import string
 from datetime import datetime
-import os
+import os, argparse
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--notebook'
+                    ,action='store_true'
+                    ,help='Set this flag to output to a Jupyter Notebook instead of a .py file'
+                    )
+NOTEBOOK = parser.parse_args().notebook
+
+try:
+    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+except:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
 SQL_ENGINE = db.create_engine(SQLALCHEMY_DATABASE_URI)
-artpieces = pd.read_sql("SELECT * FROM artpieces WHERE status = 'Submitted'",SQL_ENGINE, parse_dates = ['submit_date'])
+
+num_pieces = 0
+while num_pieces not in range(1,10):
+    try:
+        num_pieces = int(input("How much art? (1-9)"))
+    except:
+        num_pieces = 0
+query = f"""SELECT * FROM artpieces
+           WHERE status = 'Submitted'
+           ORDER BY submit_date ASC
+           LIMIT {num_pieces}
+        """
+
+artpieces = pd.read_sql(query, SQL_ENGINE, parse_dates = ['submit_date'])
 artpieces['art'] = artpieces.art.apply(json.loads)
+
+print(f'Loaded {len(artpieces)} pieces of art')
+print(artpieces[['title','email','submit_date']])
 
 #Lists slots that should typically be available
 def canvas_slot_generator():
@@ -24,31 +51,41 @@ def well_map(well):
     number = well[1] + 1
     return letter + str(number)
 
+def add_canvas_locations(template_string, artpieces):
+    #write where canvas plates are to be placed into code
+    canvas_locations = dict(zip(artpieces.title,get_canvas_slot))
+    procedure = template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
 
-#Get JSON template
-template_file = open('ART_TEMPLATE.txt')
+    return procedure
+
+def add_pixel_locations(template_string, artpieces):
+    #write where to draw pixels on each plate into code. Listed by color to reduce contamination
+    pixels_by_color = dict()
+    for index, artpiece in artpieces.iterrows():
+        for color in artpiece.art:
+            if color not in pixels_by_color:
+                pixels_by_color[color] = dict()
+            pixels_by_color[color][artpiece.title] = [well_map(pixel) for pixel in artpiece.art[color]]
+    procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
+
+    return procedure
+
+
+#Get Python art procedure template
+file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
+template_file = open(f'ART_TEMPLATE.{file_extension}')
 template_string = template_file.read()
 template_file.close()
 
-def make_procedure(artpiece):
-    art = artpiece.art
-    for color in art:
-        art[color] = [well_map(well) for well in art[color]]
-    #This works for one canvas. Jinja templating might actually be a better way to do this for multiple canvases
-    canvas_string = template_string.replace('%%PINK WELLS GO HERE%%',str(art['pink'])[1:-1])
-    canvas_string = canvas_string.replace('%%BLUE WELLS GO HERE%%', str(art['blue'])[1:-1])
-    canvas_string = canvas_string.replace('%%TEAL WELLS GO HERE%%', str(art['teal'])[1:-1])
-    canvas_string = canvas_string.replace('%%ORANGE WELLS GO HERE%%', str(art['orange'])[1:-1])
-    canvas_string = canvas_string.replace('%%YELLOW WELLS GO HERE%%', str(art['yellow'])[1:-1])
 
-    return canvas_string
+procedure = add_canvas_locations(template_string, artpieces)
+
+procedure = add_pixel_locations(procedure, artpieces)
 
 
-canvas_procedures = artpieces.iloc[:1].apply(make_procedure, axis=1)
-final_procedure_string = '\n\n'.join(canvas_procedures.tolist())
-
-unique_file_name = 'ARTISTIC_PROCEDURE_%s.py' % datetime.now().strftime("%Y%m%d-%H%M%S")
+now = datetime.now().strftime("%Y%m%d-%H%M%S")
+unique_file_name = f'ARTISTIC_PROCEDURE_{now}.{file_extension}'
 output_file = open(os.path.join(basedir,'procedures',unique_file_name),'w')
-output_file.write(final_procedure_string)
+output_file.write(procedure)
 output_file.close()
 

@@ -1,5 +1,16 @@
 import re
 
+##taken from other utitlities function 
+import os
+import io
+import json
+import sqlalchemy as db
+import pandas as pd
+import math
+from PIL import Image, ImageDraw
+import sqlalchemy as db
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 ##
 # String validations
@@ -52,7 +63,7 @@ def check_colors(colors):
     return False
 
 def check_coords(art):
-    max_coords = (39, 26)
+    max_coords = (26, 39)
 
     for color in art:
         for coords in art[color]:
@@ -112,3 +123,47 @@ def check_failed_validation(title, email, art, sub_cnt, sub_lim, prev_emails):
         return check_eight
     else:
         return False
+
+def rebuild_art(art):
+    colors = {
+        'pink': (255,192,203,1)
+        ,'blue': (0,0,255,1)
+        ,'teal': (0,128,128,1)
+        ,'orange': (255,165,0,1)
+        ,'yellow': (255,255,0,1)
+    }
+
+    scale = 40 * 5
+    num_pixels = (39, 26)
+    ratio = (3,2)
+    pixel_size = (ratio[0] * scale / num_pixels[0]
+                 ,ratio[1] * scale / num_pixels[1])
+    total_size = (math.ceil(ratio[0] * scale + pixel_size[0])
+                 ,math.ceil(ratio[1] * scale + pixel_size[1]))
+    im = Image.new('RGBA',total_size,(255,255,255,1))
+    draw = ImageDraw.Draw(im)
+
+    for art_color in art:
+        for pixel in art[art_color]:
+            origin = [pixel_size[0] * pixel[1] , pixel_size[1] * pixel[0]] #pixels are given (y,x)
+            far_corner = [pixel_size[0] + origin[0], pixel_size[1] + origin[1]]
+            draw.rectangle(origin + far_corner,  fill = colors[art_color])
+    return (im.tobytes())
+
+#converts the image to bytes from database
+def convert_bytes_to_image(im):
+    art = Image.open(im, 'rb')
+    im.show()
+
+#function to pull image off of database
+def pull_picture(id):
+    #environment vars should be removed when implementing - they are already set at app config
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
+    SQL_ENGINE = db.create_engine(SQLALCHEMY_DATABASE_URI)
+
+    query = f"""SELECT picture FROM artpieces
+            WHERE id = {id}
+            """
+    picture = pd.read_sql(query, SQL_ENGINE).iloc[0][0]
+    image = Image.frombytes("RGBX", (616, 414), picture)
+    image.show()

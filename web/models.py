@@ -1,6 +1,6 @@
 #models.py - Defines the database tables used in the website.
 
-from __init__ import db
+from web import db
 
 #Stores all submitted art and allows it to be referenced later by the robot interface
 class artpieces(db.Model):
@@ -10,6 +10,7 @@ class artpieces(db.Model):
     submit_date = db.Column(db.DateTime())
     art = db.Column(db.String())
     status = db.Column(db.String())
+    picture = db.Column(db.LargeBinary())
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.title)
