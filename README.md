@@ -27,7 +27,7 @@ The code breaks into three sections, each of which can be run independently:
 
 ### To run:
 - Use same virtual environment as listed above in *Web*
-- ARTBot.db SQLlite file should be in your ARTBot folder
+- ARTBot.db SQLite file should be in your ARTBot folder
 - Run the script ```python3 art_processor.py```
 - Generated procedure will be timestamped and saved in _procedures_ folder
 
@@ -42,7 +42,7 @@ The code breaks into three sections, each of which can be run independently:
 If everything works correctly, the pipette tip will _just_ pierce the agar for each pixel it places. This is done on purpose - since it's hard to get precise volume for each agar plate, we just overestimate.
 
 ### Troubleshooting
-If the pipette tip misses your agar, it's easiest to troubleshoot using the [Jupyter Notebook server](LINK) that the OT2 runs to interact with the robot. Once you know the correct distance between the top of the lid and the agar, change it in ART_TEMPLATE.txt
+If the pipette tip misses your agar, it's easiest to troubleshoot using the [Jupyter Notebook server](LINK) that the OT2 runs to interact with the robot. In fact, you can generate the template in a Jupyter Notebook instead with ```python3 art_processor.py --notebook```. Once you know the correct distance between the top of the lid and the agar, change it in ART_TEMPLATE.txt
 
 ## Lab
 
