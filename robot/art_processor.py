@@ -1,13 +1,14 @@
 import json
-import sqlalchemy as db
+import sqlalchemy
 import pandas as pd #pandas is overkill, but it makes the database work really really easy, and that's nice
 import string
 from datetime import datetime
 import os, argparse
 
+from web import models, db
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--notebook'
                     ,action='store_true'
@@ -15,12 +16,12 @@ parser.add_argument('--notebook'
                     )
 NOTEBOOK = parser.parse_args().notebook
 
+
 try:
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
 except:
-    print('No Database URL found. Falling back to SQLite database')
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
-SQL_ENGINE = db.create_engine(SQLALCHEMY_DATABASE_URI)
+SQL_ENGINE = sqlalchemy.create_engine(SQLALCHEMY_DATABASE_URI)
 
 
 # Lists slots that should typically be available
@@ -83,7 +84,7 @@ else:
 
     #Get Python art procedure template
     file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
-    template_file = open(f'ART_TEMPLATE.{file_extension}')
+    template_file = open(os.path.join(basedir,f'ART_TEMPLATE.{file_extension}'))
     template_string = template_file.read()
     template_file.close()
 
@@ -98,6 +99,17 @@ else:
     output_file = open(os.path.join(basedir,'procedures',unique_file_name),'w')
     output_file.write(procedure)
     output_file.close()
+
+    #TODO Update records of processed artpieces. Possibly just get rid on Pandas all together
+    """updated_records = models.artpieces.query.filter_by()
+    print(updated_records)
+    updated_records.status = 'Processed'
+    #print(dir(models.artpieces.id))
+    #print(models.artpieces.id in artpieces.id.tolist())
+    #db.update(models.artpieces). \
+     #   where(models.artpieces.id in artpieces.id.tolist()). \
+      #  values(status='Processed')
+    db.session.commit()"""
 
     print(f'Successfully generated artistic procedure into: ARTBot/robot/procedures/{unique_file_name}')
     print('The following slots will be used:')
