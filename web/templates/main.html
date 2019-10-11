@@ -177,6 +177,13 @@
 				</div>
 				<div class="column">
 					<h1>Draw Art For Robot</h1>
+					{% if limit_message %}
+					<div class="limit-reached">
+						<hr>
+						{{limit_message}}
+						<hr>
+					</div>
+					{% endif %}
 					<table class="pixel-canvas"></table>
 				</div>
 			</div>
