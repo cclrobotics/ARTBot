@@ -26,3 +26,6 @@ IMAGE_UPLOAD_FOLDER = os.path.join(static_basedir,'static','img')
 ALLOWED_IMAGE_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'svg'])
 
 SUBMISSION_LIMIT = 27
+LIMIT_MESSAGE = """Note: We're a small community lab run entirely by volunteers, and we can only make so many artpieces
+                    each month. This month we've hit our limit. You can still draw art here, but the website won't
+                    accept submissions. Come back next month and we'll start fresh!"""
