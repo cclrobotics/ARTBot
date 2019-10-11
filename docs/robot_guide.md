@@ -20,6 +20,11 @@ Then simply run the script: ```python3 run_procedure_generator.py```
 The output of this script a Python file stored in _ARTBot/robot/procedures_
 timestamped with the data and time it was generated.
 
+#### Using a Jupyter Notebook
+If you prefer to work in the interactive Jupyter Notbook environment with the robot, run
+```python3 run_procedure_generator.py --notebook``` instead. Then your output will be a .ipynb file that you can upload
+the OT2 Jupyter server.
+
 ### Upload
 
 If this is your first time running a procedure generated this way on your robot, you will need to first upload the file
