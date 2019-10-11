@@ -1,5 +1,5 @@
 import json
-import sqlalchemy
+import sqlalchemy as sa
 import pandas as pd #pandas is overkill, but it makes the database work really really easy, and that's nice
 import string
 from datetime import datetime
@@ -21,7 +21,7 @@ try:
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
 except:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
-SQL_ENGINE = sqlalchemy.create_engine(SQLALCHEMY_DATABASE_URI)
+SQL_ENGINE = sa.create_engine(SQLALCHEMY_DATABASE_URI)
 
 
 # Lists slots that should typically be available
@@ -100,16 +100,10 @@ else:
     output_file.write(procedure)
     output_file.close()
 
-    #TODO Update records of processed artpieces. Possibly just get rid on Pandas all together
-    """updated_records = models.artpieces.query.filter_by()
-    print(updated_records)
-    updated_records.status = 'Processed'
-    #print(dir(models.artpieces.id))
-    #print(models.artpieces.id in artpieces.id.tolist())
-    #db.update(models.artpieces). \
-     #   where(models.artpieces.id in artpieces.id.tolist()). \
-      #  values(status='Processed')
-    db.session.commit()"""
+    updated_records = models.artpieces.query.filter(models.artpieces.id.in_(artpieces.id))
+    for record in updated_records:
+        record.status = 'Processed'
+    db.session.commit()
 
     print(f'Successfully generated artistic procedure into: ARTBot/robot/procedures/{unique_file_name}')
     print('The following slots will be used:')
