@@ -9,7 +9,7 @@ REPLACE = False
 custom_plates = dict()
 
 custom_plates['CCL_ARTBot_canvas'] = dict(
-	grid=(39, 36),
+	grid=(39, 26),
 	spacing=(2.096, 2.096),
 	diameter=0.75,
 	depth=13,
