@@ -2,7 +2,7 @@
 
 import datetime
 import json
-from web.utilities import check_failed_validation, rebuild_art
+from web.utilities import check_failed_validation, rebuild_art, sendConfirmationEmailToUser
 from web import app, db, models, csrf
 from flask import render_template, flash, redirect, url_for, request, Response
 from sqlalchemy import desc, extract, sql
@@ -51,7 +51,14 @@ def receive_art():
 
     db.session.add(models.artpieces(**art_data))
     SUBMISSION_COUNT.val += 1
-    db.session.commit()
+    db.session.flush()
+
+    # update object in the session with its state in the db 
+    db.session.refresh(art_data)
+    
+    # send confirmation email to user
+    sendConfirmationEmailToUser(art_data)
+
     return 'Robot Art Loaded'
 
 

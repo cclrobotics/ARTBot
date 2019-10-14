@@ -9,6 +9,14 @@ import pandas as pd
 import math
 from PIL import Image, ImageDraw
 import sqlalchemy as db
+from web import app
+from Flask import Flask
+from flask_mail import Message, Mail
+
+# initiate mail with app config
+mail = Mail()
+app = Flask(__name__)
+mail.init_app(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -166,4 +174,17 @@ def pull_picture(id):
             """
     picture = pd.read_sql(query, SQL_ENGINE).iloc[0][0]
     image = Image.frombytes("RGBX", (616, 414), picture)
-    image.show()
+    # image.show()
+    return image
+
+def sendConfirmationEmailToUser(entry):
+    msg = Message("ArtBot Agar Art Submission on Behalf of %s", entry.email)
+
+    msg.recipients = [entry.email]
+
+    msg.html = "<h2>Confirmation ID: %s</h2><h2>Your art is attached. We'll send you another email when it's complete!</h2>", entry.id
+
+    image = Image.frombytes("RGBX", (616, 414), entry.picture)
+    msg.attach("image.png", "image/png", image)
+
+    mail.send(msg)
