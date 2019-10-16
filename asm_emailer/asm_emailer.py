@@ -1,6 +1,6 @@
 import schedule, time
 from web import app
-from Flask import Flask
+from flask import Flask
 from flask_mail import Message, Mail
 from web.utilities import sendConfirmationEmailToUser
 

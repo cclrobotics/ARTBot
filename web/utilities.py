@@ -10,7 +10,7 @@ import math
 from PIL import Image, ImageDraw
 import sqlalchemy as db
 from web import app
-from Flask import Flask
+from flask import Flask
 from flask_mail import Message, Mail
 
 # initiate mail with app config
