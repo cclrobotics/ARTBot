@@ -30,14 +30,15 @@ LIMIT_MESSAGE = """Note: We're a small community lab run entirely by volunteers,
                     each month. This month we've hit our limit. You can still draw art here, but the website won't
                     accept submissions. Come back next month and we'll start fresh!"""
 
-# MAIL_SERVER : default ‘localhost’
-# MAIL_PORT : default 25
-MAIL_USE_TLS : True
-MAIL_USE_SSL : True
+
+MAIL_SERVER = 'smtp.gmail.com'
+MAIL_PORT = 465
+MAIL_USE_TLS = False
+MAIL_USE_SSL = True
 # MAIL_DEBUG : default app.debug
-# MAIL_USERNAME : default None
-# MAIL_PASSWORD : default None
-# MAIL_DEFAULT_SENDER : default None
+MAIL_USERNAME = os.environ['EMAIL_USER']
+MAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
+MAIL_DEFAULT_SENDER = os.environ['EMAIL_SENDER']
 # MAIL_MAX_EMAILS : default None
 # MAIL_SUPPRESS_SEND : default app.testing
 # MAIL_ASCII_ATTACHMENTS : default False
