@@ -31,8 +31,8 @@ LIMIT_MESSAGE = """Note: We're a small community lab run entirely by volunteers,
                     accept submissions. Come back next month and we'll start fresh!"""
 
 
-MAIL_SERVER = 'smtp.gmail.com'
-MAIL_PORT = 465
+MAIL_SERVER = os.environ['EMAIL_SERVER']
+MAIL_PORT = os.environ['EMAIL_PORT']
 MAIL_USE_TLS = False
 MAIL_USE_SSL = True
 # MAIL_DEBUG : default app.debug
