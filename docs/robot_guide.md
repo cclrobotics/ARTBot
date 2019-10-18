@@ -1,3 +1,56 @@
+# Printing picture on OT2
+#### working with computer
+- login to ccl computer (password taped to comp)
+- double click generate_robot_script.sh (on desktop)
+- click run in terminal
+- follow script
+    - how much art (1 - 9) -- (how many submissions u want to print)
+    - this will give you a picece of art (frist in first out)
+    - use correct slot for correct picture file
+    - leave terminal open (dont press enter)
+- open Opentrons.APPimage (on desktop) -- to find robot IP address
+    - click robot (top left)
+    - flip switch button icon to connect to robot through wifi
+    - in pannel find connectivity setting 
+    - find wireless ip addres ex:```100.64.66.219``` (dont grab numbers after /)
+- open firefox
+    - paste ip from opentron.appimage
+    - add: ```:48888``` (this is port)
+-follow jupyter notebook 
+    - click ```upload``` (in top right corner)
+    - grad picture you generated (cross check with terminal output)
+    - press upload next to file (blue button)
+    - click jupyter link --> new tab will open
+- follow BioArt Artistic procedure
+    - run jupyter cells: place cursor in cell and click shift enter (wait for number to finish)
+    - cell 4 takes a long time (start getting labware together while 4 runs)
+    - cell 5 actually runs procedure so wait for everything to be in place before running
+
+#### Setting up opentron for printing
+prep for biosafety hood
+**before you enter cabinet!!!!**
+- get one package of canvases plates (artbot poured plates) (agar rectgangle plates on artbot shelf)
+- get one package of "palatte" plates (to hold liquid culture)
+- get bacteria cultures
+- sterilize and place needed material in hood
+
+**when your in biosafety hood - (only use if trained)**
+- take out as many plates as you need
+- add 5ml liquid culture of bacteria to wells in "palatte" plate
+- order: (START AT TOP LEFT CORNER) 
+    - A1 = PINK, A2 = BLUE, A3 = TEAL
+    - B1 = PEACH, B2 = FLOURESCENT
+
+**ENTER OPENTRON**
+- spray with alcohol 
+- place sterile material from biosafety hood into opentron
+- place "palette" into slot 11
+- place canvases into correctly numbered slots
+- check pipet tips in slot 1 -- **need pipet tips in left column!**
+- take off all lids
+- slowly close opentron door (preventing airflow)
+- run cell 5 from jupyter notebook
+
 # Making robot procedures  
 
 Web -> **Robot** -> Lab  
