@@ -15,7 +15,7 @@ from web.config import SUBMISSION_LIMIT, LIMIT_MESSAGE
 @app.route('/index', methods=('GET', 'POST'))
 def index():
     SUBMISSION_COUNT = models.site_vars.query.filter_by(var='SUBMISSION_CNT').first()
-    if SUBMISSION_COUNT.val > SUBMISSION_LIMIT:
+    if SUBMISSION_COUNT.val >= SUBMISSION_LIMIT:
         limit_message = LIMIT_MESSAGE
     else:
         limit_message = None

@@ -24,6 +24,14 @@ custom_plates['falcon_6_wellplate_15.5ml_flat'] = dict(
 	volume=15500
 )
 
+custom_plates['nunc_8_wellplate_flat'] = dict(
+	grid=(4, 2),
+	spacing=(31, 40.5),
+	diameter=31,
+	depth=13.3,
+	volume=13000
+)
+
 for plate_name in custom_plates:
 	if plate_name in labware.list():
 		if REPLACE:
