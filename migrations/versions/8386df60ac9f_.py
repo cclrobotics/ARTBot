@@ -24,6 +24,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('var')
     )
     # ### end Alembic commands ###
+    op.execute("INSERT INTO site_vars (var, val) VALUES ('SUBMISSION_CNT', 0)")
 
 
 def downgrade():
