@@ -3,6 +3,8 @@ from web import app
 from flask import Flask
 from flask_mail import Message, Mail
 from PIL import Image, ImageDraw
+import os
+import sqlalchemy as db
 import pandas as pd
 from web.utilities import sendConfirmationEmailToUser
 
@@ -11,29 +13,31 @@ mail = Mail()
 app = Flask(__name__)
 mail.init_app(app)
 
-def sendEmailToASM(entry):
-    msg = Message("ArtBot Agar Art Submission on Behalf of %s", entry.email)
-
-    msg.recipients = [entry.email]
-    msg.add_recipient("somebodyelse@asm.com")
-
-    msg.html = "<h2>Attached is %s's argar art submission!</h2>", entry.email
-
-    image = Image.frombytes("RGBX", (616, 414), entry.completed_picture)
-    msg.attach("image.png", "image/png", image)
-
-    mail.send(msg)
-
 def sendEmailToUser(entry):
-    msg = Message("ArtBot is done making your art!",
+    msg = Message("ARTBot is done making your art!",
                 recipients=[entry.email])
 
-    msg.html = "<h2>Attached is a picture of your completed agart art and the original pixel art for comparison!</h2>"
+    msg.html = f"""
+                <h2>The Counter Culture Lab ARTBot team thanks you for your submission!</h2>
+                <h2>Attached is a picture of your completed agart art and the original pixel art for comparison!</h2>
+                <h4>Questions or concerns?  Email us at 
+                    <a href="mailto:ccl-artbot@gmail.com"
+                        ccl-artbot@gmail.com
+					</a>
+                </h4>
+                """
 
     image = Image.frombytes("RGBX", (616, 414), entry.completed_picture)
+    with io.BytesIO() as output:
+        image.save(output, format='JPEG')
+        image_file = output.getvalue()
+        msg.attach("completed_art.jpg", "image/jpg", image_file)
+    
     imageTwo = Image.frombytes("RGBX", (616, 414), entry.picture)
-    msg.attach("completed_art.png", "image/png", image)
-    msg.attach("original_pixel_art.png", "image/png", imageTwo)
+    with io.BytesIO() as outputTwo:
+        imageTwo.save(output, format='JPEG')
+        image_fileTwo = outputTwo.getvalue()
+        msg.attach("original_pixel_art.jpg", "image/jpg", image_fileTwo)
 
     mail.send(msg)
 
@@ -50,7 +54,6 @@ def getCompletedArt():
 
 def getArtSendEmail():
     entry = getCompletedArt()
-    sendEmailToASM(entry)
     sendEmailToUser(entry)
 
 schedule.every().day.at("7am").do(getArtSendEmail)
