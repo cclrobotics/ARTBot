@@ -35,7 +35,13 @@ def receive_art():
 
     # perform string validations
     prev_emails = db.session.query(models.artpieces.email).filter_by(status='Submitted').all()
-    failed_validation = check_failed_validation(title, email, art, SUBMISSION_COUNT.val, SUBMISSION_LIMIT, prev_emails)
+    failed_validation = check_failed_validation(title,
+                                                email,
+                                                art,
+                                                SUBMISSION_COUNT.val,
+                                                SUBMISSION_LIMIT,
+                                                prev_emails
+                                                )
     
     if failed_validation:
         return failed_validation
@@ -53,11 +59,13 @@ def receive_art():
     SUBMISSION_COUNT.val += 1
     db.session.flush()
 
-    # update object in the session with its state in the db 
-    db.session.refresh(art_data)
+    # update object in the session with its state in the db
+    submitted_art_data = models.artpieces.query.filter_by(submit_date=art_data['submit_date'],
+                                                          art=art_data['art']
+                                                          ).first()
     
     # send confirmation email to user
-    sendConfirmationEmailToUser(art_data)
+    sendConfirmationEmailToUser(submitted_art_data)
 
     return 'Robot Art Loaded'
 
