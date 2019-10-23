@@ -112,7 +112,9 @@ colorContainer.addEventListener('click', function(e) {
 // Adds color-fill functionality. e.preventDefault(); intercepts page refresh on button click
 quickFill.addEventListener('click', function(e) {
   e.preventDefault();
-  pixelCanvas.querySelectorAll('td').forEach(td => td.style.backgroundColor = colorChoice);
+  if (confirm('This will fill all cells with the selected color and erase ALL art. Are you sure?')) {
+    pixelCanvas.querySelectorAll('td').forEach(td => td.style.backgroundColor = colorChoice);
+  } 
 });
 
 // Removes color from cell upon double-click
