@@ -80,7 +80,8 @@ def check_submission_limit(submission_cnt, submission_limit, email, prev_emails)
                 """
 
     if submission_cnt >= submission_limit:
-        return (limitErr, 400)
+        if(!check_coupon_code(title)):
+            return (limitErr, 400)
 
     userLimitErr = """Easy there, speed demon! We're a small volunteer-run, non-profit lab and there's a limit to how
                     many works of art we can help make. Once we make your previous submission, submit another one! \n
@@ -89,7 +90,14 @@ def check_submission_limit(submission_cnt, submission_limit, email, prev_emails)
                 """
 
     if email in [email_obj[0] for email_obj in prev_emails]:
-        return (userLimitErr, 400)
+        if(!check_coupon_code(title)):
+            return (userLimitErr, 400)
+
+    return False
+
+def check_coupon_code(title):
+    if (title.endswith("CCL")):
+        return True
 
     return False
 
@@ -106,6 +114,7 @@ def check_failed_validation(title, email, art, sub_cnt, sub_lim, prev_emails):
     check_seven = check_coords(art)
 
     check_eight = check_submission_limit(sub_cnt, sub_lim, email, prev_emails)
+    check_nine = check_coupon_code(title)
 
     if check_one:
         return check_one
@@ -123,6 +132,8 @@ def check_failed_validation(title, email, art, sub_cnt, sub_lim, prev_emails):
         return check_seven
     elif check_eight:
         return check_eight
+    elif check_nine:
+        return check_nine
     else:
         return False
 
