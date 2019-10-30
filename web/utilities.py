@@ -96,8 +96,10 @@ def check_submission_limit(submission_cnt, submission_limit, email, prev_emails)
     return False
 
 def check_coupon_code(title):
-    if (title.endswith("CCL")):
-        return True
+    availablecodes = models.site_vars.query.filter_by(var='code').val
+    for code in availablecodes:
+        if (title.endswith(code)):
+            return True
 
     return False
 
