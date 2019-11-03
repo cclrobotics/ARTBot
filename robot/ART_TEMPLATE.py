@@ -9,6 +9,8 @@ metadata = {
 
 def distribute_to_agar(self, vol, source, destination, disposal_vol):
 
+    self.max_volume = 20
+
     dest = list(destination) #allows for non-lists
 
     for cnt, well in enumerate(dest):
@@ -69,6 +71,11 @@ for color in pixels_by_color_by_artpiece:
             ,canvas_labware[art_title].wells('A1').from_center(x=pixel[0], y=pixel[1], z=-2.8).coordinates)
             for pixel in pixels_by_artpiece[art_title]
         ]
+        if not len(pixels_by_artpiece[art_title]): #single-well case
+            pixel = pixels_by_artpiece[art_title]
+            pixels_by_color[color] += [
+                (canvas_labware[art_title]
+                ,canvas_labware[art_title].wells('A1').from_center(x=pixel[0], y=pixel[1], z=-2.8).coordinates)]
 
 
 def run_custom_protocol():
