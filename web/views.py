@@ -2,7 +2,7 @@
 
 import datetime
 import json
-from web.utilities import check_failed_validation, rebuild_art
+from web.utilities import check_failed_validation, rebuild_art, sendConfirmationEmailToUser
 from web import app, db, models, csrf
 from flask import render_template, flash, redirect, url_for, request, Response
 from sqlalchemy import desc, extract, sql
@@ -15,7 +15,7 @@ from web.config import SUBMISSION_LIMIT, LIMIT_MESSAGE
 @app.route('/index', methods=('GET', 'POST'))
 def index():
     SUBMISSION_COUNT = models.site_vars.query.filter_by(var='SUBMISSION_CNT').first()
-    if SUBMISSION_COUNT.val > SUBMISSION_LIMIT:
+    if SUBMISSION_COUNT.val >= SUBMISSION_LIMIT:
         limit_message = LIMIT_MESSAGE
     else:
         limit_message = None
@@ -35,7 +35,13 @@ def receive_art():
 
     # perform string validations
     prev_emails = db.session.query(models.artpieces.email).filter_by(status='Submitted').all()
-    failed_validation = check_failed_validation(title, email, art, SUBMISSION_COUNT.val, SUBMISSION_LIMIT, prev_emails)
+    failed_validation = check_failed_validation(title,
+                                                email,
+                                                art,
+                                                SUBMISSION_COUNT.val,
+                                                SUBMISSION_LIMIT,
+                                                prev_emails
+                                                )
     
     if failed_validation:
         return failed_validation
@@ -51,7 +57,16 @@ def receive_art():
 
     db.session.add(models.artpieces(**art_data))
     SUBMISSION_COUNT.val += 1
-    db.session.commit()
+    db.session.flush()
+
+    # update object in the session with its state in the db
+    submitted_art_data = models.artpieces.query.filter_by(submit_date=art_data['submit_date'],
+                                                          art=art_data['art']
+                                                          ).first()
+    
+    # send confirmation email to user
+    sendConfirmationEmailToUser(submitted_art_data)
+
     return 'Robot Art Loaded'
 
 

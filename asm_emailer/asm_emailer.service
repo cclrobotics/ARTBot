@@ -1,0 +1,12 @@
+[Unit]
+Description=Email ASM and users when art is done.
+Requires=network.target
+[Service]
+#Environment=ARTBOT_CONF=/root/artbot.conf
+WorkingDirectory=/home/artbot/artbot_venv
+ExecStart=/home/artbot/artbot_venv/bin/python /home/artbot/asm_emailer/asm_emailer.py
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+User=root
+Group=root
