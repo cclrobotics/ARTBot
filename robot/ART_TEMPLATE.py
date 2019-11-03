@@ -1,4 +1,5 @@
 from opentrons import labware, instruments, robot
+import math
 
 metadata = {
     'protocolName': 'CCL ARTBot',
@@ -11,6 +12,10 @@ def distribute_to_agar(self, vol, source, destination, disposal_vol):
     dest = list(destination) #allows for non-lists
 
     for cnt, well in enumerate(dest):
+        if (cnt + 1) % 150 == 0:
+            self.drop_tip()
+            self.current_volume = 0
+
         if not self.current_tip():
             self.pick_up_tip()
 
@@ -19,17 +24,14 @@ def distribute_to_agar(self, vol, source, destination, disposal_vol):
             remaining_vol = remaining_wells * vol
 
             if remaining_vol + disposal_vol > self.max_volume:
-                asp_vol = math.floor((self.max_volume - disposal_vol) / vol) * vol
+                asp_vol = math.floor((self.max_volume - disposal_vol) / vol) * vol + disposal_vol - self.current_volume
             else:
-                asp_vol =  remaining_vol + disposal_vol
+                asp_vol = remaining_vol + disposal_vol - self.current_volume
 
             self.aspirate(asp_vol, source)
 
-        self.dispense(vol, well, 0.25)
-
-        dip_position = robot._driver.position
-        dip_position['Z'] = dip_position['Z'] - 12 #tweek number to just pierce agar surface
-        robot._driver.move(dip_position)
+        self.move_to(well, strategy='arc')
+        self.dispense(vol)
 
     self.drop_tip()
 
@@ -63,20 +65,21 @@ for color in pixels_by_color_by_artpiece:
     pixels_by_artpiece = pixels_by_color_by_artpiece[color]
     for art_title in pixels_by_artpiece:
         pixels_by_color[color] += [
-            pixel.top() for pixel in canvas_labware[art_title].wells(pixels_by_artpiece[art_title])
+            (canvas_labware[art_title]
+            ,canvas_labware[art_title].wells('A1').from_center(x=pixel[0], y=pixel[1], z=-2.8).coordinates)
+            for pixel in pixels_by_artpiece[art_title]
         ]
 
 
-def run_custom_protocol(
-        pipette_axis: 'StringSelection...'='left'):
+def run_custom_protocol():
 
     p300 = instruments.P300_Single(
-            mount=pipette_axis,
+            mount='left',
             tip_racks=[p200rack]
     )
 
     for color in pixels_by_color:
-        distribute_to_agar(p300, 0.1, palette_colors[color], pixels_by_color[color], disposal_vol=1)
+        distribute_to_agar(p300, 0.1, palette_colors[color], pixels_by_color[color], disposal_vol=4)
 
-run_custom_protocol(**{'pipette_axis': 'left'})
+run_custom_protocol()
 
