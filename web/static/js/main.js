@@ -202,23 +202,22 @@ drawSubmit.addEventListener('submit', function(e) {
   }
 
   var xhr = new XMLHttpRequest();
-  var csrf_token = document.querySelector("#csrf").value;
   var email = document.querySelector("#email").value;
   var title = document.querySelector("#title").value;
   data['email'] = email;
   data['title'] = title;
   data['art'] = canvasCoord;
 
-  xhr.open("POST", '/receive_art', true);
+  xhr.open('POST', '/receive_art', true);
   xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
-  xhr.setRequestHeader('X-CSRFToken', csrf_token);
+  xhr.responseType = "json"
   xhr.send(JSON.stringify(
     data
   ));
 
   xhr.onloadend = function () {
     let status = xhr.status;
-    let response = xhr.responseText;
+    let response = xhr.response;
     let modal;
     let text;
     let closer;
@@ -235,7 +234,18 @@ drawSubmit.addEventListener('submit', function(e) {
     }
 
     // update modal text
-    text.innerHTML = response;
+    if (response.errors) {
+      let body = response.errors.body
+      if (body.email) {
+        text.innerHTML = body.email
+      } else if (body.title) {
+        text.innerHTML = 'Title: ' + body.title
+      } else {
+        text.innerHTML = body
+      }
+    } else {
+      text.innerHTML = response.success;
+    }
 
     // When we get a response, open the modal 
     modal.style.display = "block";

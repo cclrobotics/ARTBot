@@ -1,198 +1,56 @@
 import re
 
-##taken from other utitlities function 
+##taken from other utitlities function
+import datetime
 import os
 import io
-import json
-import sqlalchemy as db
-import pandas as pd
 import math
 from PIL import Image, ImageDraw
-import sqlalchemy as db
-from web import mail
+from web.extensions import mail
 from flask_mail import Message
+from flask import current_app
+from web.artpiece import (total_submission_count_since
+        , active_submission_count
+        , get_artpiece_by_id)
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+def first_of_month():
+    return datetime.date.today().replace(day=1)
 
-##
-# String validations
-#
-##
-def check_existence(data, name):
-    strErr = 'Error: please enter a' + name
+def has_reached_monthly_submission_limit(limit):
+    return total_submission_count_since(first_of_month()) >= limit
 
-    if not data:
-        return (strErr, 400)
-
-    return False
-
-def check_email(email):
-    # the regex for emails we're using allows for lengths over 8000 characters
-    # so we need to check for length first
-    if len(email) > 254:
-        return ('Error: invalid email address.', 400)
-
-    if not re.match(r"^[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,125}[a-zA-Z]{2,63}$", email):
-        return ('Error: invalid email address.', 400)
-
-    return False
-
-def check_strings(string, name):
-    lengthErr = 'Error: ' + name + ' is too long.  Must be less than 50 characters.'
-
-    if len(string) > 50:
-        return (lengthErr, 400)
-
-    charErr = 'Error: ' + name + ' has invalid characters. Must be alphanumeric only.'
-
-    if not re.match(r"^[a-zA-Z0-9]+$", string):
-        return (charErr, 400)
-
-    return False
-
-def check_colors(colors):
-    allowed_colors = [
-      "pink",
-      "orange",
-      "teal",
-      "yellow",
-      "blue"
-    ]
-
-    for key in colors:
-        if key not in allowed_colors: 
-            return ('Error: bad request.', 400)
-    return False
-
-def check_coords(art):
-    max_coords = (26, 39)
-
-    for color in art:
-        for coords in art[color]:
-            if coords[0] > max_coords[0] or coords[1] > max_coords[1]:
-                return ('Error: bad request.', 400)
-
-    return False
-
-def check_submission_limit(submission_cnt, submission_limit, email, prev_emails):
-    limitErr = """We're a small volunteer-run, non-profit lab and there's a limit to how many works of art we can
-                   help make. We're full-up this month, but come back on the 1st and we'll be open for art-making again!
-                """
-
-    if submission_cnt >= submission_limit:
-        return (limitErr, 400)
-
-    userLimitErr = """Easy there, speed demon! We're a small volunteer-run, non-profit lab and there's a limit to how
-                    many works of art we can help make. Once we make your previous submission, submit another one! \n
-                    If there's an issue with your previous submission and you want to withdraw it, send us an email:
-                    ccl-artbot@gmail.com
-                """
-
-    if email in [email_obj[0] for email_obj in prev_emails]:
-        return (userLimitErr, 400)
-
-    return False
-
-def check_failed_validation(title, email, art, sub_cnt, sub_lim, prev_emails):
-    
-    check_one = check_existence(title, ' title')
-    check_two = check_existence(email, 'n email')
-    check_three = check_existence(art, 'n art design')
-    
-    check_four = check_strings(title, 'title')
-    check_five = check_email(email)
-
-    check_six = check_colors(art)
-    check_seven = check_coords(art)
-
-    check_eight = check_submission_limit(sub_cnt, sub_lim, email, prev_emails)
-
-    if check_one:
-        return check_one
-    elif check_two:
-        return check_two
-    elif check_three:
-        return check_three
-    elif check_four:
-        return check_four
-    elif check_five:
-        return check_five
-    elif check_six:
-        return check_six
-    elif check_seven:
-        return check_seven
-    elif check_eight:
-        return check_eight
-    else:
-        return False
-
-def rebuild_art(art):
-    colors = {
-        'pink': (255,192,203,1)
-        ,'blue': (0,0,255,1)
-        ,'teal': (0,128,128,1)
-        ,'orange': (255,165,0,1)
-        ,'yellow': (255,255,0,1)
-    }
-
-    scale = 40 * 5
-    num_pixels = (39, 26)
-    ratio = (3,2)
-    pixel_size = (ratio[0] * scale / num_pixels[0]
-                 ,ratio[1] * scale / num_pixels[1])
-    total_size = (math.ceil(ratio[0] * scale + pixel_size[0])
-                 ,math.ceil(ratio[1] * scale + pixel_size[1]))
-    im = Image.new('RGBA',total_size,(255,255,255,1))
-    draw = ImageDraw.Draw(im)
-
-    for art_color in art:
-        for pixel in art[art_color]:
-            origin = [pixel_size[0] * pixel[1] , pixel_size[1] * pixel[0]] #pixels are given (y,x)
-            far_corner = [pixel_size[0] + origin[0], pixel_size[1] + origin[1]]
-            draw.rectangle(origin + far_corner,  fill = colors[art_color])
-    return (im.tobytes())
-
-#converts the image to bytes from database
-def convert_bytes_to_image(im):
-    art = Image.open(im, 'rb')
-    im.show()
+def has_active_submission(email):
+    return active_submission_count(email) != 0
 
 #function to pull image off of database
 def pull_picture(id):
-    #environment vars should be removed when implementing - they are already set at app config
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
-    SQL_ENGINE = db.create_engine(SQLALCHEMY_DATABASE_URI)
-
-    query = f"""SELECT picture FROM artpieces
-            WHERE id = {id}
-            """
-    picture = pd.read_sql(query, SQL_ENGINE).iloc[0][0]
-    image = Image.frombytes("RGBX", (616, 414), picture)
-    # image.show()
+    # handle invalid id
+    artpiece = get_artpiece_by_id(id)
+    image = Image.frombytes("RGBX", (616, 414), artpiece.raw_image)
+    image.show()
     return image
 
 def sendConfirmationEmailToUser(entry):
     msg = Message(f"ARTBot Submission Confirmation for {entry.title}")
-
-    msg.recipients = [entry.email]
+            , sender=f"no-reply@{current_app.config['MAIL_SERVER']}"
+            , recipients=[entry.email])
 
     msg.html = f"""
                 <h2>The Counter Culture Lab BioArtBot team thanks you for your submission!</h2>
                 <h2>Confirmation ID: {entry.id}</h2>
                 <h2>The pixel version of your artwork is attached.
                     We'll send you another email with pictures when the bio version is complete!</h2>
-                <h4>Questions or concerns?  Email us at 
+                <h4>Questions or concerns?  Email us at
                     <a href="mailto:ccl-artbot@gmail.com"
                         ccl-artbot@gmail.com
 					</a>
                 </h4>
                 """
 
-    image = Image.frombytes("RGBX", (616, 414), entry.picture)
+    image = Image.frombytes("RGBX", (616, 414), entry.raw_image)
     with io.BytesIO() as output:
         image.save(output, format='JPEG')
         image_file = output.getvalue()
-        msg.attach("image.jpg", "image/jpg", image_file)
 
-
+    msg.attach("image.jpg", "image/jpg", image_file)
     mail.send(msg)

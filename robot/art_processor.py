@@ -1,13 +1,11 @@
-import json
 import sqlalchemy as sa
-import pandas as pd #pandas is overkill, but it makes the database work really really easy, and that's nice
+from sqlalchemy.orm import sessionmaker
 import string
 from datetime import datetime
 import os, argparse
+from contextlib import contextmanager
 
-from web import models, db
-
-basedir = os.path.abspath(os.path.dirname(__file__))
+from web.database.models import ArtpieceModel, SubmissionStatus
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--notebook'
@@ -16,13 +14,28 @@ parser.add_argument('--notebook'
                     )
 NOTEBOOK = parser.parse_args().notebook
 
+APP_DIR = os.path.abspath(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
+DB_NAME = 'ARTBot.db'
+# Put the db file in project root
+DB_PATH = os.path.join(PROJECT_ROOT, DB_NAME)
+SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///{0}'.format(DB_PATH))
 
-try:
-    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
-except:
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
 SQL_ENGINE = sa.create_engine(SQLALCHEMY_DATABASE_URI)
+Session = sessionmaker(bind=SQL_ENGINE)
 
+@contextmanager
+def session_scope():
+    """Provide transactional scope around a series of operations."""
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 # Lists slots that should typically be available
 def canvas_slot_generator():
@@ -36,10 +49,10 @@ def well_map(well):
     number = well[1] + 1
     return letter + str(number)
 
-
+# BUG: overwrites locations if same title
 def add_canvas_locations(template_string, artpieces):
     # write where canvas plates are to be placed into code
-    canvas_locations = dict(zip(artpieces.title, get_canvas_slot))
+    canvas_locations = dict(zip([artpiece.title for artpiece in artpieces], get_canvas_slot))
     procedure = template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
 
     return procedure, canvas_locations
@@ -48,7 +61,7 @@ def add_canvas_locations(template_string, artpieces):
 def add_pixel_locations(template_string, artpieces):
     # write where to draw pixels on each plate into code. Listed by color to reduce contamination
     pixels_by_color = dict()
-    for index, artpiece in artpieces.iterrows():
+    for artpiece in artpieces:
         for color in artpiece.art:
             if color not in pixels_by_color:
                 pixels_by_color[color] = dict()
@@ -61,50 +74,40 @@ def add_pixel_locations(template_string, artpieces):
 num_pieces = 0
 while num_pieces not in range(1,10):
     try:
-        num_pieces = int(input("How much art? (1-9)"))
+        num_pieces = int(input("How much art? (1-9) "))
     except:
         num_pieces = 0
-query = f"""SELECT * FROM artpieces
-           WHERE status = 'Submitted'
-           ORDER BY submit_date ASC
-           LIMIT {num_pieces}
-        """
 
-artpieces = pd.read_sql(query, SQL_ENGINE, parse_dates = ['submit_date'])
-artpieces['art'] = artpieces.art.apply(json.loads)
+with session_scope() as session:
+    artpieces = session.query(ArtpieceModel).filter(
+            ArtpieceModel.status == SubmissionStatus.submitted).order_by(ArtpieceModel.submit_date.asc()).limit(num_pieces).all()
 
+    if not artpieces:
+        print('No new art found. All done.')
+    else:
+        print(f'Loaded {len(artpieces)} pieces of art')
+        for artpiece in artpieces:
+            print(f"{artpiece.id}: {artpiece.title}, {artpiece.email}, {artpiece.submit_date}")
 
-if not len(artpieces):
-    print('No new art found. All done.')
+        #Get Python art procedure template
+        file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
+        with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
+            template_string = template_file.read()
 
-else:
-    print(f'Loaded {len(artpieces)} pieces of art')
-    print(artpieces[['id','title','email','submit_date']])
+        procedure, canvas_locations = add_canvas_locations(template_string, artpieces)
 
-
-    #Get Python art procedure template
-    file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
-    template_file = open(os.path.join(basedir,f'ART_TEMPLATE.{file_extension}'))
-    template_string = template_file.read()
-    template_file.close()
+        procedure = add_pixel_locations(procedure, artpieces)
 
 
-    procedure, canvas_locations = add_canvas_locations(template_string, artpieces)
+        now = datetime.now().strftime("%Y%m%d-%H%M%S")
+        unique_file_name = f'ARTISTIC_PROCEDURE_{now}.{file_extension}'
+        with open(os.path.join(APP_DIR,'procedures',unique_file_name),'w') as output_file:
+            output_file.write(procedure)
 
-    procedure = add_pixel_locations(procedure, artpieces)
+        updated_records = session.query(ArtpieceModel).filter(ArtpieceModel.id.in_([artpiece.id for artpiece in artpieces]))
+        for record in updated_records:
+            record.status = SubmissionStatus.processed
 
-
-    now = datetime.now().strftime("%Y%m%d-%H%M%S")
-    unique_file_name = f'ARTISTIC_PROCEDURE_{now}.{file_extension}'
-    output_file = open(os.path.join(basedir,'procedures',unique_file_name),'w')
-    output_file.write(procedure)
-    output_file.close()
-
-    updated_records = models.artpieces.query.filter(models.artpieces.id.in_(artpieces.id))
-    for record in updated_records:
-        record.status = 'Processed'
-    db.session.commit()
-
-    print(f'Successfully generated artistic procedure into: ARTBot/robot/procedures/{unique_file_name}')
-    print('The following slots will be used:')
-    print('\n'.join([f'Slot {str(canvas_locations[key])}: "{key}"' for key in canvas_locations]))
+        print(f'Successfully generated artistic procedure into: ARTBot/robot/procedures/{unique_file_name}')
+        print('The following slots will be used:')
+        print('\n'.join([f'Slot {str(canvas_locations[key])}: "{key}"' for key in canvas_locations]))
