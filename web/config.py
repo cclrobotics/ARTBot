@@ -30,15 +30,17 @@ LIMIT_MESSAGE = """Note: We're a small community lab run entirely by volunteers,
                     each month. This month we've hit our limit. You can still draw art here, but the website won't
                     accept submissions. Come back next month and we'll start fresh!"""
 
-
-MAIL_SERVER = os.environ['EMAIL_SERVER']
-MAIL_PORT = os.environ['EMAIL_PORT']
-MAIL_USE_TLS = False
-MAIL_USE_SSL = True
-# MAIL_DEBUG : default app.debug
-MAIL_USERNAME = os.environ['EMAIL_USER']
-MAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
-MAIL_DEFAULT_SENDER = os.environ['EMAIL_SENDER']
-# MAIL_MAX_EMAILS : default None
-# MAIL_SUPPRESS_SEND : default app.testing
-# MAIL_ASCII_ATTACHMENTS : default False
+try:
+    MAIL_SERVER = os.environ['EMAIL_SERVER']
+    MAIL_PORT = os.environ['EMAIL_PORT']
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    # MAIL_DEBUG : default app.debug
+    MAIL_USERNAME = os.environ['EMAIL_USER']
+    MAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
+    MAIL_DEFAULT_SENDER = os.environ['EMAIL_SENDER']
+    # MAIL_MAX_EMAILS : default None
+    # MAIL_SUPPRESS_SEND : default app.testing
+    # MAIL_ASCII_ATTACHMENTS : default False
+except:
+    print("Missing or incomplete email config. Emails won't send")

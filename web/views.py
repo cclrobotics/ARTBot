@@ -65,7 +65,8 @@ def receive_art():
                                                           ).first()
     
     # send confirmation email to user
-    sendConfirmationEmailToUser(submitted_art_data)
+    if 'MAIL_DEFAULT_SENDER' in locals():
+        sendConfirmationEmailToUser(submitted_art_data)
 
     return 'Robot Art Loaded'
 
