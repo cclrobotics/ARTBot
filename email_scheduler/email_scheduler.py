@@ -1,23 +1,28 @@
 import schedule, time
-from web import app
+#from web import app
 from flask import Flask
 from flask_mail import Message, Mail
 from PIL import Image, ImageDraw
 import os
-import sqlalchemy as db
+import sqlalchemy as sa
 import pandas as pd
+from web.config import *
 from web.utilities import sendConfirmationEmailToUser
 
 # initiate mail with app config
 mail = Mail()
 app = Flask(__name__)
+#app.config.from_object('web.config')
 mail.init_app(app)
+
+SQL_ENGINE = sa.create_engine(SQLALCHEMY_DATABASE_URI)
+
 
 def sendEmailToUser(entry):
     msg = Message("BioArtBot is done making your art!",
                 recipients=[entry.email])
 
-    msg.html = f"""
+    msg.html = """
                 <h2>The Counter Culture Labs BioArtBot team thanks you for your submission!</h2>
                 <h2>Attached is a picture of your completed agart art and the original pixel art for comparison!</h2>
                 <h4>Questions or concerns?  Email us at 
@@ -42,23 +47,21 @@ def sendEmailToUser(entry):
     mail.send(msg)
 
 def getCompletedArt():
-    #environment vars should be removed when implementing - they are already set at app config
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.abspath(os.path.join(basedir, os.pardir, 'ARTBot.db'))
-    SQL_ENGINE = db.create_engine(SQLALCHEMY_DATABASE_URI)
-
-    query = f"""SELECT picture FROM artpieces
+    query = """SELECT picture FROM artpieces
             WHERE picture IS NOT NULL AND status <> 'Completed'
             """
-    entry = pd.read_sql(query, SQL_ENGINE).iloc[0]
-    return entry
+    entries = pd.read_sql(query, SQL_ENGINE)
+    return entries
 
 def getArtSendEmail():
-    entry = getCompletedArt()
-    sendEmailToUser(entry)
+    print('Sending email batch')
+    entries = getCompletedArt()
+    entries.apply(sendEmailToUser, axis=1)
 
-schedule.every().day.at("7am").do(getArtSendEmail)
-schedule.every().day.at("2pm").do(getArtSendEmail)
-schedule.every().day.at("11pm").do(getArtSendEmail)
+schedule.every().day.at("07:00").do(getArtSendEmail)
+schedule.every().day.at("14:00").do(getArtSendEmail)
+schedule.every().day.at("23:00").do(getArtSendEmail)
+schedule.every().minute.at(":00").do(getArtSendEmail)
 
 while True:
     schedule.run_pending()
