@@ -4,6 +4,7 @@ import os
 
 class Config(object):
     """Base configuration."""
+    ENV = 'default'
     UNSECURE_DEFAULT_SECRET_KEY = 'invalid-secret-key'
     SECRET_KEY = os.environ.get('WEB_SECRET', UNSECURE_DEFAULT_SECRET_KEY)
     APP_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -51,7 +52,6 @@ class Config(object):
 class ProdConfig(Config):
     """Production configuration."""
     ENV = 'production'
-    DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
     @classmethod
@@ -72,7 +72,6 @@ class ProdConfig(Config):
 class DevConfig(Config):
     """Development configuration."""
     ENV = 'development'
-    DEBUG = True
     DB_NAME = 'ARTBot.db'
     # Put the db file in project root
     DB_PATH = os.path.join(Config.PROJECT_ROOT, DB_NAME)
