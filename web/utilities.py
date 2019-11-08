@@ -177,9 +177,10 @@ def sendConfirmationEmailToUser(entry):
     msg.recipients = [entry.email]
 
     msg.html = f"""
-                <h2>The Counter Culture Lab ARTBot team thanks you for your submission!</h2>
+                <h2>The Counter Culture Lab BioArtBot team thanks you for your submission!</h2>
                 <h2>Confirmation ID: {entry.id}</h2>
-                <h2>Your art is attached. We'll send you another email with pictures when it's complete!</h2>
+                <h2>The pixel version of your artwork is attached.
+                    We'll send you another email with pictures when the bio version is complete!</h2>
                 <h4>Questions or concerns?  Email us at 
                     <a href="mailto:ccl-artbot@gmail.com"
                         ccl-artbot@gmail.com

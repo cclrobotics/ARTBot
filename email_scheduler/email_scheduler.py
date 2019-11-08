@@ -14,11 +14,11 @@ app = Flask(__name__)
 mail.init_app(app)
 
 def sendEmailToUser(entry):
-    msg = Message("ARTBot is done making your art!",
+    msg = Message("BioArtBot is done making your art!",
                 recipients=[entry.email])
 
     msg.html = f"""
-                <h2>The Counter Culture Lab ARTBot team thanks you for your submission!</h2>
+                <h2>The Counter Culture Labs BioArtBot team thanks you for your submission!</h2>
                 <h2>Attached is a picture of your completed agart art and the original pixel art for comparison!</h2>
                 <h4>Questions or concerns?  Email us at 
                     <a href="mailto:ccl-artbot@gmail.com"
@@ -27,7 +27,7 @@ def sendEmailToUser(entry):
                 </h4>
                 """
 
-    image = Image.frombytes("RGBX", (616, 414), entry.completed_picture)
+    image = Image.frombytes("RGBX", (616, 414), entry.photo)
     with io.BytesIO() as output:
         image.save(output, format='JPEG')
         image_file = output.getvalue()
