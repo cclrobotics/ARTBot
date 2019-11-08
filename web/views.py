@@ -5,8 +5,7 @@ from marshmallow import ValidationError
 from web.serializers import ArtpieceSchema
 from web.utilities import (sendConfirmationEmailToUser
                         , has_reached_monthly_submission_limit
-                        , has_active_submission
-                        , pull_picture)
+                        , has_active_submission)
 from web.exceptions import (error_template, InvalidUsage, MONTLY_SUBMISSION_LIMIT_MESSAGE)
 
 main = Blueprint('main', __name__)
