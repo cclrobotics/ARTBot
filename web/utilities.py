@@ -172,11 +172,20 @@ def pull_picture(id):
     return image
 
 def sendConfirmationEmailToUser(entry):
-    msg = Message(f"ArtBot Agar Art Submission on Behalf of {entry.email}")
+    msg = Message(f"ARTBot Submission Confirmation for {entry.email}")
 
     msg.recipients = [entry.email]
 
-    msg.html = f"<h2>Confirmation ID: {entry.id}</h2><h2>Your art is attached. We'll send you another email when it's complete!</h2>"
+    msg.html = f"""
+                <h2>The Counter Culture Lab ARTBot team thanks you for your submission!</h2>
+                <h2>Confirmation ID: {entry.id}</h2>
+                <h2>Your art is attached. We'll send you another email with pictures when it's complete!</h2>
+                <h4>Questions or concerns?  Email us at 
+                    <a href="mailto:ccl-artbot@gmail.com"
+                        ccl-artbot@gmail.com
+					</a>
+                </h4>
+                """
 
     image = Image.frombytes("RGBX", (616, 414), entry.picture)
     with io.BytesIO() as output:
