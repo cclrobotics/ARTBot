@@ -25,13 +25,13 @@ else:
 IMAGE_UPLOAD_FOLDER = os.path.join(static_basedir,'static','img')
 ALLOWED_IMAGE_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'svg'])
 
-SUBMISSION_LIMIT = 1
+SUBMISSION_LIMIT = 27
 LIMIT_MESSAGE = """Note: We're a small community lab run entirely by volunteers, and we can only make so many artpieces
                     each month. This month we've hit our limit. You can still draw art here, but the website won't
                     accept submissions. Come back next month and we'll start fresh!"""
 
 
-"""MAIL_SERVER = os.environ['EMAIL_SERVER']
+MAIL_SERVER = os.environ['EMAIL_SERVER']
 MAIL_PORT = os.environ['EMAIL_PORT']
 MAIL_USE_TLS = False
 MAIL_USE_SSL = True
@@ -41,4 +41,4 @@ MAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
 MAIL_DEFAULT_SENDER = os.environ['EMAIL_SENDER']
 # MAIL_MAX_EMAILS : default None
 # MAIL_SUPPRESS_SEND : default app.testing
-# MAIL_ASCII_ATTACHMENTS : default False"""
+# MAIL_ASCII_ATTACHMENTS : default False
