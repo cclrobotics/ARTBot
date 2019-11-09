@@ -58,6 +58,7 @@ def receive_art():
     db.session.add(models.artpieces(**art_data))
     SUBMISSION_COUNT.val += 1
     db.session.flush()
+    db.session.commit()
 
     # update object in the session with its state in the db
     submitted_art_data = models.artpieces.query.filter_by(submit_date=art_data['submit_date'],

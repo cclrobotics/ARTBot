@@ -61,7 +61,8 @@ def getArtSendEmail():
 schedule.every().day.at("07:00").do(getArtSendEmail)
 schedule.every().day.at("14:00").do(getArtSendEmail)
 schedule.every().day.at("23:00").do(getArtSendEmail)
-schedule.every().minute.at(":00").do(getArtSendEmail)
+
+#TODO: Test that mail actually sends. Understand what the idea was for running this.
 
 while True:
     schedule.run_pending()
