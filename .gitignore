@@ -3,3 +3,4 @@
 *.db
 *.vscode
 pyvenv.cfg
+/mail_config.bat

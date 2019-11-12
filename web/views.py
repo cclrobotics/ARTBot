@@ -34,7 +34,7 @@ def receive_art():
     picture = rebuild_art(art)
 
     # perform string validations
-    prev_emails = db.session.query(models.artpieces.email).filter_by(status='Submitted').all()
+    prev_emails = db.session.query(models.artpieces.email).filter(models.artpieces.status.like('Submitted%')).all()
     failed_validation = check_failed_validation(title,
                                                 email,
                                                 art,
@@ -66,8 +66,14 @@ def receive_art():
                                                           ).first()
     
     # send confirmation email to user
-    if 'MAIL_DEFAULT_SENDER' in locals():
+    # TODO: Consider returning success before emailing, since emailing can take some time and the user won't get feedback
+    try:
         sendConfirmationEmailToUser(submitted_art_data)
+    except:
+        print('Submission received but email failed. Marking as email-owed.')
+        submitted_art_data.status = 'Submitted-OwedConfirmation'
+        db.session.flush()
+        db.session.commit()
 
     return 'Robot Art Loaded'
 
