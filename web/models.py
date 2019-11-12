@@ -11,6 +11,7 @@ class artpieces(db.Model):
     art = db.Column(db.String())
     status = db.Column(db.String())
     picture = db.Column(db.LargeBinary())
+    photo = db.Column(db.LargeBinary())
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.title)
