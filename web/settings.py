@@ -27,6 +27,7 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', None)
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', None)
 
     @classmethod
     def verbose_config(cls):
@@ -82,6 +83,7 @@ class DevConfig(Config):
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 1025
     MAIL_USE_SSL = False
+    MAIL_DEFAULT_SENDER = f'dev@{MAIL_SERVER}'
 
     @classmethod
     def print_warnings(cls):

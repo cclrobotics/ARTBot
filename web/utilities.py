@@ -28,7 +28,7 @@ def pull_picture(id):
 
 def sendConfirmationEmailToUser(entry):
     msg = Message(f"ARTBot Submission Confirmation for {entry.title}"
-            , sender=f"no-reply@{current_app.config['MAIL_SERVER']}"
+            , sender=current_app.config['MAIL_DEFAULT_SENDER']
             , recipients=[entry.email])
 
     msg.html = f"""
