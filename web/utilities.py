@@ -1,8 +1,4 @@
-import re
-
-##taken from other utitlities function
 import datetime
-import os
 import io
 import math
 from PIL import Image, ImageDraw
@@ -31,7 +27,7 @@ def pull_picture(id):
     return image
 
 def sendConfirmationEmailToUser(entry):
-    msg = Message(f"ARTBot Submission Confirmation for {entry.title}")
+    msg = Message(f"ARTBot Submission Confirmation for {entry.title}"
             , sender=f"no-reply@{current_app.config['MAIL_SERVER']}"
             , recipients=[entry.email])
 
