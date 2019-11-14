@@ -5,7 +5,12 @@ from web.settings import ProdConfig
 from web.views import main
 from web.exceptions import InvalidUsage
 
-def create_app(config_object=ProdConfig):
+def create_app(config_object=ProdConfig, verbose=True, validate=True):
+    if validate:
+        config_object.validate()
+    if verbose:
+        config_object.verbose_config()
+
     """An application factory."""
     app = Flask(__name__.split('.')[0])
     app.url_map.strict_slashes = False
