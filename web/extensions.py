@@ -13,24 +13,25 @@ class CRUDMixin(Model):
         instance = cls(**kwargs)
         return instance.save()
 
-    def update(self, commit=True, **kwargs):
+    def update(self, commit=False, **kwargs):
         """Update specific fields of a record."""
         for attr, value in kwargs.items():
             setattr(self, attr, value)
-        return commit and self.save() or self
+        return self.save()
 
-    def save(self, commit=True):
+    def save(self, commit=False):
         """Save the record."""
         db.session.add(self)
         if commit:
             db.session.commit()
         return self
 
-    def delete(self, commit=True):
+    def delete(self, commit=False):
         """Remove the record from the database."""
         db.session.delete(self)
         return commit and db.session.commit()
 
-db = SQLAlchemy(model_class=CRUDMixin)
+db = SQLAlchemy(model_class=CRUDMixin, session_options={'autoflush': True})
 migrate = Migrate()
 mail = Mail()
+

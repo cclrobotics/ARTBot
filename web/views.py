@@ -33,7 +33,7 @@ def receive_art():
     if has_active_submission(artpiece.email):
         raise InvalidUsage.reached_user_limit()
 
-    artpiece.save()
+    artpiece.save(commit=True)
 
     # TODO: handle exceptions
     sendConfirmationEmailToUser(artpiece)
