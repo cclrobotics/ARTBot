@@ -1,10 +1,11 @@
 from collections import namedtuple
+import io
 import json
 import datetime as dt
 import math
 from PIL import Image, ImageDraw
 from web.database.models import ArtpieceModel, SubmissionStatus
-from web.settings import Config 
+from web.settings import Config
 
 Artpiece = ArtpieceModel
 _CartesianCoordinates = namedtuple('CartesianCoordinates', ['x', 'y'])
@@ -41,7 +42,7 @@ def has_pixels_within_canvas(pixels, canvas_size=Canvas(39, 26)):
         if x > canvas_size.x or y > canvas_size.y: #check for negative values?
             return False
     return True
-    
+
 def decode_to_image(pixel_art_color_encoding, color_mapping, scale=200):
     canvas_size = Canvas(39, 26)
     ratio = (3, 2)
@@ -59,3 +60,10 @@ def decode_to_image(pixel_art_color_encoding, color_mapping, scale=200):
             draw.rectangle([origin, far_corner], fill=color_mapping[color])
 
     return (im.tobytes())
+
+def convert_raw_image_to_jpg(raw_image):
+    image = Image.frombytes('RGBX', (616, 414), raw_image)
+    with io.BytesIO() as output:
+        image.save(output, format='JPEG')
+        image_file = output.getvalue()
+    return image_file
