@@ -236,12 +236,10 @@ drawSubmit.addEventListener('submit', function(e) {
     // update modal text
     if (response.errors) {
       let body = response.errors.body
-      if (body.email) {
-        text.innerHTML = body.email
-      } else if (body.title) {
-        text.innerHTML = 'Title: ' + body.title
+      if (typeof body == 'object') {
+        text.innerHTML = body[Object.keys(body)[0]][0]
       } else {
-        text.innerHTML = body
+        text.innerHTML = "Oops... an unexpected error occurred!"
       }
     } else {
       text.innerHTML = response.success;
