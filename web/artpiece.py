@@ -11,22 +11,14 @@ Artpiece = ArtpieceModel
 _CartesianCoordinates = namedtuple('CartesianCoordinates', ['x', 'y'])
 Canvas = _CartesianCoordinates
 
-def make_artpiece(title, email, art):
+def make_artpiece(title, art, user_id):
         submit_date = dt.datetime.now()
         raw_image = decode_to_image(art, Config.COLOR_SCHEME)
-        return Artpiece(title=title, email=email, submit_date=submit_date
-                , art=art, status=SubmissionStatus.submitted, raw_image=raw_image)
+        return Artpiece(title=title, submit_date=submit_date, art=art
+                , status=SubmissionStatus.submitted, raw_image=raw_image, user_id=user_id)
 
 def get_artpiece_by_id(id):
     return Artpiece.get_by_id(id)
-
-def active_submission_count(email):
-    return (
-            Artpiece.query.filter(
-                Artpiece.email == email
-                , Artpiece.status == SubmissionStatus.submitted)
-            .count()
-    )
 
 def total_submission_count_since(date):
     return Artpiece.query.filter(Artpiece.submit_date >= date).count()

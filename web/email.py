@@ -25,11 +25,11 @@ def send_email(subject, sender, recipients, text_body, html_body,
                 , args=(current_app._get_current_object(), msg)).start()
 
 
-def send_confirmation_email(submission):
+def send_confirmation_email(user, submission):
     image_file = convert_raw_image_to_jpg(submission.raw_image)
     send_email(f'ARTBot Submission Confirmation for "{submission.title}"'
             , sender=current_app.config['MAIL_DEFAULT_SENDER']
-            , recipients=[submission.email]
+            , recipients=[user.email]
             , text_body=render_template(
                 'email/submission_confirmation.txt', submission=submission)
             , html_body=render_template(

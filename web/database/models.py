@@ -14,7 +14,7 @@ class ArtpieceModel(SurrogatePK, Model):
     __tablename__ = 'artpieces'
 
     title = Column(db.String(50), nullable=False)
-    email = Column(db.String(50), nullable=False)
+    user_id = Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     submit_date = Column(db.DateTime(), nullable=False)
     art = Column(db.JSON(), nullable=False, name='art_encoding')
     status = Column(
@@ -24,3 +24,14 @@ class ArtpieceModel(SurrogatePK, Model):
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.title)
+
+class UserModel(SurrogatePK, Model):
+    __tablename__ = 'users'
+
+    email = Column(db.String(50), nullable=False, index=True, unique=True)
+    created_at = Column(db.DateTime(), nullable=False)
+    verified = Column(db.Boolean, nullable=False)
+    artpieces = relationship('ArtpieceModel', backref='user', lazy='dynamic')
+
+    def __repr__(self):
+        return '<%r: %r>' % (self.id, self.email)

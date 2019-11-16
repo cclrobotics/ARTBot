@@ -2,10 +2,12 @@
 
 from flask import (render_template, Blueprint, request, current_app, jsonify)
 from marshmallow import ValidationError
-from web.serializers import ArtpieceSchema
-from web.utilities import (has_reached_monthly_submission_limit, has_active_submission)
-from web.email import send_confirmation_email
-from web.exceptions import (error_template, InvalidUsage, MONTLY_SUBMISSION_LIMIT_MESSAGE)
+from .serializers import ArtpieceSchema
+from .utilities import has_reached_monthly_submission_limit
+from .email import send_confirmation_email
+from .exceptions import (error_template, InvalidUsage, MONTLY_SUBMISSION_LIMIT_MESSAGE)
+from .user import User
+from .extensions import db
 
 main = Blueprint('main', __name__)
 
@@ -25,16 +27,18 @@ def receive_art():
         raise InvalidUsage.reached_monthly_submission_limit()
 
     try:
-        artpiece = ArtpieceSchema().load(request.get_json())
+        data = ArtpieceSchema().load(request.get_json())
     except ValidationError as err:
         raise InvalidUsage(**error_template(err.messages))
 
-    if has_active_submission(artpiece.email):
+    user = User.get_by_email(data['email']) or User.from_email(data['email'])
+    if user.has_active_submission():
         raise InvalidUsage.reached_user_limit()
 
-    artpiece.save(commit=True)
+    artpiece = user.make_artpiece(data['title'], data['art'])
+    db.session.commit()
 
     # TODO: handle exceptions
-    send_confirmation_email(artpiece)
+    send_confirmation_email(user, artpiece)
 
     return jsonify({'success': 'We will send you a confirmation email'}), 201

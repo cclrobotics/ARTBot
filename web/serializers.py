@@ -1,7 +1,7 @@
 from marshmallow import fields, Schema, post_load, ValidationError
 from marshmallow.validate import Length, Regexp
 from web.artpiece import Artpiece, has_matching_color_scheme, has_pixels_within_canvas
-from web.settings import Config 
+from web.settings import Config
 import web.artpiece as artpiece
 
 COLOR_SCHEME = Config.COLOR_SCHEME
@@ -25,7 +25,7 @@ class ArtpieceSchema(Schema):
                     , error="Title is limited to alpha-numeric characters only")
                 ]
             )
-    email = fields.Email(required=True)
+    email = fields.Email(required=True, load_only=True)
     art = fields.Dict(
             required=True
             , keys=fields.Str()
@@ -40,7 +40,7 @@ class ArtpieceSchema(Schema):
     @post_load
     def make_artpiece(self, data, many, **kwargs):
         data['title'] = data['title'].strip()
-        return artpiece.make_artpiece(**data)
+        return data
 
     class meta:
         strict=True
