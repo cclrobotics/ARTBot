@@ -14,7 +14,7 @@ class ArtpieceModel(SurrogatePK, Model):
     __tablename__ = 'artpieces'
 
     title = Column(db.String(50), nullable=False)
-    user_id = Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     submit_date = Column(db.DateTime(), nullable=False)
     art = Column(db.JSON(), nullable=False, name='art_encoding')
     status = Column(
