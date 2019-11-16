@@ -1,7 +1,10 @@
 from flask import jsonify
 
 def error_template(data, code=400):
-    return {'message': {'errors': {'body': {'message': data}}}, 'status_code': code}
+    return {'message': {'errors': {'body': data}}, 'status_code': code}
+
+def wrap_in_message(data, code=400):
+    return {'message': [data]}
 
 MONTLY_SUBMISSION_LIMIT_MESSAGE = (
     "Note: We're a small community lab run entirely by volunteers, and we can only make so many "
@@ -14,10 +17,14 @@ _USER_LIMIT_MESSAGE = (
     "another one! If there's an issue with your previous submission and you want to withdraw "
     "it, send us an email: ccl-artbot@gmail.com"
 )
+_UNKNOWN_ERROR_MESSAGE = (
+    "Oops... an unexpected error occurred!"
+)
 
-_MONTLY_SUBMISSION_LIMIT = error_template([MONTLY_SUBMISSION_LIMIT_MESSAGE], code=429)
-_USER_LIMIT = error_template([_USER_LIMIT_MESSAGE], code=429)
-_UNKNOWN_ERROR = error_template([], code=500)
+_MONTLY_SUBMISSION_LIMIT = error_template(
+        wrap_in_message(MONTLY_SUBMISSION_LIMIT_MESSAGE), code=429)
+_USER_LIMIT = error_template(wrap_in_message(_USER_LIMIT_MESSAGE), code=429)
+_UNKNOWN_ERROR = error_template(wrap_in_message(_UNKNOWN_ERROR_MESSAGE), code=500)
 
 class InvalidUsage(Exception):
     status_code = 400
