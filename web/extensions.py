@@ -22,6 +22,7 @@ class CRUDMixin(Model):
     def save(self, commit=False):
         """Save the record."""
         db.session.add(self)
+        db.session.flush()
         if commit:
             db.session.commit()
         return self
@@ -29,9 +30,9 @@ class CRUDMixin(Model):
     def delete(self, commit=False):
         """Remove the record from the database."""
         db.session.delete(self)
+        db.session.flush()
         return commit and db.session.commit()
 
-db = SQLAlchemy(model_class=CRUDMixin, session_options={'autoflush': True})
+db = SQLAlchemy(model_class=CRUDMixin)
 migrate = Migrate()
 mail = Mail()
-
