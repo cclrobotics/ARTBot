@@ -35,3 +35,16 @@ class UserModel(SurrogatePK, Model):
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.email)
+
+class EmailFailureState(Enum):
+    submission_confirmation = 's_confirmation'
+    bioart_completion = 'bioart_completion'
+
+class EmailFailureModel(SurrogatePK, Model):
+    __tablename__ = 'emailfailures'
+
+    user_id = Column(db.Integer, db.ForeignKey('users.id'))
+    artpiece_id = Column(db.Integer, db.ForeignKey('artpieces.id'))
+    state = Column(db.Enum(EmailFailureState, values_callable=lambda x: [e.value for e in x])
+            , nullable=False, name='failure_state')
+    error_msg = Column(db.String(150), nullable=False)

@@ -38,7 +38,6 @@ def receive_art():
     artpiece = user.make_artpiece(data['title'], data['art'])
     db.session.commit()
 
-    # TODO: handle exceptions
     send_confirmation_email_async(artpiece)
 
     return jsonify({'success': 'We will send you a confirmation email'}), 201

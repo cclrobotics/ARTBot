@@ -2,9 +2,17 @@ from flask import (render_template, current_app)
 from flask_mail import Message
 from threading import Thread
 
-from web.extensions import mail
+from web.extensions import (mail, db)
 from web.artpiece import (convert_raw_image_to_jpg, get_artpiece_by_id)
 from web.user import User
+from web.database.models import (EmailFailureModel, EmailFailureState)
+
+
+def log_email_failure(fail_state, user_id=None, artpiece_id=None):
+    def log_to_database(error_msg):
+        EmailFailureModel(state=fail_state, error_msg=error_msg
+                , artpiece_id=artpiece_id, user_id=user_id).save(commit=True)
+    return log_to_database
 
 
 def build_email(subject, sender, recipients, text_body, html_body, attachments=None):
@@ -15,6 +23,13 @@ def build_email(subject, sender, recipients, text_body, html_body, attachments=N
         for attachment in attachments:
             msg.attach(*attachment)
     return msg
+
+
+def safe_send_email(email, error_handler):
+    try:
+        mail.send(email)
+    except Exception as e:
+        error_handler(repr(e))
 
 
 def send_confirmation_email(artpiece_id):
@@ -30,9 +45,16 @@ def send_confirmation_email(artpiece_id):
                 , attachments=[('pixel-art.jpg', 'image/jpg', image_file)])
         return email
 
+    def log_confirmation_email_failure(artpiece):
+        return log_email_failure(
+                EmailFailureState.submission_confirmation, artpiece.user_id, artpiece.id)
+
     artpiece = get_artpiece_by_id(artpiece_id)
     user = User.get_by_id(artpiece.user_id)
-    mail.send(build_confirmation_email(user, artpiece))
+    safe_send_email(
+            build_confirmation_email(user, artpiece)
+            , log_confirmation_email_failure(artpiece)
+            )
 
 
 def with_context(app, cleanup=lambda : None):
@@ -44,5 +66,5 @@ def with_context(app, cleanup=lambda : None):
 
 
 def send_confirmation_email_async(artpiece):
-    Thread(target=with_context(current_app._get_current_object())
+    Thread(target=with_context(current_app._get_current_object(), db.session.remove)
             , args=(send_confirmation_email, artpiece.id)).start()
