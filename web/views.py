@@ -4,7 +4,7 @@ from flask import (render_template, Blueprint, request, current_app, jsonify)
 from marshmallow import ValidationError
 from .serializers import ArtpieceSchema
 from .utilities import has_reached_monthly_submission_limit
-from .email import send_confirmation_email
+from .email import send_confirmation_email_async
 from .exceptions import (error_template, InvalidUsage, MONTLY_SUBMISSION_LIMIT_MESSAGE)
 from .user import User
 from .extensions import db
@@ -39,6 +39,6 @@ def receive_art():
     db.session.commit()
 
     # TODO: handle exceptions
-    send_confirmation_email(user, artpiece)
+    send_confirmation_email_async(artpiece)
 
     return jsonify({'success': 'We will send you a confirmation email'}), 201
