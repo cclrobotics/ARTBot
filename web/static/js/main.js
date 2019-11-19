@@ -37,6 +37,20 @@ function makeColorPicker() {
   }); 
 }
 
+function fillPixelCanvas(color) {
+  pixelCanvas.querySelectorAll('td').forEach(td => td.style.backgroundColor = color);
+}
+
+function resetInputFields() {
+  function resetPixelCanvas() {
+    fillPixelCanvas(null);
+  }
+
+  resetPixelCanvas();
+  document.querySelector("#email").value = "";
+  document.querySelector("#title").value = "";
+}
+
 let colorChoice = "pink"; // Tracks the current color
 
 makeColorPicker();
@@ -88,7 +102,7 @@ colorContainer.addEventListener('click', function(e) {
 quickFill.addEventListener('click', function(e) {
   e.preventDefault();
   if (confirm('This will fill all cells with the selected color and erase ALL art. Are you sure?')) {
-    pixelCanvas.querySelectorAll('td').forEach(td => td.style.backgroundColor = colorChoice);
+    fillPixelCanvas(colorChoice)
   } 
 });
 
@@ -229,6 +243,9 @@ drawSubmit.addEventListener('submit', function(e) {
         modal.style.display = "none";
         // remove listener since we're done with modal
         e.target.removeEventListener(e.type, arguments.callee);
+        if (modal === successModal) {
+          resetInputFields();
+        }
       }
     }
 
