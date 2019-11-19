@@ -41,31 +41,6 @@ let colorChoice = "pink"; // Tracks the current color
 
 makeColorPicker();
 
-function makeGrid() {
-  let gridHeight = 26
-  let gridWidth = 39
-  // If grid already present, clears any cells that have been filled in
-  while (pixelCanvas.firstChild) {
-    pixelCanvas.removeChild(pixelCanvas.firstChild);
-  }
-  // Creates rows and cells
-  for (let i = 1; i <= gridHeight; i++) {
-    let gridRow = document.createElement('tr');
-    pixelCanvas.appendChild(gridRow);
-    for (let j = 1; j <= gridWidth; j++) {
-      let gridCell = document.createElement('td');
-      gridRow.appendChild(gridCell);
-      // Fills in cell with selected color upon mouse press ('mousedown', unlike 'click', doesn't also require release of mouse button)
-      gridCell.addEventListener('mousedown', function() {
-        const color = document.querySelector('.color-picker').value;
-        this.style.backgroundColor = color;
-      });
-    }
-  }
-}
-
-makeGrid(26, 39);
-
 pixelCanvas.addEventListener('mousedown', function(e) {
     if (e.target.tagName !== 'TD') return;
     e.target.style.backgroundColor = colorChoice;

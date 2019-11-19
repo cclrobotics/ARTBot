@@ -193,7 +193,15 @@
 						<hr>
 					</div>
 					{% endif %}
-					<table class="pixel-canvas"></table>
+					<table class="pixel-canvas">
+					    {% for ly in range(canvas_size.y) %}
+					    <tr>
+						{% for lx in range(canvas_size.x) %}
+						<td></td>
+						{% endfor %}
+					    </tr>
+					    {% endfor %}
+					</table>
 				</div>
 			</div>
 		</section>

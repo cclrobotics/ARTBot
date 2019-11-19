@@ -10,6 +10,7 @@ from web.settings import Config
 Artpiece = ArtpieceModel
 _CartesianCoordinates = namedtuple('CartesianCoordinates', ['x', 'y'])
 Canvas = _CartesianCoordinates
+DEFAULT_CANVAS = Canvas(39, 26)
 
 def make_artpiece(title, art, user_id):
         submit_date = dt.datetime.now()
@@ -29,14 +30,14 @@ def has_matching_color_scheme(pixel_art_color_encoding, allowed_color_scheme):
             return False
     return True
 
-def has_pixels_within_canvas(pixels, canvas_size=Canvas(39, 26)):
+def has_pixels_within_canvas(pixels, canvas_size=DEFAULT_CANVAS):
     for y, x in pixels:
         if x > canvas_size.x or y > canvas_size.y: #check for negative values?
             return False
     return True
 
-def decode_to_image(pixel_art_color_encoding, color_mapping, scale=200):
-    canvas_size = Canvas(39, 26)
+def decode_to_image(pixel_art_color_encoding, color_mapping
+    , canvas_size=DEFAULT_CANVAS, scale=200):
     ratio = (3, 2)
     pixel_size = (ratio[0] * scale / canvas_size.x
                  , ratio[1] * scale / canvas_size.y)

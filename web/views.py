@@ -8,6 +8,7 @@ from .email import send_confirmation_email_async
 from .exceptions import (error_template, InvalidUsage, MONTLY_SUBMISSION_LIMIT_MESSAGE)
 from .user import User
 from .extensions import db
+from .artpiece import DEFAULT_CANVAS
 
 main = Blueprint('main', __name__)
 
@@ -19,7 +20,7 @@ def index():
         limit_message = MONTLY_SUBMISSION_LIMIT_MESSAGE
     else:
         limit_message = None
-    return render_template('main.html', limit_message=limit_message)
+    return render_template('main.html', limit_message=limit_message, canvas_size=DEFAULT_CANVAS)
 
 @main.route('/receive_art', methods=('POST', ))
 def receive_art():
