@@ -1,3 +1,5 @@
+http://www.bioartbot.org/
+
 # BioArtBot Robotic Artist from Counter Culture Labs
 This project provides an interface for users to draw and submit pixel art via a web app, and then converts that submission into instructions for an [Opentrons OT2 robot](https://www.opentrons.com) to reproduce that drawing by distributing colorful micobes onto an agar plate. As the microbes grow, the picture comes into focus, resulting in living art. It's very neat.
 
