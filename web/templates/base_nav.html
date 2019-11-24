@@ -1,0 +1,24 @@
+<div class="sticky-wrapper" style="height:102px;">
+    <div id="header-wrap" class="stuck">
+	<div id="header" class="container">
+	    <label id="nav-trigger" class="hamburger" for="mobile-input">
+		<span></span>
+	    </label>
+	    <h1 id="logo">
+		<span class="wsite-logo">
+		    <a href="/">
+			<img
+			    src="/static/img/logo-full-small.png"
+			    alt="Counter Culture Labs" />
+		    </a>
+		</span>
+	    </h1>
+	    <div id="nav">
+		{% block nav_content %}{% endblock %}
+	    </div>
+	    <div id="mobile-nav" class="container">
+		{% block mobile_nav_content %}{% endblock %}
+	    </div>
+	</div>
+    </div>
+</div>

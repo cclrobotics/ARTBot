@@ -1,0 +1,68 @@
+<div class="row">
+    <h3>What is this?</h3>
+    <br>
+    The BioArtBot project lets <b>you</b> make art with biology. Click your mouse 
+    in the grid below to make your drawing and we will print it out with microbial 
+    ink - real living bacteria that produce vivid colors! We'll email a photo of 
+    your living work of art back to you.
+</div>
+<hr>
+<br>
+<div class="row">
+    <div class="column">
+	<div class="inputs">
+	    <h4>Select color</h4>
+	    <div id="color-container"></div>
+	    <input type="button" class="quick-fill" value="fill">
+	    <br>
+
+	    <hr>
+	    <h4>Mode</h4>
+	    <input type="button" class="draw-mode" value="draw">
+	    <input type="button" class="erase-mode" value="erase">
+	    <p><em>or double-click to erase</em></p>
+	    <hr>
+	    <h4>Art title</h4>
+	    <p><em>Give your art a title</em></p>
+	    <input type="text" id="title" class="draw-mode">
+	    <br>
+
+	    <hr>
+	    <h4>Contact info</h4>
+	    <p><em>Give us an email so we can confirm your submission and let you know when it's ready</em></p>
+	    <input type="email" id="email" class="draw-mode">
+	    <br>
+
+	    <hr>
+	    <h4>Submit drawing</h4>
+	    <form class="draw-submit">
+		<input type="submit" class="submit-button" value="Submit drawing">
+	    </form>
+	    <br>
+
+	    <hr>
+	    <h4>Donate!</h4>
+	    <p><em>Please donate.  It costs money to produce the art and your donation helps Counter Culture Labs continue!</em></p>
+	    {% include 'paypal_form.html' %}
+	</div>
+    </div>
+    <div class="column">
+	<h1>Draw Art For Robot</h1>
+	{% if limit_message %}
+	<div class="limit-reached">
+	    <hr>
+	    {{limit_message}}
+	    <hr>
+	</div>
+	{% endif %}
+	<table class="pixel-canvas">
+	    {% for ly in range(canvas_size.y) %}
+	    <tr>
+		{% for lx in range(canvas_size.x) %}
+		<td></td>
+		{% endfor %}
+	    </tr>
+	    {% endfor %}
+	</table>
+    </div>
+</div>
