@@ -28,8 +28,8 @@ def upgrade():
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     # ### end Alembic commands ###
     op.execute(("INSERT INTO "
-        "users(email, created_at, verified) "
-        "SELECT email, MIN(submit_date), True as verified "
+        "users(id, email, created_at, verified) "
+        "SELECT id, email, MIN(submit_date), True as verified "
         "FROM artpieces "
         "GROUP BY email"))
     op.create_table('new_artpieces',
@@ -47,8 +47,8 @@ def upgrade():
     )
     op.execute(("INSERT INTO "
         "new_artpieces("
-        "title, submit_date, art_encoding, submission_status, raw_image, user_id) "
-        "SELECT artpieces.title, artpieces.submit_date, artpieces.art_encoding, artpieces.submission_status, artpieces.raw_image, users.id "
+        "id, title, submit_date, art_encoding, submission_status, raw_image, user_id) "
+        "SELECT artpieces.id, artpieces.title, artpieces.submit_date, artpieces.art_encoding, artpieces.submission_status, artpieces.raw_image, users.id "
         "FROM artpieces "
         "INNER JOIN users "
         "ON artpieces.email=users.email")
@@ -72,8 +72,8 @@ def downgrade():
             )
     op.execute(("INSERT INTO "
         "new_artpieces("
-        "title, email, submit_date, art_encoding, submission_status, raw_image) "
-        "SELECT artpieces.title, users.email, artpieces.submit_date, artpieces.art_encoding, artpieces.submission_status, artpieces.raw_image "
+        "id, title, email, submit_date, art_encoding, submission_status, raw_image) "
+        "SELECT artpieces.id, artpieces.title, users.email, artpieces.submit_date, artpieces.art_encoding, artpieces.submission_status, artpieces.raw_image "
         "FROM artpieces "
         "INNER JOIN users "
         "ON artpieces.user_id=users.id")
