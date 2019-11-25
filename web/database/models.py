@@ -31,7 +31,6 @@ class UserModel(SurrogatePK, Model):
 
     email = Column(db.String(50), nullable=False, index=True, unique=True)
     created_at = Column(db.DateTime(), nullable=False)
-    verified = Column(db.Boolean, nullable=False)
     artpieces = relationship('ArtpieceModel', backref='user', lazy='dynamic')
 
     def __repr__(self):
@@ -44,7 +43,6 @@ class EmailFailureState(Enum):
 class EmailFailureModel(SurrogatePK, Model):
     __tablename__ = 'emailfailures'
 
-    user_id = Column(db.Integer, db.ForeignKey('users.id'))
     artpiece_id = Column(db.Integer, db.ForeignKey('artpieces.id'))
     state = Column(db.Enum(EmailFailureState, values_callable=lambda x: [e.value for e in x])
             , nullable=False, name='failure_state')

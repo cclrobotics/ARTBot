@@ -8,10 +8,10 @@ from web.user import User
 from web.database.models import (EmailFailureModel, EmailFailureState)
 
 
-def log_email_failure(fail_state, user_id=None, artpiece_id=None):
+def log_email_failure(fail_state, artpiece_id=None):
     def log_to_database(error_msg):
         EmailFailureModel(state=fail_state, error_msg=error_msg
-                , artpiece_id=artpiece_id, user_id=user_id).save(commit=True)
+                , artpiece_id=artpiece_id).save(commit=True)
     return log_to_database
 
 
@@ -50,7 +50,7 @@ def send_confirmation_email(artpiece, confirmation_url):
 
     def log_confirmation_email_failure(artpiece):
         return log_email_failure(
-                EmailFailureState.submission_confirmation, None, artpiece._model.id)
+                EmailFailureState.submission_confirmation, artpiece._model.id)
 
     safe_send_email(
             build_confirmation_email(artpiece, confirmation_url)

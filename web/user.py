@@ -10,7 +10,7 @@ class User():
 
     @classmethod
     def _create(cls, email, created_at, verified):
-        return cls(_Model(email=email, created_at=created_at, verified=verified).save())
+        return cls(_Model(email=email, created_at=created_at).save())
 
     @classmethod
     def from_email(cls, email):
