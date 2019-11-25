@@ -79,8 +79,12 @@ while num_pieces not in range(1,10):
         num_pieces = 0
 
 with session_scope() as session:
-    artpieces = session.query(ArtpieceModel).filter(
-            ArtpieceModel.status == SubmissionStatus.submitted).order_by(ArtpieceModel.submit_date.asc()).limit(num_pieces).all()
+    artpieces = (session.query(ArtpieceModel).filter(
+            ArtpieceModel.status == SubmissionStatus.submitted
+            , ArtpieceModel.confirmed == True)
+            .order_by(ArtpieceModel.submit_date.asc())
+            .limit(num_pieces)
+            .all())
 
     if not artpieces:
         print('No new art found. All done.')
