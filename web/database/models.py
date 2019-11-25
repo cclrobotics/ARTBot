@@ -20,6 +20,7 @@ class ArtpieceModel(SurrogatePK, Model):
     status = Column(
             db.Enum(SubmissionStatus, values_callable=lambda x: [e.value for e in x])
             , nullable=False, name='submission_status')
+    confirmed = Column(db.Boolean, nullable=False)
     raw_image = deferred(Column(db.LargeBinary(), nullable=False))
 
     def __repr__(self):

@@ -2,13 +2,14 @@
 
 from flask import (render_template, Blueprint, request, current_app, jsonify)
 from marshmallow import ValidationError
+from jwt import (ExpiredSignatureError, PyJWTError)
 from .serializers import ArtpieceSchema
 from .utilities import has_reached_monthly_submission_limit
 from .email import send_confirmation_email_async
 from .exceptions import (error_template, InvalidUsage, MONTLY_SUBMISSION_LIMIT_MESSAGE)
 from .user import User
 from .extensions import db
-from .artpiece import DEFAULT_CANVAS
+from .artpiece import (DEFAULT_CANVAS, Artpiece)
 
 main = Blueprint('main', __name__)
 
@@ -36,9 +37,22 @@ def receive_art():
     if user.has_active_submission():
         raise InvalidUsage.reached_user_limit()
 
-    artpiece = user.make_artpiece(data['title'], data['art'])
+    artpiece = user.create_artpiece(data['title'], data['art'])
     db.session.commit()
 
     send_confirmation_email_async(artpiece)
 
     return jsonify({'success': 'We will send you a confirmation email'}), 201
+
+@main.route('/confirm_art/<token>', methods=('GET', ))
+def confirm_art(token):
+    try:
+        artpiece = Artpiece.verify_confirmation_token(token)
+    except ExpiredSignatureError:
+        return render_template('confirmation_expired.html')
+    except PyJWTError:
+        return render_template('404.html')
+
+    artpiece.confirm()
+    db.session.commit()
+    return render_template('artpiece_confirmed.html')

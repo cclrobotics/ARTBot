@@ -1,8 +1,21 @@
-<h2>The Counter Culture Lab BioArtBot team thanks you for your submission!</h2>
-<h2>The pixel version of your artwork is attached.
-We'll send you another email with pictures when the bio version is complete!</h2>
-<h4>Questions or concerns?  Email us at
-  <a href="mailto:ccl-artbot@gmail.com?subject=Confirmation ID: {{ submission.id }}">
-    ccl-artbot@gmail.com
+<div style='text-align: center'>
+  <a href="http://www.bioartbot.org">
+    <img
+      src="http://www.bioartbot.org/static/img/logo-full-small.png"
+      alt="Counter Culture Labs" />
   </a>
-</h4>
+  <h3>
+    <p>The Counter Culture Lab BioArtBot team thanks you for your submission!</p>
+    <p>Please <a style='text-decoration:underline' href="{{ confirmation_url }}">confirm</a>
+    so that we can get to work on it.</p>
+  </h3>
+  <h5>
+    <p>The pixel version of your artwork is attached.
+    We'll send you another email with pictures when the bio version is complete!</p>
+    <p>Questions or concerns? Email us at
+    <a style='text-decoration:underline'
+      href="mailto:ccl-artbot@gmail.com?subject=Confirmation ID: {{ submission._model.id }}">
+      ccl-artbot@gmail.com
+    </a></p>
+  </h5>
+</div>

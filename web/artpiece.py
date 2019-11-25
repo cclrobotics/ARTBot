@@ -1,28 +1,19 @@
 from collections import namedtuple
+from time import time
+import jwt
 import io
 import json
 import datetime as dt
 import math
 from PIL import Image, ImageDraw
+from flask import current_app
 from web.database.models import ArtpieceModel, SubmissionStatus
 from web.settings import Config
 
-Artpiece = ArtpieceModel
+
 _CartesianCoordinates = namedtuple('CartesianCoordinates', ['x', 'y'])
 Canvas = _CartesianCoordinates
 DEFAULT_CANVAS = Canvas(39, 26)
-
-def make_artpiece(title, art, user_id):
-        submit_date = dt.datetime.now()
-        raw_image = decode_to_image(art, Config.COLOR_SCHEME)
-        return Artpiece(title=title, submit_date=submit_date, art=art
-                , status=SubmissionStatus.submitted, raw_image=raw_image, user_id=user_id)
-
-def get_artpiece_by_id(id):
-    return Artpiece.get_by_id(id)
-
-def total_submission_count_since(date):
-    return Artpiece.query.filter(Artpiece.submit_date >= date).count()
 
 def has_matching_color_scheme(pixel_art_color_encoding, allowed_color_scheme):
     for color in pixel_art_color_encoding:
@@ -36,7 +27,7 @@ def has_pixels_within_canvas(pixels, canvas_size=DEFAULT_CANVAS):
             return False
     return True
 
-def decode_to_image(pixel_art_color_encoding, color_mapping
+def _decode_to_image(pixel_art_color_encoding, color_mapping
     , canvas_size=DEFAULT_CANVAS, scale=200):
     ratio = (3, 2)
     pixel_size = (ratio[0] * scale / canvas_size.x
@@ -54,9 +45,63 @@ def decode_to_image(pixel_art_color_encoding, color_mapping
 
     return (im.tobytes())
 
-def convert_raw_image_to_jpg(raw_image):
-    image = Image.frombytes('RGBX', (616, 414), raw_image)
-    with io.BytesIO() as output:
-        image.save(output, format='JPEG')
-        image_file = output.getvalue()
-    return image_file
+_Model = ArtpieceModel
+
+class Artpiece():
+    def __init__(self, model):
+        self._model = model
+        self._model_id = model.id
+
+    def refresh(self):
+        self._model = _Model.get_by_id(self._model_id)
+
+    @classmethod
+    def create(cls, user_id, title, art):
+        submit_date = dt.datetime.now()
+        raw_image = _decode_to_image(art, Config.COLOR_SCHEME)
+        return cls(
+                _Model(title=title, submit_date=submit_date, art=art
+                    , status=SubmissionStatus.submitted, raw_image=raw_image
+                    , user_id=user_id, confirmed=False)
+                .save())
+
+    @classmethod
+    def get_by_id(cls, id):
+        return cls(_Model.get_by_id(id))
+
+    @property
+    def creator(self):
+        from .user import User
+        return User.get_by_id(self._model.user_id)
+
+    def get_image_as_jpg(self):
+        image = Image.frombytes('RGBX', (616, 414), self._model.raw_image)
+        with io.BytesIO() as output:
+            image.save(output, format='JPEG')
+            image_file = output.getvalue()
+        return image_file
+
+    def get_confirmation_token(self, expires_in=60*60*72):
+        return jwt.encode(
+                {'confirm_artpiece': self._model.id, 'exp': time() + expires_in}
+                , current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    @staticmethod
+    def verify_confirmation_token(token):
+        id = jwt.decode(token, current_app.config['SECRET_KEY']
+                , algorithm=['HS256'])['confirm_artpiece']
+        return Artpiece.get_by_id(id)
+
+    def confirm(self):
+        self._model.confirmed = True
+
+    def is_confirmed(self):
+        return self._model.confirmed
+
+    @property
+    def title(self):
+        return self._model.title
+
+    @staticmethod
+    def total_submission_count_since(date):
+        return _Model.query.filter(_Model.submit_date >= date).count()

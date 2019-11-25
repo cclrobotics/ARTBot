@@ -1,9 +1,9 @@
-from flask import (render_template, current_app)
+from flask import (render_template, current_app, url_for)
 from flask_mail import Message
 from threading import Thread
 
 from web.extensions import (mail, db)
-from web.artpiece import (convert_raw_image_to_jpg, get_artpiece_by_id)
+from web.artpiece import Artpiece
 from web.user import User
 from web.database.models import (EmailFailureModel, EmailFailureState)
 
@@ -32,39 +32,46 @@ def safe_send_email(email, error_handler):
         error_handler(repr(e))
 
 
-def send_confirmation_email(artpiece_id):
-    def build_confirmation_email(user, submission):
-        image_file = convert_raw_image_to_jpg(submission.raw_image)
-        email = build_email(f'ARTBot Submission Confirmation for "{submission.title}"'
-                , sender=current_app.config['MAIL_DEFAULT_SENDER']
-                , recipients=[user.email]
+def send_confirmation_email(artpiece, confirmation_url):
+    def build_confirmation_email(artpiece, confirmation_url):
+        image_file = artpiece.get_image_as_jpg()
+        email = build_email(f'Submission: "{artpiece.title}"'
+                , sender=('ArtBot Confirmation', current_app.config['MAIL_DEFAULT_SENDER'])
+                , recipients=[artpiece.creator.email]
                 , text_body=render_template(
-                    'email/submission_confirmation.txt', submission=submission)
+                    'email/submission_confirmation.txt', confirmation_url=confirmation_url)
                 , html_body=render_template(
-                    'email/submission_confirmation.html', submission=submission)
+                    'email/submission_confirmation.html'
+                    , submission=artpiece
+                    , confirmation_url=confirmation_url
+                    )
                 , attachments=[('pixel-art.jpg', 'image/jpg', image_file)])
         return email
 
     def log_confirmation_email_failure(artpiece):
         return log_email_failure(
-                EmailFailureState.submission_confirmation, artpiece.user_id, artpiece.id)
+                EmailFailureState.submission_confirmation, None, artpiece._model.id)
 
-    artpiece = get_artpiece_by_id(artpiece_id)
-    user = User.get_by_id(artpiece.user_id)
     safe_send_email(
-            build_confirmation_email(user, artpiece)
+            build_confirmation_email(artpiece, confirmation_url)
             , log_confirmation_email_failure(artpiece)
             )
 
 
-def with_context(app, cleanup=lambda : None):
+def with_context(app, prepare=lambda : None, cleanup=lambda : None):
     def wrapper(func, *args):
         with app.app_context():
+            prepare()
             func(*args) if args else func()
             cleanup()
     return wrapper
 
 
 def send_confirmation_email_async(artpiece):
-    Thread(target=with_context(current_app._get_current_object(), db.session.remove)
-            , args=(send_confirmation_email, artpiece.id)).start()
+    confirmation_url = url_for(
+            'main.confirm_art'
+            , token=artpiece.get_confirmation_token()
+            , _external=True)
+    Thread(target=with_context(
+        current_app._get_current_object(), artpiece.refresh, db.session.remove)
+        , args=(send_confirmation_email, artpiece, confirmation_url)).start()

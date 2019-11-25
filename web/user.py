@@ -1,8 +1,8 @@
 import datetime as dt
 from web.database.models import (UserModel, ArtpieceModel, SubmissionStatus)
-import web.artpiece as artpiece
 
-Model = UserModel
+
+_Model = UserModel
 
 class User():
     def __init__(self, model):
@@ -10,7 +10,7 @@ class User():
 
     @classmethod
     def _create(cls, email, created_at, verified):
-        return cls(Model(email=email, created_at=created_at, verified=verified).save())
+        return cls(_Model(email=email, created_at=created_at, verified=verified).save())
 
     @classmethod
     def from_email(cls, email):
@@ -18,16 +18,17 @@ class User():
 
     @classmethod
     def get_by_email(cls, email):
-        model = Model.query.filter(Model.email == email).one_or_none()
+        model = _Model.query.filter(_Model.email == email).one_or_none()
         return cls(model) if model else None
 
     @classmethod
     def get_by_id(cls, id):
-        model = Model.get_by_id(id)
+        model = _Model.get_by_id(id)
         return cls(model) if model else None
 
-    def make_artpiece(self, title, art):
-        return artpiece.make_artpiece(title, art, self._model.id).save()
+    def create_artpiece(self, title, art):
+        from .artpiece import Artpiece
+        return Artpiece.create(self._model.id, title, art)
 
     def has_active_submission(self):
         return self._model.artpieces.filter(
