@@ -47,6 +47,8 @@ def upgrade():
     op.drop_table('users')
     op.execute('ALTER TABLE new_users RENAME TO users')
 
+    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+
 def downgrade():
     op.create_table('new_emailfailures',
     sa.Column('id', sa.Integer(), nullable=False),

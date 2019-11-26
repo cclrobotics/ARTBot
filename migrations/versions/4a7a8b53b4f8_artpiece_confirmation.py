@@ -40,6 +40,8 @@ def upgrade():
     op.drop_table('artpieces')
     op.execute('ALTER TABLE new_artpieces RENAME TO artpieces')
 
+    op.create_index(op.f('ix_artpieces_user_id'), 'artpieces', ['user_id'], unique=False)
+
 
 def downgrade():
     op.create_table('new_artpieces',
