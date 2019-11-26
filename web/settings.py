@@ -69,6 +69,7 @@ class ProdConfig(Config):
         assert cls.MAIL_SERVER != None, 'A mail server is required'
         assert cls.MAIL_USERNAME != None, 'A mail username is required'
         assert cls.MAIL_PASSWORD != None, 'A mail password is required'
+        assert cls.MAIL_DEFAULT_SENDER != None, 'A mail default sender is required'
 
 class DevConfig(Config):
     """Development configuration."""
