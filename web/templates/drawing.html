@@ -12,7 +12,16 @@
     <div class="column">
 	<div class="inputs">
 	    <h4>Select color</h4>
-	    <div id="color-container"></div>
+	    <div id="color-container">
+			{% for color in colors %}
+			<div
+				class="color-picker"
+				style="background-color:
+				rgba({{color.red}},{{color.green}},{{color.blue}},{{color.opacity}}"
+				data-id="{{ color.name }}">
+			</div>
+			{% endfor %}
+	    </div>
 	    <input type="button" class="quick-fill" value="fill">
 	    <br>
 

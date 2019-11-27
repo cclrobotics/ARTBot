@@ -8,8 +8,7 @@ import math
 from PIL import Image, ImageDraw
 from flask import current_app
 from web.database.models import ArtpieceModel, SubmissionStatus
-from web.settings import Config
-
+from .colors import get_available_color_scheme
 
 _CartesianCoordinates = namedtuple('CartesianCoordinates', ['x', 'y'])
 Canvas = _CartesianCoordinates
@@ -58,7 +57,7 @@ class Artpiece():
     @classmethod
     def create(cls, user_id, title, art):
         submit_date = dt.datetime.now()
-        raw_image = _decode_to_image(art, Config.COLOR_SCHEME)
+        raw_image = _decode_to_image(art, get_available_color_scheme())
         return cls(
                 _Model(title=title, submit_date=submit_date, art=art
                     , status=SubmissionStatus.submitted, raw_image=raw_image

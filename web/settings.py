@@ -10,14 +10,6 @@ class Config(object):
     APP_DIR = os.path.abspath(os.path.dirname(__file__))
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
     MONTLY_SUBMISSION_LIMIT = int(os.environ.get('WEB_MONTHLY_SUBMISSION_LIMIT', 27))
-    # this should be moved to the database
-    COLOR_SCHEME = {
-        'pink': (255,192,203,1)
-        ,'blue': (0,0,255,1)
-        ,'teal': (0,128,128,1)
-        ,'orange': (255,165,0,1)
-        ,'yellow': (255,255,0,1)
-    }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     """Mail settings."""
