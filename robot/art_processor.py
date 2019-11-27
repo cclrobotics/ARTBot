@@ -5,6 +5,7 @@ from datetime import datetime
 import os, argparse
 from contextlib import contextmanager
 
+from .custom_artbot_labware import custom_plates
 from web.database.models import ArtpieceModel, SubmissionStatus
 
 parser = argparse.ArgumentParser()
@@ -12,7 +13,15 @@ parser.add_argument('--notebook'
                     ,action='store_true'
                     ,help='Set this flag to output to a Jupyter Notebook instead of a .py file'
                     )
-NOTEBOOK = parser.parse_args().notebook
+parser.add_argument('--wellplate'
+        , choices=custom_plates.keys()
+        , help='The plate type to use'
+        )
+args = parser.parse_args()
+NOTEBOOK = args.notebook
+WELLPLATE_TYPE = args.wellplate or 'nunc_8_wellplate_flat'
+grid = custom_plates[WELLPLATE_TYPE]['grid']
+wellplate_grid_size = grid[0]*grid[1]
 
 APP_DIR = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
@@ -70,6 +79,8 @@ def add_pixel_locations(template_string, artpieces):
 
     return procedure
 
+def add_wellplate_type(template_string, wellplate_type):
+    return template_string.replace('%%WELLPLATE TYPE GO HERE%%', "'"+wellplate_type+"'")
 
 num_pieces = 0
 while num_pieces not in range(1,10):
@@ -101,7 +112,7 @@ with session_scope() as session:
         procedure, canvas_locations = add_canvas_locations(template_string, artpieces)
 
         procedure = add_pixel_locations(procedure, artpieces)
-
+        procedure = add_wellplate_type(procedure, WELLPLATE_TYPE)
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
         unique_file_name = f'ARTISTIC_PROCEDURE_{now}.{file_extension}'

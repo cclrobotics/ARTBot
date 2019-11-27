@@ -40,11 +40,15 @@ def distribute_to_agar(self, vol, source, destination, disposal_vol):
 
     self.drop_tip()
 
-# a 6-well plate for all of the colors in our pallette
-palette = labware.load('nunc_8_wellplate_flat', 11)
-
 # a tip rack for our pipette
 p200rack = labware.load('tiprack-200ul', 10)
+
+pixels_by_color_by_artpiece = %%PIXELS GO HERE%%
+canvas_locations = %%CANVAS LOCATIONS GO HERE%%
+wellplate_type = %%WELLPLATE TYPE GO HERE%%
+
+# a well plate for all of the colors in our pallette
+palette = labware.load(wellplate_type, 11)
 
 # colored culture locations
 palette_colors = dict(
@@ -54,9 +58,6 @@ palette_colors = dict(
     ,orange = palette.wells('B1')
     ,yellow = palette.wells('B2')
     )
-
-pixels_by_color_by_artpiece = %%PIXELS GO HERE%%
-canvas_locations = %%CANVAS LOCATIONS GO HERE%%
 
 # plates to create art in
 canvas_labware = dict()
