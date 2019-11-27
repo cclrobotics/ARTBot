@@ -122,9 +122,8 @@ with session_scope() as session:
         with open(os.path.join(APP_DIR,'procedures',unique_file_name),'w') as output_file:
             output_file.write(procedure)
 
-        updated_records = session.query(ArtpieceModel).filter(ArtpieceModel.id.in_([artpiece.id for artpiece in artpieces]))
-        for record in updated_records:
-            record.status = SubmissionStatus.processed
+        for artpiece in artpieces:
+            artpiece.status = SubmissionStatus.processed
 
         print(('Successfully generated artistic procedure into: '
             f'ARTBot/robot/procedures/{unique_file_name}'))
