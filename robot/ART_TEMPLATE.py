@@ -50,14 +50,16 @@ wellplate_type = %%WELLPLATE TYPE GO HERE%%
 # a well plate for all of the colors in our pallette
 palette = labware.load(wellplate_type, 11)
 
+def well_generator(plate):
+    for well in plate.wells():
+        yield well
+get_well = well_generator(palette)
+
 # colored culture locations
-palette_colors = dict(
-    pink = palette.wells('A1')
-    ,blue = palette.wells('A2')
-    ,teal = palette.wells('A3')
-    ,orange = palette.wells('B1')
-    ,yellow = palette.wells('B2')
-    )
+palette_colors = { color: next(get_well) for color in pixels_by_color_by_artpiece.keys() }
+for color in palette_colors:
+    print(f'{color} -> {palette_colors[color]}')
+input('Once you have filled the color plate, press enter to continue...')
 
 # plates to create art in
 canvas_labware = dict()
