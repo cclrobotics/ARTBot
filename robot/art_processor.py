@@ -24,11 +24,13 @@ grid = custom_plates[WELLPLATE_TYPE]['grid']
 wellplate_grid_size = grid[0]*grid[1]
 
 APP_DIR = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
-DB_NAME = 'ARTBot.db'
-# Put the db file in project root
-DB_PATH = os.path.join(PROJECT_ROOT, DB_NAME)
-SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///{0}'.format(DB_PATH))
+SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+if not SQLALCHEMY_DATABASE_URI:
+    PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
+    DB_NAME = 'ARTBot.db'
+    # Put the db file in project root
+    DB_PATH = os.path.join(PROJECT_ROOT, DB_NAME)
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(DB_PATH)
 
 SQL_ENGINE = sa.create_engine(SQLALCHEMY_DATABASE_URI)
 Session = sessionmaker(bind=SQL_ENGINE)
