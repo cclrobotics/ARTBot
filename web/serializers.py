@@ -1,14 +1,13 @@
 from marshmallow import fields, Schema, post_load, ValidationError
 from marshmallow.validate import Length, Regexp
 from web.artpiece import Artpiece, has_matching_color_scheme, has_pixels_within_canvas
-from web.settings import Config
+from web.colors import get_available_color_names
 import web.artpiece as artpiece
 
-COLOR_SCHEME = Config.COLOR_SCHEME
 _ALPHA_NUM_REGEX = r"^[\w\s]+$"
 
 def validate_color_scheme(pixel_art_color_encoding):
-    if not has_matching_color_scheme(pixel_art_color_encoding, COLOR_SCHEME.keys()):
+    if not has_matching_color_scheme(pixel_art_color_encoding, get_available_color_names()):
         raise ValidationError('Invalid color scheme')
 
 def validate_pixels(pixel_art_color_encoding):

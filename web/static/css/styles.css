@@ -118,6 +118,8 @@ hr.section-break:before {
   width: 20px;
   height: 20px;
   cursor: pointer;
+  display: inline-block;
+  margin: 5px;
 }
 
 .color-picker::-webkit-color-swatch {

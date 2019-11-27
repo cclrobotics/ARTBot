@@ -10,6 +10,7 @@ from .exceptions import (error_template, InvalidUsage, MONTLY_SUBMISSION_LIMIT_M
 from .user import User
 from .extensions import db
 from .artpiece import (DEFAULT_CANVAS, Artpiece)
+from .colors import get_available_colors
 
 main = Blueprint('main', __name__)
 
@@ -21,7 +22,10 @@ def index():
         limit_message = MONTLY_SUBMISSION_LIMIT_MESSAGE
     else:
         limit_message = None
-    return render_template('main.html', limit_message=limit_message, canvas_size=DEFAULT_CANVAS)
+    return render_template('main.html'
+            , limit_message=limit_message
+            , canvas_size=DEFAULT_CANVAS
+            , colors=get_available_colors())
 
 @main.route('/receive_art', methods=('POST', ))
 def receive_art():
