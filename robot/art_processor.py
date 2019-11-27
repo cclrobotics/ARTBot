@@ -91,7 +91,7 @@ with session_scope() as session:
     else:
         print(f'Loaded {len(artpieces)} pieces of art')
         for artpiece in artpieces:
-            print(f"{artpiece.id}: {artpiece.title}, {artpiece.email}, {artpiece.submit_date}")
+            print(f"{artpiece.id}: {artpiece.title}, {artpiece.submit_date}")
 
         #Get Python art procedure template
         file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
