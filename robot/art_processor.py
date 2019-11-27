@@ -123,7 +123,7 @@ with session_scope() as session:
             output_file.write(procedure)
 
         for artpiece in artpieces:
-            artpiece.status = SubmissionStatus.processed
+            artpiece.status = SubmissionStatus.processing
 
         print(('Successfully generated artistic procedure into: '
             f'ARTBot/robot/procedures/{unique_file_name}'))
