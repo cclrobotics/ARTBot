@@ -46,12 +46,6 @@ def session_scope():
     finally:
         session.close()
 
-# Lists slots that should typically be available
-def canvas_slot_generator():
-    for slot in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
-        yield str(slot)
-get_canvas_slot = canvas_slot_generator()
-
 def well_map(well):
     map = dict(zip(range(26), string.ascii_uppercase))
     letter = map[well[0]]
@@ -59,15 +53,20 @@ def well_map(well):
     return letter + str(number)
 
 # BUG: overwrites locations if same title
-def add_canvas_locations(template_string, artpieces):
+def get_canvas_locations(artpieces):
+    # Lists slots that should typically be available
+    def canvas_slot_generator():
+        for slot in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
+            yield str(slot)
+    get_canvas_slot = canvas_slot_generator()
+
+    return dict(zip([artpiece.title for artpiece in artpieces], get_canvas_slot))
+
+def add_canvas_locations(template_string, canvas_locations):
     # write where canvas plates are to be placed into code
-    canvas_locations = dict(zip([artpiece.title for artpiece in artpieces], get_canvas_slot))
-    procedure = template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
+    return template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
 
-    return procedure, canvas_locations
-
-
-def add_pixel_locations(template_string, artpieces):
+def get_pixels_by_color(artpieces):
     # write where to draw pixels on each plate into code. Listed by color to reduce contamination
     pixels_by_color = dict()
     for artpiece in artpieces:
@@ -75,9 +74,10 @@ def add_pixel_locations(template_string, artpieces):
             if color not in pixels_by_color:
                 pixels_by_color[color] = dict()
             pixels_by_color[color][artpiece.title] = [well_map(pixel) for pixel in artpiece.art[color]]
-    procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
+    return pixels_by_color
 
-    return procedure
+def add_pixel_locations(template_string, pixels_by_color):
+    return template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
 
 def add_wellplate_type(template_string, wellplate_type):
     return template_string.replace('%%WELLPLATE TYPE GO HERE%%', "'"+wellplate_type+"'")
@@ -107,11 +107,14 @@ with session_scope() as session:
         #Get Python art procedure template
         file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
         with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
-            template_string = template_file.read()
+            procedure = template_file.read()
 
-        procedure, canvas_locations = add_canvas_locations(template_string, artpieces)
+        canvas_locations = get_canvas_locations(artpieces)
+        pixels_by_color = get_pixels_by_color(artpieces)
+        assert len(pixels_by_color) < wellplate_grid_size, 'More colors than wells'
 
-        procedure = add_pixel_locations(procedure, artpieces)
+        procedure = add_canvas_locations(procedure, canvas_locations)
+        procedure = add_pixel_locations(procedure, pixels_by_color)
         procedure = add_wellplate_type(procedure, WELLPLATE_TYPE)
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -123,6 +126,8 @@ with session_scope() as session:
         for record in updated_records:
             record.status = SubmissionStatus.processed
 
-        print(f'Successfully generated artistic procedure into: ARTBot/robot/procedures/{unique_file_name}')
+        print(('Successfully generated artistic procedure into: '
+            f'ARTBot/robot/procedures/{unique_file_name}'))
         print('The following slots will be used:')
-        print('\n'.join([f'Slot {str(canvas_locations[key])}: "{key}"' for key in canvas_locations]))
+        print('\n'.join(
+                [f'Slot {str(canvas_locations[key])}: "{key}"' for key in canvas_locations]))
