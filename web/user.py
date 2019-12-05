@@ -9,12 +9,12 @@ class User():
         self._model = model
 
     @classmethod
-    def _create(cls, email, created_at, verified):
+    def _create(cls, email, created_at):
         return cls(_Model(email=email, created_at=created_at).save())
 
     @classmethod
     def from_email(cls, email):
-        return cls._create(email, dt.datetime.now(), False)
+        return cls._create(email, dt.datetime.now())
 
     @classmethod
     def get_by_email(cls, email):
