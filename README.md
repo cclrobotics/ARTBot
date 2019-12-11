@@ -13,12 +13,12 @@ The code breaks into three sections, each of which can be run independently:
 - Activate the virtual environment: ```source <path to new venv>/bin/activate```
 - Install the Python packages to the virtual environment: ```pip3 install -r requirements.txt```
 - Set up the database: ```flask db upgrade```
-- Run the server: ```python3 run_webserver.py```
+- Run the server: ```flask run```
 - Go to ```127.0.0.1:5000``` in your browser.
 
 #### If you contribute code:
 - Add your virtual environment to the gitignore before you push (and your SQLlite file if you have one).
-- Run ```export FLASK_APP=web``` (or ```set FLASK_APP=web``` on Windows), folowed by ```flask db migrate``` if you have made any changes to the data models. This will create a script in migrations/versions. Type ```git add [new_file_name]``` to include this in your commit.
+- Inside the virtual env, run ```flask db migrate``` if you have made any changes to the data models. This will create a script in migrations/versions. Type ```git add [new_file_name]``` to include this in your commit.
 
 ### Screenshot
 ![ARTBot Screenshot](/ARTBotScreenShot.png?raw=true "ARTBot Screenshot")
