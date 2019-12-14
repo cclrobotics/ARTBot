@@ -1,83 +1,58 @@
 #views.py - Maps URLs to backend functions, then returns the results to the appropriate view
 
-import datetime
-import json
-from web.utilities import check_failed_validation, rebuild_art, sendConfirmationEmailToUser
-from web import app, db, models, csrf
-from flask import render_template, flash, redirect, url_for, request, Response
-from sqlalchemy import desc, extract, sql
-from flask_login import login_required
+from flask import (render_template, Blueprint, request, current_app, jsonify)
+from marshmallow import ValidationError
+from jwt import (ExpiredSignatureError, PyJWTError)
+from .serializers import ArtpieceSchema
+from .utilities import has_reached_monthly_submission_limit
+from .email import send_confirmation_email_async
+from .exceptions import (error_template, InvalidUsage, MONTLY_SUBMISSION_LIMIT_MESSAGE)
+from .user import User
+from .extensions import db
+from .artpiece import (DEFAULT_CANVAS, Artpiece)
 
-from web.config import SUBMISSION_LIMIT, LIMIT_MESSAGE
+main = Blueprint('main', __name__)
 
 #Home page
-@app.route('/', methods=('GET', 'POST'))
-@app.route('/index', methods=('GET', 'POST'))
+@main.route('/', methods=('GET', ))
+@main.route('/index', methods=('GET', ))
 def index():
-    SUBMISSION_COUNT = models.site_vars.query.filter_by(var='SUBMISSION_CNT').first()
-    if SUBMISSION_COUNT.val >= SUBMISSION_LIMIT:
-        limit_message = LIMIT_MESSAGE
+    if has_reached_monthly_submission_limit(current_app.config['MONTLY_SUBMISSION_LIMIT']):
+        limit_message = MONTLY_SUBMISSION_LIMIT_MESSAGE
     else:
         limit_message = None
-    return render_template('main.html', limit_message=limit_message)
+    return render_template('main.html', limit_message=limit_message, canvas_size=DEFAULT_CANVAS)
 
-@app.route('/receive_art', methods=['POST'])
+@main.route('/receive_art', methods=('POST', ))
 def receive_art():
-    SUBMISSION_COUNT = models.site_vars.query.filter_by(var='SUBMISSION_CNT').first()
-    data = request.json
+    if has_reached_monthly_submission_limit(current_app.config['MONTLY_SUBMISSION_LIMIT']):
+        raise InvalidUsage.reached_monthly_submission_limit()
 
- ##added art to test db
-    
-    title = data.pop('title')
-    email = data.pop('email')
-    art = data.pop('art')
-    picture = rebuild_art(art)
+    try:
+        data = ArtpieceSchema().load(request.get_json())
+    except ValidationError as err:
+        raise InvalidUsage(**error_template(err.messages))
 
-    # perform string validations
-    prev_emails = db.session.query(models.artpieces.email).filter(models.artpieces.status.like('Submitted%')).all()
-    failed_validation = check_failed_validation(title,
-                                                email,
-                                                art,
-                                                SUBMISSION_COUNT.val,
-                                                SUBMISSION_LIMIT,
-                                                prev_emails
-                                                )
-    
-    if failed_validation:
-        return failed_validation
-    
-    # passed validation so commit to DB
-    art_data = dict()
-    art_data['title'] = title
-    art_data['email'] = email
-    art_data['submit_date'] = datetime.datetime.now()
-    art_data['art'] = json.dumps(art)
-    art_data['status'] = 'Submitted'
-    art_data['picture'] = picture
+    user = User.get_by_email(data['email']) or User.from_email(data['email'])
+    if user.has_active_submission():
+        raise InvalidUsage.reached_user_limit()
 
-    db.session.add(models.artpieces(**art_data))
-    SUBMISSION_COUNT.val += 1
-    db.session.flush()
+    artpiece = user.create_artpiece(data['title'], data['art'])
     db.session.commit()
 
-    # update object in the session with its state in the db
-    submitted_art_data = models.artpieces.query.filter_by(submit_date=art_data['submit_date'],
-                                                          art=art_data['art']
-                                                          ).first()
-    
-    # send confirmation email to user
-    # TODO: Consider returning success before emailing, since emailing can take some time and the user won't get feedback
+    send_confirmation_email_async(artpiece)
+
+    return jsonify({'success': 'We will send you a confirmation email'}), 201
+
+@main.route('/confirm_art/<token>', methods=('GET', ))
+def confirm_art(token):
     try:
-        sendConfirmationEmailToUser(submitted_art_data)
-    except:
-        print('Submission received but email failed. Marking as email-owed.')
-        submitted_art_data.status = 'Submitted-OwedConfirmation'
-        db.session.flush()
-        db.session.commit()
+        artpiece = Artpiece.verify_confirmation_token(token)
+    except ExpiredSignatureError:
+        return render_template('confirmation_expired.html')
+    except PyJWTError:
+        return render_template('404.html')
 
-    return 'Robot Art Loaded'
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
+    artpiece.confirm()
+    db.session.commit()
+    return render_template('artpiece_confirmed.html')

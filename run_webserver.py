@@ -1,6 +1,8 @@
-#!flask/bin/python
-# run_webserver.py - Calls the __init__.py function (which runs all other required code), then starts the Flask server
-from web import app
+"""Create a web application instance.""" 
+from flask.helpers import get_env
 
-if __name__ == "__main__":
-    app.run(debug=True)
+from web.app import create_app
+from web.settings import ProdConfig, DevConfig
+
+CONFIG = DevConfig if get_env() == 'development' else ProdConfig
+app = create_app(CONFIG)

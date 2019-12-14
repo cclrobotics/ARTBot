@@ -37,34 +37,23 @@ function makeColorPicker() {
   }); 
 }
 
+function fillPixelCanvas(color) {
+  pixelCanvas.querySelectorAll('td').forEach(td => td.style.backgroundColor = color);
+}
+
+function resetInputFields() {
+  function resetPixelCanvas() {
+    fillPixelCanvas(null);
+  }
+
+  resetPixelCanvas();
+  document.querySelector("#email").value = "";
+  document.querySelector("#title").value = "";
+}
+
 let colorChoice = "pink"; // Tracks the current color
 
 makeColorPicker();
-
-function makeGrid() {
-  let gridHeight = 26
-  let gridWidth = 39
-  // If grid already present, clears any cells that have been filled in
-  while (pixelCanvas.firstChild) {
-    pixelCanvas.removeChild(pixelCanvas.firstChild);
-  }
-  // Creates rows and cells
-  for (let i = 1; i <= gridHeight; i++) {
-    let gridRow = document.createElement('tr');
-    pixelCanvas.appendChild(gridRow);
-    for (let j = 1; j <= gridWidth; j++) {
-      let gridCell = document.createElement('td');
-      gridRow.appendChild(gridCell);
-      // Fills in cell with selected color upon mouse press ('mousedown', unlike 'click', doesn't also require release of mouse button)
-      gridCell.addEventListener('mousedown', function() {
-        const color = document.querySelector('.color-picker').value;
-        this.style.backgroundColor = color;
-      });
-    }
-  }
-}
-
-makeGrid(26, 39);
 
 pixelCanvas.addEventListener('mousedown', function(e) {
     if (e.target.tagName !== 'TD') return;
@@ -113,7 +102,7 @@ colorContainer.addEventListener('click', function(e) {
 quickFill.addEventListener('click', function(e) {
   e.preventDefault();
   if (confirm('This will fill all cells with the selected color and erase ALL art. Are you sure?')) {
-    pixelCanvas.querySelectorAll('td').forEach(td => td.style.backgroundColor = colorChoice);
+    fillPixelCanvas(colorChoice)
   } 
 });
 
@@ -202,23 +191,22 @@ drawSubmit.addEventListener('submit', function(e) {
   }
 
   var xhr = new XMLHttpRequest();
-  var csrf_token = document.querySelector("#csrf").value;
   var email = document.querySelector("#email").value;
   var title = document.querySelector("#title").value;
   data['email'] = email;
   data['title'] = title;
   data['art'] = canvasCoord;
 
-  xhr.open("POST", '/receive_art', true);
+  xhr.open('POST', '/receive_art', true);
   xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
-  xhr.setRequestHeader('X-CSRFToken', csrf_token);
+  xhr.responseType = "json"
   xhr.send(JSON.stringify(
     data
   ));
 
   xhr.onloadend = function () {
     let status = xhr.status;
-    let response = xhr.responseText;
+    let response = xhr.response;
     let modal;
     let text;
     let closer;
@@ -235,7 +223,16 @@ drawSubmit.addEventListener('submit', function(e) {
     }
 
     // update modal text
-    text.innerHTML = response;
+    if (response.errors) {
+      let body = response.errors.body;
+      if (typeof body == 'object') {
+        text.innerHTML = body[Object.keys(body)[0]][0];
+      } else {
+        text.innerHTML = "Oops... an unexpected error occurred!";
+      }
+    } else {
+      text.innerHTML = response.success;
+    }
 
     // When we get a response, open the modal 
     modal.style.display = "block";
@@ -246,6 +243,9 @@ drawSubmit.addEventListener('submit', function(e) {
         modal.style.display = "none";
         // remove listener since we're done with modal
         e.target.removeEventListener(e.type, arguments.callee);
+        if (modal === successModal) {
+          resetInputFields();
+        }
       }
     }
 
