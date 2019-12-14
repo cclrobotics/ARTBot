@@ -42,7 +42,7 @@ def receive_art():
 
     send_confirmation_email_async(artpiece)
 
-    return jsonify({'success': 'We will send you a confirmation email'}), 201
+    return jsonify({'success': "<b>One more step</b>: We're sending a confirmation email. Click the link there to confirm your art design"}), 201
 
 @main.route('/confirm_art/<token>', methods=('GET', ))
 def confirm_art(token):
