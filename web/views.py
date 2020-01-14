@@ -1,6 +1,7 @@
 #views.py - Maps URLs to backend functions, then returns the results to the appropriate view
 
 from flask import (render_template, Blueprint, request, current_app, jsonify)
+from sqlalchemy.exc import DBAPIError
 from marshmallow import ValidationError
 from jwt import (ExpiredSignatureError, PyJWTError)
 from .serializers import ArtpieceSchema
@@ -17,10 +18,12 @@ main = Blueprint('main', __name__)
 @main.route('/', methods=('GET', ))
 @main.route('/index', methods=('GET', ))
 def index():
-    if has_reached_monthly_submission_limit(current_app.config['MONTLY_SUBMISSION_LIMIT']):
-        limit_message = MONTLY_SUBMISSION_LIMIT_MESSAGE
-    else:
-        limit_message = None
+    limit_message = None
+    try:
+        if has_reached_monthly_submission_limit(current_app.config['MONTLY_SUBMISSION_LIMIT']):
+            limit_message = MONTLY_SUBMISSION_LIMIT_MESSAGE
+    except DBAPIError:
+        pass
     return render_template('main.html', limit_message=limit_message, canvas_size=DEFAULT_CANVAS)
 
 @main.route('/receive_art', methods=('POST', ))
@@ -42,7 +45,11 @@ def receive_art():
 
     send_confirmation_email_async(artpiece)
 
-    return jsonify({'success': "<b>One more step</b>: We're sending a confirmation email. Click the link there to confirm your art design"}), 201
+    success_msg = ('<b>One more step</b>: '
+        'We\'re sending a confirmation email. Click the link there to confirm your art design')
+
+    return jsonify({'success': success_msg}), 201
+                
 
 @main.route('/confirm_art/<token>', methods=('GET', ))
 def confirm_art(token):
