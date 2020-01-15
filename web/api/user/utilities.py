@@ -1,6 +1,6 @@
 import datetime
 from PIL import Image
-from web.artpiece import Artpiece
+from .artpiece import Artpiece
 
 def first_of_month():
     return datetime.date.today().replace(day=1)

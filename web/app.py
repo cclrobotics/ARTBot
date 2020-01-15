@@ -5,7 +5,8 @@ from sqlalchemy_utils.functions import (create_database, drop_database)
 from sqlalchemy.exc import DBAPIError
 from web.extensions import db, migrate, mail
 from web.views import main
-from web.exceptions import InvalidUsage
+from web.api.user.artpiece.views import artpiece_blueprint 
+from web.api.user.exceptions import InvalidUsage
 
 def create_app():
 
@@ -31,6 +32,7 @@ def register_extensions(app):
 def register_blueprints(app):
     """Register Flask blueprints."""
     app.register_blueprint(main)
+    app.register_blueprint(artpiece_blueprint)
 
 def register_errorhandlers(app):
     @app.errorhandler(InvalidUsage)

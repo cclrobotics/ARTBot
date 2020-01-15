@@ -3,8 +3,8 @@ from flask_mail import Message
 from threading import Thread
 
 from web.extensions import (mail, db)
-from web.artpiece import Artpiece
-from web.user import User
+from .artpiece import Artpiece
+from .user import User
 from web.database.models import (EmailFailureModel, EmailFailureState)
 
 

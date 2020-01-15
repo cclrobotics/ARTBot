@@ -71,7 +71,7 @@ class Artpiece():
 
     @property
     def creator(self):
-        from .user import User
+        from ..user import User
         return User.get_by_id(self._model.user_id)
 
     def get_image_as_jpg(self):
