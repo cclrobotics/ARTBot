@@ -26,6 +26,10 @@ def index():
         pass
     return render_template('main.html', limit_message=limit_message, canvas_size=DEFAULT_CANVAS)
 
+@main.route('/art_confirmation/<token>', methods=('GET', ))
+def art_confirmation(token):
+    return render_template('art_confirmation.html', confirmation_token=token)
+
 @main.route('/receive_art', methods=('POST', ))
 def receive_art():
     if has_reached_monthly_submission_limit(current_app.config['MONTLY_SUBMISSION_LIMIT']):
@@ -51,15 +55,20 @@ def receive_art():
     return jsonify({'success': success_msg}), 201
                 
 
-@main.route('/confirm_art/<token>', methods=('GET', ))
-def confirm_art(token):
+@main.route('/artpiece/confirm/<token>', methods=('POST', ))
+def confirm_artpiece(token):
     try:
         artpiece = Artpiece.verify_confirmation_token(token)
     except ExpiredSignatureError:
-        return render_template('confirmation_expired.html')
+        raise InvalidUsage(**error_template('expired'))
     except PyJWTError:
-        return render_template('404.html')
+        raise InvalidUsage(**error_template('invalid', 404))
 
-    artpiece.confirm()
-    db.session.commit()
-    return render_template('artpiece_confirmed.html')
+    if artpiece.is_confirmed():
+        success_type = 'already-confirmed'
+    else:
+        success_type = 'confirmed'
+        artpiece.confirm()
+        db.session.commit()
+
+    return jsonify({'successType': success_type}), 200

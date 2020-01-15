@@ -69,7 +69,7 @@ def with_context(app, prepare=lambda : None, cleanup=lambda : None):
 
 def send_confirmation_email_async(artpiece):
     confirmation_url = url_for(
-            'main.confirm_art'
+            'main.art_confirmation'
             , token=artpiece.get_confirmation_token()
             , _external=True)
     Thread(target=with_context(
