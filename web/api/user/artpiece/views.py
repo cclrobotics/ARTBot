@@ -36,7 +36,7 @@ def receive_art():
     return jsonify({'success': success_msg}), 201
                 
 
-@artpiece_blueprint.route('/artpiece/confirm/<token>', methods=('POST', ))
+@artpiece_blueprint.route('/artpiece/confirm/<token>', methods=('PUT', ))
 def confirm_artpiece(token):
     try:
         artpiece = Artpiece.verify_confirmation_token(token)
@@ -53,4 +53,3 @@ def confirm_artpiece(token):
         db.session.commit()
 
     return jsonify({'successType': success_type}), 200
-
