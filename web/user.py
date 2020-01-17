@@ -26,9 +26,9 @@ class User():
         model = _Model.get_by_id(id)
         return cls(model) if model else None
 
-    def create_artpiece(self, title, art):
+    def create_artpiece(self, title, art, status):
         from .artpiece import Artpiece
-        return Artpiece.create(self._model.id, title, art)
+        return Artpiece.create(self._model.id, title, art, status)
 
     def has_active_submission(self):
         return self._model.artpieces.filter(

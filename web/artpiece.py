@@ -56,12 +56,12 @@ class Artpiece():
         self._model = _Model.get_by_id(self._model_id)
 
     @classmethod
-    def create(cls, user_id, title, art):
+    def create(cls, user_id, title, art, status=SubmissionStatus.submitted):
         submit_date = dt.datetime.now()
         raw_image = _decode_to_image(art, Config.COLOR_SCHEME)
         return cls(
                 _Model(title=title, submit_date=submit_date, art=art
-                    , status=SubmissionStatus.submitted, raw_image=raw_image
+                    , status=status, raw_image=raw_image
                     , user_id=user_id, confirmed=False)
                 .save())
 

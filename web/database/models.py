@@ -5,6 +5,7 @@ from .database import (Model, SurrogatePK, db, Column,
                               reference_col, relationship, deferred, composite)
 
 class SubmissionStatus(Enum):
+    awaiting_payment = 'Awaiting Payment'
     submitted = 'Submitted'
     processing = 'Processing'
     processed = 'Processed'
