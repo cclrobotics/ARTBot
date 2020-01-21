@@ -1,23 +1,25 @@
 """The app module, containing the app factory function."""
+import os
 from flask import Flask, render_template
+from sqlalchemy_utils.functions import (create_database, drop_database)
+from sqlalchemy.exc import DBAPIError
 from web.extensions import db, migrate, mail
-from web.settings import ProdConfig
 from web.views import main
 from web.exceptions import InvalidUsage
 
-def create_app(config_object=ProdConfig, verbose=True, validate=True):
-    if validate:
-        config_object.validate()
-    if verbose:
-        config_object.verbose_config()
+def create_app():
 
     """An application factory."""
     app = Flask(__name__.split('.')[0])
     app.url_map.strict_slashes = False
-    app.config.from_object(config_object)
+    app_settings = os.getenv('APP_SETTINGS')
+    app.config.from_object(app_settings)
+
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)
+    register_shell_context(app)
+
     return app
 
 def register_extensions(app):
@@ -37,6 +39,25 @@ def register_errorhandlers(app):
         response.status_code = error.status_code
         return response
 
+    """Catch all error handler for db"""
+    @app.errorhandler(DBAPIError)
+    def handle_db_error(error):
+        response = "internal server error"
+        response.status_code = 500
+        return response
+
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('404.html'), 404
+
+def register_shell_context(app):
+    @app.shell_context_processor
+    def ctx():
+        return {'app': app, 'db': db}
+
+    @app.cli.command()
+    def reset_db():
+        url = db.session.get_bind().url
+        drop_database(url)
+        create_database(url)
+        db.session.commit()

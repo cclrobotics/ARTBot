@@ -10,17 +10,36 @@ The code breaks into three sections, each of which can be run independently:
 
 ## Web
 
-### To run locally:
-- Create a virtual environment: ```python3 -m venv <path to new virtual env> ```
-- Activate the virtual environment: ```source <path to new venv>/bin/activate```
-- Install the Python packages to the virtual environment: ```pip3 install -r requirements.txt```
-- Set up the database: ```flask db upgrade```
-- Run the server: ```flask run```
-- Go to ```127.0.0.1:5000``` in your browser.
+### prerequisites
+- Install [Docker compose](https://docs.docker.com/compose/install/)
 
-#### If you contribute code:
-- Add your virtual environment to the gitignore before you push (and your SQLlite file if you have one).
-- Inside the virtual env, run ```flask db migrate``` if you have made any changes to the data models. This will create a script in migrations/versions. Type ```git add [new_file_name]``` to include this in your commit.
+### to run locally
+```bash
+docker-compose up -d --build                                       # build and spin up containers
+docker-compose exec artbot flask db upgrade                                 # setup database
+```
+### to inspect the database
+```bash
+docker-compose exec artbot-db psql -U postgres -d artbot_dev
+```
+### to access the application
+- go to `localhost:5001` for the web interface
+- go to `localhost:1080` for the mail-dev client (inspect outgoing e-mails)
+
+#### if you contribute code
+Changes to the data models must be accompanied by a migration script which you can generate by running:
+```bash
+docker-compose exec artbot flask db migrate -m "short description"
+```
+The script will be created in migrations/versions. Please inspect the file, change it if required, and test it by running:
+```bash
+docker-compose exec artbot flask db upgrade
+docker-compose exec artbot flask db downgrade                   # check backward compatibility
+```
+Use the logs to check for any errors during the migration:
+```bash
+docker-compose logs arbot
+```
 
 ### Screenshot
 ![ARTBot Screenshot](/ARTBotScreenShot.png?raw=true "ARTBot Screenshot")
@@ -28,10 +47,12 @@ The code breaks into three sections, each of which can be run independently:
 ## Robot
 
 ### To run:
-- Use same virtual environment as listed above in *Web*
-- ARTBot.db SQLite file should be in your ARTBot folder
-- Run the script ```python3 art_processor.py```
-- Generated procedure will be timestamped and saved in _procedures_ folder
+With the web containers running, execute these commands:
+```bash
+mkdir robot/procedures
+docker-compose exec artbot python run_procedure_generator.py
+```
+The generated procedure will be timestamped and saved in _procedures_ folder
 
 ### To upload generated procedure to robot:
 - Download official Opentrons app
