@@ -197,7 +197,7 @@ drawSubmit.addEventListener('submit', function(e) {
   data['title'] = title;
   data['art'] = canvasCoord;
 
-  xhr.open('POST', '/artpiece', true);
+  xhr.open('POST', '/artpieces', true);
   xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
   xhr.responseType = "json"
   xhr.send(JSON.stringify(

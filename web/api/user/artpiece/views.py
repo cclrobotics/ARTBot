@@ -11,7 +11,7 @@ from web.extensions import db
 
 artpiece_blueprint = Blueprint('artpiece', __name__)
 
-@artpiece_blueprint.route('/artpiece', methods=('POST', ))
+@artpiece_blueprint.route('/artpieces', methods=('POST', ))
 def receive_art():
     if has_reached_monthly_submission_limit(current_app.config['MONTLY_SUBMISSION_LIMIT']):
         raise InvalidUsage.reached_monthly_submission_limit()
