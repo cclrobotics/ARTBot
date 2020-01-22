@@ -6,7 +6,7 @@ from ..utilities import has_reached_monthly_submission_limit
 from ..email import send_confirmation_email_async
 from ..exceptions import (error_template, InvalidUsage, MONTLY_SUBMISSION_LIMIT_MESSAGE)
 from ..user import User
-from .artpiece import Artpiece
+from .artpiece import (Artpiece, TokenIDMismatchError)
 from web.extensions import db
 
 artpiece_blueprint = Blueprint('artpiece', __name__)
@@ -36,13 +36,17 @@ def receive_art():
     return jsonify({'success': success_msg}), 201
                 
 
-@artpiece_blueprint.route('/artpiece/confirm/<token>', methods=('PUT', ))
-def confirm_artpiece(token):
+@artpiece_blueprint.route('/artpieces/<int:id>/confirmation/<token>', methods=('PUT', ))
+def confirm_artpiece(id, token):
+    artpiece = Artpiece.get_by_id(id)
+    if artpiece is None:
+        raise InvalidUsage(**error_template('invalid', 404))
+
     try:
-        artpiece = Artpiece.verify_confirmation_token(token)
+        artpiece.verify_confirmation_token(token)
     except ExpiredSignatureError:
         raise InvalidUsage(**error_template('expired'))
-    except PyJWTError:
+    except (PyJWTError, TokenIDMismatchError):
         raise InvalidUsage(**error_template('invalid', 404))
 
     if artpiece.is_confirmed():

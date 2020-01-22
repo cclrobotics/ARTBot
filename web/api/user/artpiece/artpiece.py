@@ -67,7 +67,8 @@ class Artpiece():
 
     @classmethod
     def get_by_id(cls, id):
-        return cls(_Model.get_by_id(id))
+        model = _Model.get_by_id(id)
+        return None if model is None else cls(_Model.get_by_id(id))
 
     @property
     def creator(self):
@@ -86,11 +87,11 @@ class Artpiece():
                 {'confirm_artpiece': self._model.id, 'exp': time() + expires_in}
                 , current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
-    @staticmethod
-    def verify_confirmation_token(token):
+    def verify_confirmation_token(self, token):
         id = jwt.decode(token, current_app.config['SECRET_KEY']
                 , algorithm=['HS256'])['confirm_artpiece']
-        return Artpiece.get_by_id(id)
+        if self._model_id != id:
+            raise TokenIDMismatchError()
 
     def confirm(self):
         self._model.confirmed = True
@@ -102,6 +103,14 @@ class Artpiece():
     def title(self):
         return self._model.title
 
+    @property
+    def id(self):
+        return self._model_id
+
     @staticmethod
     def total_submission_count_since(date):
         return _Model.query.filter(_Model.submit_date >= date).count()
+
+class TokenIDMismatchError(Exception):
+    """ Artpiece id from token does not match """
+    pass

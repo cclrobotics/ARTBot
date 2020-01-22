@@ -1,6 +1,6 @@
 #views.py - Maps URLs to backend functions, then returns the results to the appropriate view
 
-from flask import (render_template, Blueprint, current_app)
+from flask import (render_template, Blueprint, current_app, request)
 from sqlalchemy.exc import DBAPIError
 from .api.user.utilities import has_reached_monthly_submission_limit
 from .api.user.exceptions import MONTLY_SUBMISSION_LIMIT_MESSAGE
@@ -21,6 +21,12 @@ def index():
     return render_template('main.html', limit_message=limit_message, canvas_size=DEFAULT_CANVAS)
 
 
-@main.route('/art_confirmation/<token>', methods=('GET', ))
-def art_confirmation(token):
-    return render_template('art_confirmation.html', confirmation_token=token)
+@main.route('/art_confirmation', methods=('GET', ))
+def art_confirmation():
+    args = request.args
+    token = args.get('token')
+    artpiece_id = args.get('id')
+
+    return render_template(
+            'art_confirmation.html', confirmation_token=token, artpiece_id=artpiece_id
+            )

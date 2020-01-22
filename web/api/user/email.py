@@ -71,6 +71,7 @@ def send_confirmation_email_async(artpiece):
     confirmation_url = url_for(
             'main.art_confirmation'
             , token=artpiece.get_confirmation_token()
+            , id=artpiece.id
             , _external=True)
     Thread(target=with_context(
         current_app._get_current_object(), artpiece.refresh, db.session.remove)
