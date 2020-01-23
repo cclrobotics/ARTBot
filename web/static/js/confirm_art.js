@@ -12,7 +12,9 @@ function displayConfirmationMessage() {
 		xhr.onloadend = function () {
 			let status = xhr.status;
 			let response = xhr.response;
-			let divToDisplay = status >= 400 ? response.errors.body : response.successType;
+			let divToDisplay = (
+				status >= 400 ? response.errors.body : response.data.confirmation.status
+			);
 
 			document.getElementById(divToDisplay).hidden = false;
 		};

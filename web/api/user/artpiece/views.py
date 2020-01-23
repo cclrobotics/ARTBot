@@ -47,10 +47,10 @@ def confirm_artpiece(id, token):
         raise InvalidUsage(**error_template('invalid', 404))
 
     if artpiece.is_confirmed():
-        success_type = 'already-confirmed'
+        status = 'already-confirmed'
     else:
-        success_type = 'confirmed'
+        status = 'confirmed'
         artpiece.confirm()
         db.session.commit()
 
-    return jsonify({'successType': success_type}), 200
+    return jsonify({'data': {'confirmation': {'status': status}}}), 200
