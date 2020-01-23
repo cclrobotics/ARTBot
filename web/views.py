@@ -1,7 +1,6 @@
 #views.py - Maps URLs to backend functions, then returns the results to the appropriate view
 
 from flask import (render_template, Blueprint, current_app, request)
-from sqlalchemy.exc import DBAPIError
 from .api.user.artpiece import DEFAULT_CANVAS
 
 main = Blueprint('main', __name__)
