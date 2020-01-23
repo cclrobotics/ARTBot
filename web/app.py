@@ -5,7 +5,7 @@ from sqlalchemy_utils.functions import (create_database, drop_database)
 from sqlalchemy.exc import DBAPIError
 from web.extensions import db, migrate, mail
 from web.views import main
-from web.api.user.artpiece.views import artpiece_blueprint 
+from web.api.user.artpiece.endpoints import artpiece_blueprint 
 from web.api.user.exceptions import InvalidUsage
 
 def create_app():
