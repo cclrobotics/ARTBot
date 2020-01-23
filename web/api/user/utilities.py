@@ -5,8 +5,11 @@ from .artpiece import Artpiece
 def first_of_month():
     return datetime.date.today().replace(day=1)
 
+def get_monthly_submission_count():
+    return Artpiece.total_submission_count_since(first_of_month())
+
 def has_reached_monthly_submission_limit(limit):
-    return Artpiece.total_submission_count_since(first_of_month()) >= limit
+    return get_monthly_submission_count() >= limit
 
 #function to pull image off of database
 def pull_picture(id):

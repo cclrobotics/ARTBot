@@ -1,30 +1,15 @@
 from flask import jsonify
 
-def error_template(data, code=400):
-    return {'message': {'errors': {'body': data}}, 'status_code': code}
+def error_template(code, title):
+    return {'errors': [{'code': code, 'title': title}]}
 
-def wrap_in_message(data, code=400):
-    return {'message': [data]}
+_MONTLY_SUBMISSION_LIMIT = error_template('monthly_limit', 'monthly submission limit exceeded')
+_USER_LIMIT = error_template('user_limit', 'user limit exceeded')
 
-MONTLY_SUBMISSION_LIMIT_MESSAGE = (
-    "Note: We're a small community lab run entirely by volunteers, and we can only make so many "
-    "artpieces each month. This month we've hit our limit. You can still draw art here, but the "
-    "website won't accept submissions. Come back next month and we'll start fresh!"
-)
-_USER_LIMIT_MESSAGE = (
-    "Easy there, speed demon! We're a small volunteer-run, non-profit lab and there's a limit "
-    "to how many works of art we can help make. Once we make your previous submission, submit "
-    "another one! If there's an issue with your previous submission and you want to withdraw "
-    "it, send us an email: ccl-artbot@gmail.com"
-)
-_UNKNOWN_ERROR_MESSAGE = (
-    "Oops... an unexpected error occurred!"
-)
+_TOKEN_EXPIRATION = error_template('token_expired', 'confirmation token expiration')
+_INVALID_TOKEN = error_template('token_invalid', 'invalid confirmation token')
 
-_MONTLY_SUBMISSION_LIMIT = error_template(
-        wrap_in_message(MONTLY_SUBMISSION_LIMIT_MESSAGE), code=429)
-_USER_LIMIT = error_template(wrap_in_message(_USER_LIMIT_MESSAGE), code=429)
-_UNKNOWN_ERROR = error_template(wrap_in_message(_UNKNOWN_ERROR_MESSAGE), code=500)
+_NOT_FOUND = error_template('not_found', 'resource not found')
 
 class InvalidUsage(Exception):
     status_code = 400
@@ -42,12 +27,29 @@ class InvalidUsage(Exception):
 
     @classmethod
     def reached_monthly_submission_limit(cls):
-        return cls(**_MONTLY_SUBMISSION_LIMIT)
+        return cls(_MONTLY_SUBMISSION_LIMIT, status_code=429)
 
     @classmethod
     def reached_user_limit(cls):
-        return cls(**_USER_LIMIT)
+        return cls(_USER_LIMIT, status_code=429)
 
     @classmethod
-    def unknown_error(cls):
-        return cls(**_UNKNOWN_ERROR)
+    def confirmation_token_expired(cls):
+        return cls(_TOKEN_EXPIRATION)
+
+    @classmethod
+    def resource_not_found(cls):
+        return cls(_NOT_FOUND, status_code=404)
+
+    @classmethod
+    def invalid_confirmation_token(cls):
+        return cls(_INVALID_TOKEN, status_code=404)
+
+    @classmethod
+    def from_validation_error(cls, err):
+        message = dict({'errors': []})
+        errors = message['errors']
+        for code in err.messages.keys():
+            for title in err.messages[code]:
+                errors.append({'code': code, 'title': title})
+        return cls(message)

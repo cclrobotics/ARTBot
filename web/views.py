@@ -2,8 +2,6 @@
 
 from flask import (render_template, Blueprint, current_app, request)
 from sqlalchemy.exc import DBAPIError
-from .api.user.utilities import has_reached_monthly_submission_limit
-from .api.user.exceptions import MONTLY_SUBMISSION_LIMIT_MESSAGE
 from .api.user.artpiece import DEFAULT_CANVAS
 
 main = Blueprint('main', __name__)
@@ -12,13 +10,7 @@ main = Blueprint('main', __name__)
 @main.route('/', methods=('GET', ))
 @main.route('/index', methods=('GET', ))
 def index():
-    limit_message = None
-    try:
-        if has_reached_monthly_submission_limit(current_app.config['MONTLY_SUBMISSION_LIMIT']):
-            limit_message = MONTLY_SUBMISSION_LIMIT_MESSAGE
-    except DBAPIError:
-        pass
-    return render_template('main.html', limit_message=limit_message, canvas_size=DEFAULT_CANVAS)
+    return render_template('main.html', canvas_size=DEFAULT_CANVAS)
 
 
 @main.route('/art_confirmation', methods=('GET', ))

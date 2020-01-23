@@ -2,14 +2,28 @@ from flask import (Blueprint, request, current_app, jsonify)
 from marshmallow import ValidationError
 from jwt import (ExpiredSignatureError, PyJWTError)
 from .serializers import ArtpieceSchema
-from ..utilities import has_reached_monthly_submission_limit
+from ..utilities import (has_reached_monthly_submission_limit, get_monthly_submission_count)
 from ..email import send_confirmation_email_async
-from ..exceptions import (error_template, InvalidUsage, MONTLY_SUBMISSION_LIMIT_MESSAGE)
+from ..exceptions import InvalidUsage
 from ..user import User
 from .artpiece import (Artpiece, TokenIDMismatchError)
 from web.extensions import db
 
 artpiece_blueprint = Blueprint('artpiece', __name__)
+
+@artpiece_blueprint.route('/artpieces', methods=('GET', ))
+def get_artpieces_meta():
+    monthly_limit = current_app.config['MONTLY_SUBMISSION_LIMIT']
+    monthly_submission_count = get_monthly_submission_count()
+    return jsonify(
+            {
+                'meta':
+                {
+                    'submission_limit': monthly_limit
+                    , 'submission_count': monthly_submission_count
+                }
+                , 'data': None
+            }), 200
 
 @artpiece_blueprint.route('/artpieces', methods=('POST', ))
 def receive_art():
@@ -19,7 +33,7 @@ def receive_art():
     try:
         data = ArtpieceSchema().load(request.get_json())
     except ValidationError as err:
-        raise InvalidUsage(**error_template(err.messages))
+        raise InvalidUsage.from_validation_error(err)
 
     user = User.get_by_email(data['email']) or User.from_email(data['email'])
     if user.has_active_submission():
@@ -31,23 +45,23 @@ def receive_art():
     send_confirmation_email_async(artpiece)
 
     return jsonify({'data': None}), 201
-                
+
 
 @artpiece_blueprint.route('/artpieces/<int:id>/confirmation/<token>', methods=('PUT', ))
 def confirm_artpiece(id, token):
     artpiece = Artpiece.get_by_id(id)
     if artpiece is None:
-        raise InvalidUsage(**error_template('invalid', 404))
+        raise InvalidUsage.resource_not_found()
 
     try:
         artpiece.verify_confirmation_token(token)
     except ExpiredSignatureError:
-        raise InvalidUsage(**error_template('expired'))
+        raise InvalidUsage.confirmation_token_expired()
     except (PyJWTError, TokenIDMismatchError):
-        raise InvalidUsage(**error_template('invalid', 404))
+        raise InvalidUsage.invalid_confirmation_token()
 
     if artpiece.is_confirmed():
-        status = 'already-confirmed'
+        status = 'already_confirmed'
     else:
         status = 'confirmed'
         artpiece.confirm()

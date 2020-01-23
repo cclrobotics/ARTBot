@@ -3,7 +3,7 @@ function displayConfirmationMessage() {
 	let id = document.getElementById('id').value;
 
 	if (token == "" || id == "") {
-		document.getElementById('invalid').hidden = false;
+		document.getElementById('token_invalid').hidden = false;
 	} else {
 		let xhr = new XMLHttpRequest();
 		xhr.open('PUT', '/artpieces/'+id+'/confirmation/'+token, true);
@@ -13,9 +13,11 @@ function displayConfirmationMessage() {
 			let status = xhr.status;
 			let response = xhr.response;
 			let divToDisplay = (
-				status >= 400 ? response.errors.body : response.data.confirmation.status
+				status >= 400 ? response.errors[0].code : response.data.confirmation.status
 			);
-
+			if (divToDisplay == 'not_found') {
+				divToDisplay = 'token_invalid';
+			}
 			document.getElementById(divToDisplay).hidden = false;
 		};
 		xhr.send();
