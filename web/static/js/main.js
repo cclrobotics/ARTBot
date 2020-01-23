@@ -8,11 +8,10 @@ const colorContainer = document.querySelector('#color-container');
 
 const successModal = document.getElementById("success-modal");
 const successClose = document.getElementsByClassName("close")[0];
-const successText = document.getElementsByClassName("response-text")[0];
 
 const errorModal = document.getElementById("error-modal");
 const errorClose = document.getElementsByClassName("close")[1];
-const errorText = document.getElementsByClassName("response-text")[1];
+const errorText = document.getElementsByClassName("response-text")[0];
 
 function makeColorPicker() {
   let colors = [
@@ -208,30 +207,23 @@ drawSubmit.addEventListener('submit', function(e) {
     let status = xhr.status;
     let response = xhr.response;
     let modal;
-    let text;
     let closer;
     
 
     if ((status < 300) && (status >= 200)) {
       modal = successModal;
-      text = successText;
       closer = successClose;
     } else {
       modal = errorModal;
-      text = errorText;
       closer = errorClose;
-    }
-
-    // update modal text
-    if (response.errors) {
+      let text = errorText;
+      // update modal text
       let body = response.errors.body;
       if (typeof body == 'object') {
         text.innerHTML = body[Object.keys(body)[0]][0];
       } else {
         text.innerHTML = "Oops... an unexpected error occurred!";
       }
-    } else {
-      text.innerHTML = response.success;
     }
 
     // When we get a response, open the modal 

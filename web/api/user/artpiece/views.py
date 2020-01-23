@@ -30,10 +30,7 @@ def receive_art():
 
     send_confirmation_email_async(artpiece)
 
-    success_msg = ('<b>One more step</b>: '
-        'We\'re sending a confirmation email. Click the link there to confirm your art design')
-
-    return jsonify({'success': success_msg}), 201
+    return jsonify({'data': None}), 201
                 
 
 @artpiece_blueprint.route('/artpieces/<int:id>/confirmation/<token>', methods=('PUT', ))
