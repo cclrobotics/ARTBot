@@ -45,8 +45,7 @@ requests = function() {
 
 				if ((status < 300) && (status >= 200)) {
 					artpieceMeta = response.meta;
-					if (limitReached.hidden && 
-						artpieceMeta.submission_count >= artpieceMeta.submission_limit) {
+					if (limitReached.hidden && artpieceMeta.submission_limit_exceeded) {
 						limitReached.innerHTML = '<hr>'
 							+codeToMessage('monthly_limit')
 							+'<hr>';

@@ -2,7 +2,7 @@ from flask import (Blueprint, request, current_app, jsonify)
 from marshmallow import ValidationError
 from jwt import (ExpiredSignatureError, PyJWTError)
 from .serializers import ArtpieceSchema
-from ..utilities import (has_reached_monthly_submission_limit, get_monthly_submission_count)
+from ..utilities import has_reached_monthly_submission_limit
 from ..email import send_confirmation_email_async
 from ..exceptions import InvalidUsage
 from ..user import User
@@ -14,13 +14,12 @@ artpiece_blueprint = Blueprint('artpiece', __name__)
 @artpiece_blueprint.route('/artpieces', methods=('GET', ))
 def get_artpieces_meta():
     monthly_limit = current_app.config['MONTLY_SUBMISSION_LIMIT']
-    monthly_submission_count = get_monthly_submission_count()
     return jsonify(
             {
                 'meta':
                 {
-                    'submission_limit': monthly_limit
-                    , 'submission_count': monthly_submission_count
+                    'submission_limit_exceeded': has_reached_monthly_submission_limit(
+                        monthly_limit)
                 }
                 , 'data': None
             }), 200
