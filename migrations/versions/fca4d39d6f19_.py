@@ -22,7 +22,7 @@ def upgrade():
     # ### end Alembic commands ###
     op.alter_column('artpieces', 'art', new_column_name='art_encoding', type_=sa.JSON(),
             postgresql_using='art::json', nullable=False)
-    op.alter_column('artpieces', 'picture', new_column_name='raw_image', nullable=False)
+    op.alter_column('artpieces', 'picture', new_column_name='raw_image', nullable=True)
     op.alter_column('artpieces', 'status', new_column_name='submission_status', nullable=False)
     op.alter_column('artpieces', 'title', nullable=False)
     op.alter_column('artpieces', 'submit_date', nullable=False)
