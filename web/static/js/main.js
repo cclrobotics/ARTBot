@@ -5,14 +5,108 @@ const eraseMode = document.querySelector('.erase-mode');
 const drawMode = document.querySelector('.draw-mode');
 const drawSubmit = document.querySelector('.draw-submit');
 const colorContainer = document.querySelector('#color-container');
+const limitReached = document.querySelector('.limit-reached');
 
 const successModal = document.getElementById("success-modal");
 const successClose = document.getElementsByClassName("close")[0];
-const successText = document.getElementsByClassName("response-text")[0];
 
 const errorModal = document.getElementById("error-modal");
 const errorClose = document.getElementsByClassName("close")[1];
-const errorText = document.getElementsByClassName("response-text")[1];
+const errorText = document.getElementsByClassName("response-text")[0];
+
+function codeToMessage(code) {
+	let messages = {
+		"monthly_limit": 
+			"Note: We're a small community lab run entirely by volunteers, and we can only "
+			+ "make so many artpieces each month. This month we've hit our limit. You can "
+			+ "still draw art here, but the website won't accept submissions. Come back next "
+			+ "month and we'll start fresh!"
+		, "user_limit":
+			"Easy there, speed demon! We're a small volunteer-run, non-profit lab and there's "
+			+ "a limit to how many works of art we can help make. Once we make your previous "
+			+ "submission, submit another one! If there's an issue with your previous "
+			+ "submission and you want to withdraw it, send us an email: ccl-artbot@gmail.com"
+	};
+	return messages[code];
+}
+
+requests = function() {
+	var artpieceMeta;
+
+	return {
+		getArtpieceMeta: function() {
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', '/artpieces', true);
+			xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+			xhr.responseType = "json"
+			xhr.onloadend = function () {
+				let status = xhr.status;
+				let response = xhr.response;
+
+				if ((status < 300) && (status >= 200)) {
+					artpieceMeta = response.meta;
+					if (limitReached.hidden && artpieceMeta.submission_limit_exceeded) {
+						limitReached.innerHTML = '<hr>'
+							+codeToMessage('monthly_limit')
+							+'<hr>';
+						limitReached.hidden = false;
+					}
+				}
+			};
+			xhr.send();
+		}
+		, createArtpiece: function(email, title, art) {
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', '/artpieces', true);
+			xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+			xhr.responseType = "json";
+			xhr.send(JSON.stringify({'email': email, 'title': title, 'art': art}));
+
+			xhr.onloadend = function () {
+				let status = xhr.status;
+				let response = xhr.response;
+				let modal;
+				let closer;
+
+				if ((status < 300) && (status >= 200)) {
+					modal = successModal;
+					closer = successClose;
+				} else {
+					modal = errorModal;
+					closer = errorClose;
+					let text = errorText;
+					let errors = response.errors;
+					// update modal text
+					if (errors.length == 0) {
+						text.innerHTML = "Oops... an unexpected error occurred!";
+					} else {
+						let code = errors[0]['code'];
+						let title = errors[0]['title'];
+						text.innerHTML = codeToMessage(code) || title;
+					}
+				}
+
+				// When we get a response, open the modal 
+				modal.style.display = "block";
+
+				// close the modal
+				function closeModal(e) {
+					if ((e.target == modal) || (e.target == closer)){
+						modal.style.display = "none";
+						// remove listener since we're done with modal
+						e.target.removeEventListener(e.type, arguments.callee);
+						if (modal === successModal) {
+							resetInputFields();
+						}
+					}
+				}
+				window.addEventListener('click', closeModal);
+			};
+		}
+	};
+}();
+
+requests.getArtpieceMeta();
 
 function makeColorPicker() {
   let colors = [
@@ -189,70 +283,12 @@ drawSubmit.addEventListener('submit', function(e) {
      }
    }
   }
-
-  var xhr = new XMLHttpRequest();
   var email = document.querySelector("#email").value;
   var title = document.querySelector("#title").value;
-  data['email'] = email;
-  data['title'] = title;
-  data['art'] = canvasCoord;
-
-  xhr.open('POST', '/receive_art', true);
-  xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
-  xhr.responseType = "json"
-  xhr.send(JSON.stringify(
-    data
-  ));
-
-  xhr.onloadend = function () {
-    let status = xhr.status;
-    let response = xhr.response;
-    let modal;
-    let text;
-    let closer;
-    
-
-    if ((status < 300) && (status >= 200)) {
-      modal = successModal;
-      text = successText;
-      closer = successClose;
-    } else {
-      modal = errorModal;
-      text = errorText;
-      closer = errorClose;
-    }
-
-    // update modal text
-    if (response.errors) {
-      let body = response.errors.body;
-      if (typeof body == 'object') {
-        text.innerHTML = body[Object.keys(body)[0]][0];
-      } else {
-        text.innerHTML = "Oops... an unexpected error occurred!";
-      }
-    } else {
-      text.innerHTML = response.success;
-    }
-
-    // When we get a response, open the modal 
-    modal.style.display = "block";
-
-    // close the modal
-    function closeModal(e) {
-      if ((e.target == modal) || (e.target == closer)){
-        modal.style.display = "none";
-        // remove listener since we're done with modal
-        e.target.removeEventListener(e.type, arguments.callee);
-        if (modal === successModal) {
-          resetInputFields();
-        }
-      }
-    }
-
-    window.addEventListener('click', closeModal);
-  };
-
+  requests.createArtpiece(email, title, canvasCoord);
 });
+
+
 
 // SLIDESHOW CODE:
 
