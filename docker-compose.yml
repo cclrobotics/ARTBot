@@ -4,7 +4,8 @@ services:
     artbot:
         build:
             context: .
-            dockerfile: Dockerfile
+            dockerfile: Dockerfile.prod
+        command: flask run -h 0.0.0.0
         volumes:
             - .:/usr/src/app
         ports:
@@ -27,6 +28,8 @@ services:
             dockerfile: Dockerfile
         expose:
             - 5432
+        ports:
+            - 5432:5432
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
