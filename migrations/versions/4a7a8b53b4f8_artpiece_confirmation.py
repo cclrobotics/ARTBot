@@ -16,6 +16,7 @@ depends_on = None
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
+from migrations.utils.session import session_scope
 
 Base = declarative_base()
 
@@ -27,16 +28,12 @@ class ArtpieceModel(Base):
 
 
 def upgrade():
-    bind = op.get_bind()
-    session = sa.orm.Session(bind=bind)
-
     op.add_column('artpieces', sa.Column('confirmed', sa.Boolean, nullable=True))
 
-    artpieces = session.query(ArtpieceModel).all()
-    for artpiece in artpieces:
-        artpiece.confirmed = True
-
-    session.commit()
+    with session_scope() as session:
+        artpieces = session.query(ArtpieceModel).all()
+        for artpiece in artpieces:
+            artpiece.confirmed = True
 
     op.alter_column('artpieces', 'confirmed', nullable=False)
 

@@ -30,16 +30,12 @@ def upgrade():
     op.drop_column('users', 'verified')
 
 def downgrade():
-    bind = op.get_bind()
-    session = sa.orm.Session(bind=bind)
-
     op.add_column('users', sa.Column('verified', sa.Boolean, nullable=True))
 
-    users = session.query(UserModel).all()
-    for user in users:
-        user.verified = True
-
-    session.commit()
+    with session_scope() as session:
+        users = session.query(UserModel).all()
+        for user in users:
+            user.verified = True
 
     op.alter_column('users', 'verified', nullable=False)
     op.add_column('emailfailures', sa.Column('user_id', sa.Integer, sa.ForeignKey('users.id'),

@@ -17,6 +17,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.expression import func
+from migrations.utils.session import session_scope
 
 Base = declarative_base()
 
@@ -39,32 +40,28 @@ class ArtpieceModel(Base):
 
 
 def upgrade():
-    bind = op.get_bind()
-    session = sa.orm.Session(bind=bind)
-
     # create the users table and the artpieces.user_id column
-    UserModel.__table__.create(bind)
+    UserModel.__table__.create(op.get_bind())
     op.add_column(
             'artpieces'
             , sa.Column('user_id', sa.Integer, sa.ForeignKey('users.id'), nullable=True)
             )
 
     # create users from unique email addresses
-    artpieces_with_unique_email = (session.query(
-        ArtpieceModel.email, func.min(ArtpieceModel.submit_date).label('submit_date'))
-        .group_by(ArtpieceModel.email)
-        )
-    users = { artpiece.email: UserModel(
-                email=artpiece.email, created_at=artpiece.submit_date, verified=True)
-                for artpiece in artpieces_with_unique_email
-            }
-    session.add_all(users.values())
+    with session_scope() as session:
+        artpieces_with_unique_email = (session.query(
+            ArtpieceModel.email, func.min(ArtpieceModel.submit_date).label('submit_date'))
+            .group_by(ArtpieceModel.email)
+            )
+        users = { artpiece.email: UserModel(
+                    email=artpiece.email, created_at=artpiece.submit_date, verified=True)
+                    for artpiece in artpieces_with_unique_email
+                }
+        session.add_all(users.values())
 
-    # set artpiece user(/creator) based on email address
-    for artpiece in session.query(ArtpieceModel):
-        artpiece.user = users[artpiece.email]
-
-    session.commit()
+        # set artpiece user(/creator) based on email address
+        for artpiece in session.query(ArtpieceModel):
+            artpiece.user = users[artpiece.email]
 
     op.alter_column('artpieces', 'user_id', nullable=False)
     # don't need email now that user relationship is set up
@@ -72,18 +69,14 @@ def upgrade():
 
 
 def downgrade():
-    bind = op.get_bind()
-    session = sa.orm.Session(bind=bind)
-
     op.add_column('artpieces', sa.Column('email', sa.String(50), nullable=True))
 
     # populate artpiece's email using user_id
-    users = {user.id: user.email for user in session.query(UserModel).all()}
-    artpieces = session.query(ArtpieceModel).all()
-    for artpiece in artpieces:
-        artpiece.email = users[artpiece.user_id]
-
-    session.commit()
+    with session_scope() as session:
+        users = {user.id: user.email for user in session.query(UserModel).all()}
+        artpieces = session.query(ArtpieceModel).all()
+        for artpiece in artpieces:
+            artpiece.email = users[artpiece.user_id]
 
     op.alter_column('artpieces', 'email', nullable=False)
     op.drop_column('artpieces', 'user_id')
