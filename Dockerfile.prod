@@ -29,4 +29,4 @@ RUN addgroup -S artbot && adduser -S -G artbot artbot
 RUN chown -R artbot:artbot $APP_HOME
 USER artbot
 
-CMD flask db upgrade ; gunicorn --bind 0.0.0.0:$PORT $FLASK_APP\(\)
+CMD gunicorn --bind 0.0.0.0:$PORT $FLASK_APP\(\)
