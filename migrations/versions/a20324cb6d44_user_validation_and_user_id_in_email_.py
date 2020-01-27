@@ -15,6 +15,7 @@ depends_on = None
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
+from migrations.utils.session import session_scope
 
 Base = declarative_base()
 
