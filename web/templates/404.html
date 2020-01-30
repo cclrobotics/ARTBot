@@ -1,11 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>404</title>
-</head>
-<body>
-<h1>404</h1>
-<h2>Page Not Found</h2>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block body %}
+<section>
+    <div>
+	<img
+	    style='vetical-align: middle'
+	    src="/static/img/404_notfound.png"
+	    srcset="/static/img/small/404_notfound.png 500w,
+		    /static/img/med/404_notfound.png 800w,
+		    /static/img/large/404_notfound.png 1024w"
+	    sizes="(min-width: 1024px) 1024px, 90vw"
+	    alt="404 Not Found"/>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block body %}
+    <section>
+		<input id="token" type="hidden" value="{{confirmation_token}}">
+		<input id="id" type="hidden" value="{{artpiece_id}}">
+		<div hidden id="confirmed">
+			<h2>
+				Thanks for submitting your art!
+			</h2>
+			<h3>
+				We'll get to growing it.
+			</h3>
+		</div>
+		<div hidden id="token_expired">
+			<h2>
+				Oops... looks like you are too late, you are welcome to submit some more art!
+			</h2>
+		</div>
+		<div hidden id="already_confirmed">
+			<h2>
+				You have already confirmed your submission!
+			</h2>
+			<h3>
+				We might even be growing it.
+			</h3>
+		</div>
+		<div hidden id="token_invalid">
+			<h2>
+				We were unable to confirm your art! Try again later...
+			</h2>
+		</div>
+    </section>
+
+	<script src="/static/js/confirm_art.js"></script>
+{% endblock %}
+
