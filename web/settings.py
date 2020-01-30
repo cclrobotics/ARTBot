@@ -20,6 +20,10 @@ class Config(object):
     }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    """JWT settings."""
+    UNSECURE_DEFAULT_JWT_SECRET_KEY = 'invalid-jwt-secret-key'
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET', UNSECURE_DEFAULT_JWT_SECRET_KEY)
+
     """Mail settings."""
     MAIL_SERVER = os.environ.get('MAIL_SERVER', None)
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 25))

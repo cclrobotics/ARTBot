@@ -85,10 +85,10 @@ class Artpiece():
     def get_confirmation_token(self, expires_in=60*60*72):
         return jwt.encode(
                 {'confirm_artpiece': self._model.id, 'exp': time() + expires_in}
-                , current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+                , current_app.config['JWT_SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     def verify_confirmation_token(self, token):
-        id = jwt.decode(token, current_app.config['SECRET_KEY']
+        id = jwt.decode(token, current_app.config['JWT_SECRET_KEY']
                 , algorithm=['HS256'])['confirm_artpiece']
         if self._model_id != id:
             raise TokenIDMismatchError()
