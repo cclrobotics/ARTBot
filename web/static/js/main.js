@@ -15,12 +15,12 @@ const errorClose = document.getElementsByClassName("close")[1];
 const errorText = document.getElementsByClassName("response-text")[0];
 
 successModal.addEventListener("click", function() {
-	successModal.style.display = "none";
+	this.style.display = "none";
 	resetInputFields();
 });
 
 errorModal.addEventListener("click", function() {
-	errorModal.style.display = "none";
+	this.style.display = "none";
 });
 
 function codeToMessage(code) {
