@@ -14,6 +14,15 @@ const errorModal = document.getElementById("error-modal");
 const errorClose = document.getElementsByClassName("close")[1];
 const errorText = document.getElementsByClassName("response-text")[0];
 
+successModal.addEventListener("click", function() {
+	successModal.style.display = "none";
+	resetInputFields();
+});
+
+errorModal.addEventListener("click", function() {
+	errorModal.style.display = "none";
+});
+
 function codeToMessage(code) {
 	let messages = {
 		"monthly_limit": 
@@ -70,10 +79,8 @@ requests = function() {
 
 				if ((status < 300) && (status >= 200)) {
 					modal = successModal;
-					closer = successClose;
 				} else {
 					modal = errorModal;
-					closer = errorClose;
 					let text = errorText;
 					let errors = response.errors;
 					// update modal text
@@ -88,19 +95,6 @@ requests = function() {
 
 				// When we get a response, open the modal 
 				modal.style.display = "block";
-
-				// close the modal
-				function closeModal(e) {
-					if ((e.target == modal) || (e.target == closer)){
-						modal.style.display = "none";
-						// remove listener since we're done with modal
-						e.target.removeEventListener(e.type, arguments.callee);
-						if (modal === successModal) {
-							resetInputFields();
-						}
-					}
-				}
-				window.addEventListener('click', closeModal);
 			};
 		}
 	};
