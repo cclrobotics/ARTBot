@@ -89,7 +89,7 @@ class Artpiece():
 
     def verify_confirmation_token(self, token):
         id = jwt.decode(token, current_app.config['JWT_SECRET_KEY']
-                , algorithm=['HS256'])['confirm_artpiece']
+                , algorithms=['HS256'])['confirm_artpiece']
         if self._model_id != id:
             raise TokenIDMismatchError()
 
