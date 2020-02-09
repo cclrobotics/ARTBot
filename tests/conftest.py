@@ -21,6 +21,7 @@ def test_database():
 @pytest.fixture(scope='function')
 def clear_database():
     yield
+    db.session.rollback()
     meta = db.metadata
     for table in reversed(meta.sorted_tables):
         db.session.execute(table.delete())

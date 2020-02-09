@@ -53,7 +53,7 @@ def test_create_artpiece_when_monthly_limit_exceeded():
 
 def create_artpiece(email, title, art):
     user = User.from_email(email)
-    user.create_artpiece(title, art)
+    return user.create_artpiece(title, art)
 
 @pytest.mark.usefixtures("setup_app")
 def test_create_artpieces_with_same_email():
@@ -96,3 +96,65 @@ def test_create_artpiece_unavailable_color():
     assert rsp.status_code == 400
     data = json.loads(rsp.data.decode())
     assert data['errors'][0]['code'] == 'art'
+
+def post_artpiece_confirmation(id, token):
+    return current_app.test_client().put(
+            f'/artpieces/{id}/confirmation/{token}'
+            , content_type='application/json'
+        )
+
+@pytest.mark.usefixtures("setup_app")
+def test_confirm_artpiece():
+    in_data = create_artpiece_data('regular@joe.com', 'artistic joe', {'pink': [[3,3], [5,5]]})
+    artpiece = create_artpiece(**in_data)
+    token = artpiece.get_confirmation_token()
+    rsp = post_artpiece_confirmation(artpiece.id, token)
+    assert rsp.status_code == 200
+    data = json.loads(rsp.data.decode())
+    assert data['data']['confirmation']['status'] == 'confirmed'
+
+@pytest.mark.usefixtures("setup_app")
+def test_confirmed_artpiece():
+    in_data = create_artpiece_data('regular@joe.com', 'artistic joe', {'pink': [[3,3], [5,5]]})
+    artpiece = create_artpiece(**in_data)
+    artpiece.confirm()
+    token = artpiece.get_confirmation_token()
+    rsp = post_artpiece_confirmation(artpiece.id, token)
+    assert rsp.status_code == 200
+    data = json.loads(rsp.data.decode())
+    assert data['data']['confirmation']['status'] == 'already_confirmed'
+
+@pytest.mark.usefixtures("setup_app")
+def test_expired_token_confirm_artpiece():
+    in_data = create_artpiece_data('regular@joe.com', 'artistic joe', {'pink': [[3,3], [5,5]]})
+    artpiece = create_artpiece(**in_data)
+    token = artpiece.get_confirmation_token(expires_in=-1)
+    rsp = post_artpiece_confirmation(artpiece.id, token)
+    assert rsp.status_code == 400
+    data = json.loads(rsp.data.decode())
+    assert data['errors'][0]['code'] == 'token_expired'
+
+@pytest.mark.usefixtures("setup_app")
+def test_token_id_mismatch_confirm_artpiece():
+    in_data = create_artpiece_data('regular@joe.com', 'artistic joe', {'pink': [[3,3], [5,5]]})
+    artpiece = create_artpiece(**in_data)
+    in_data['email'] = 'irregular@joe.com'
+    mismatched_id = create_artpiece(**in_data).id
+
+    token = artpiece.get_confirmation_token()
+    rsp = post_artpiece_confirmation(mismatched_id, token)
+
+    assert rsp.status_code == 404
+    data = json.loads(rsp.data.decode())
+    assert data['errors'][0]['code'] == 'token_invalid'
+
+@pytest.mark.usefixtures("setup_app")
+def test_invalid_token_confirm_artpiece():
+    in_data = create_artpiece_data('invalid@token.com', 'invalid token', {'blue': [[1,1]]})
+    artpiece = create_artpiece(**in_data)
+
+    rsp = post_artpiece_confirmation(artpiece.id, 'oopsydaisy')
+
+    assert rsp.status_code == 404
+    data = json.loads(rsp.data.decode())
+    assert data['errors'][0]['code'] == 'token_invalid'
