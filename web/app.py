@@ -1,11 +1,11 @@
 """The app module, containing the app factory function."""
 import os
 from flask import Flask, render_template
-from sqlalchemy_utils.functions import (create_database, drop_database)
+from flask_migrate import upgrade
 from sqlalchemy.exc import DBAPIError
 from web.extensions import db, migrate, mail
 from web.views import main
-from web.api.user.artpiece.endpoints import artpiece_blueprint 
+from web.api.user.artpiece.endpoints import artpiece_blueprint
 from web.api.user.exceptions import InvalidUsage
 
 def create_app():
@@ -59,7 +59,6 @@ def register_shell_context(app):
 
     @app.cli.command()
     def reset_db():
-        url = db.session.get_bind().url
-        drop_database(url)
-        create_database(url)
-        db.session.commit()
+        db.reflect()
+        db.drop_all()
+        upgrade()
