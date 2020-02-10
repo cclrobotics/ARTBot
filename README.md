@@ -31,6 +31,7 @@ Changes to the data models must be accompanied by a migration script which you c
 ```bash
 docker-compose exec artbot flask db migrate -m "short description"
 ```
+
 The script will be created in migrations/versions. Please inspect the file, change it if required, and test it by running:
 ```bash
 docker-compose exec artbot flask db upgrade
@@ -39,6 +40,13 @@ docker-compose exec artbot flask db downgrade                   # check backward
 Use the logs to check for any errors during the migration:
 ```bash
 docker-compose logs arbot
+```
+
+### Troubleshooting
+#### Trouble generating the migration script
+Might require updating the `migrations/versions` folder permissions, to give Docker write access
+```bash
+chown :1024 migrations/versions                 # set group permissions to gid shared with docker
 ```
 
 ### Screenshot
@@ -50,6 +58,7 @@ docker-compose logs arbot
 With the web containers running, execute these commands:
 ```bash
 mkdir robot/procedures
+chown :1024 robot/procedures
 docker-compose exec artbot python run_procedure_generator.py
 ```
 The generated procedure will be timestamped and saved in _procedures_ folder
