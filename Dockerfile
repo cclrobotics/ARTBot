@@ -25,7 +25,7 @@ COPY ./web $APP_HOME/web
 COPY ./migrations $APP_HOME/migrations
 
 # add and run as non-root user
-RUN addgroup -S artbot && adduser -S -G artbot artbot
+RUN addgroup --gid 1024 artbot && adduser --disabled-password --gecos "" --ingroup artbot artbot
 RUN chown -R artbot:artbot $APP_HOME
 USER artbot
 
