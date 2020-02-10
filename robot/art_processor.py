@@ -52,7 +52,7 @@ def well_map(well):
 # BUG: overwrites locations if same title
 def add_canvas_locations(template_string, artpieces):
     # write where canvas plates are to be placed into code
-    canvas_locations = dict(zip([artpiece.title for artpiece in artpieces], get_canvas_slot))
+    canvas_locations = dict(zip([artpiece.slug for artpiece in artpieces], get_canvas_slot))
     procedure = template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
 
     return procedure, canvas_locations
@@ -65,7 +65,7 @@ def add_pixel_locations(template_string, artpieces):
         for color in artpiece.art:
             if color not in pixels_by_color:
                 pixels_by_color[color] = dict()
-            pixels_by_color[color][artpiece.title] = [well_map(pixel) for pixel in artpiece.art[color]]
+            pixels_by_color[color][artpiece.slug] = [well_map(pixel) for pixel in artpiece.art[color]]
     procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
 
     return procedure
