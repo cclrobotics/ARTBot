@@ -6,6 +6,7 @@ from ..utilities import has_reached_monthly_submission_limit
 from ..email import send_confirmation_email_async
 from ..exceptions import InvalidUsage
 from ..user import User
+from ..colors import (get_available_colors, color_schema)
 from .artpiece import (Artpiece, TokenIDMismatchError)
 from web.extensions import db
 
@@ -20,6 +21,7 @@ def get_artpieces_meta():
                 {
                     'submission_limit_exceeded': has_reached_monthly_submission_limit(
                         monthly_limit)
+                    , 'bacterial_colors': color_schema.dumps(get_available_colors())
                 }
                 , 'data': None
             }), 200
