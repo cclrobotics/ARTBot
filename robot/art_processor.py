@@ -49,7 +49,20 @@ def well_map(well):
     number = well[1] + 1
     return letter + str(number)
 
+
 # BUG: overwrites locations if same title
+def plate_location_map(coord):
+    x_wellspacing = 105 / 38
+    y_wellspacing = 70 / 25
+    x_max_mm = 52.5
+    y_max_mm = 35
+    well_radius = 35
+
+    x = (x_wellspacing * coord[1] - x_max_mm) / well_radius
+    y = (y_wellspacing * -coord[0] + y_max_mm) / well_radius
+
+    return x, y
+
 def add_canvas_locations(template_string, artpieces):
     # write where canvas plates are to be placed into code
     canvas_locations = dict(zip([artpiece.slug for artpiece in artpieces], get_canvas_slot))
@@ -65,7 +78,7 @@ def add_pixel_locations(template_string, artpieces):
         for color in artpiece.art:
             if color not in pixels_by_color:
                 pixels_by_color[color] = dict()
-            pixels_by_color[color][artpiece.slug] = [well_map(pixel) for pixel in artpiece.art[color]]
+            pixels_by_color[color][artpiece.slug] = [plate_location_map(pixel) for pixel in artpiece.art[color]]
     procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
 
     return procedure

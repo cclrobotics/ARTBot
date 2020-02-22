@@ -32,11 +32,9 @@ def distribute_to_agar(self, vol, source, destination, disposal_vol):
 
             self.aspirate(asp_vol, source)
 
-        self.dispense(vol, well, 0.25)
+        self.move_to(well, strategy='arc')
+        self.dispense(vol)
 
-        dip_position = robot._driver.position
-        dip_position['Z'] = dip_position['Z'] - 11
-        robot._driver.move(dip_position)
 
     self.drop_tip()
 
@@ -70,8 +68,15 @@ for color in pixels_by_color_by_artpiece:
     pixels_by_artpiece = pixels_by_color_by_artpiece[color]
     for art_title in pixels_by_artpiece:
         pixels_by_color[color] += [
-            pixel.top() for pixel in canvas_labware[art_title].wells(pixels_by_artpiece[art_title])
+            (canvas_labware[art_title]
+            ,canvas_labware[art_title].wells('A1').from_center(x=pixel[0], y=pixel[1], z=-2.8).coordinates)
+            for pixel in pixels_by_artpiece[art_title]
         ]
+        if not len(pixels_by_artpiece[art_title]): #single-well case
+            pixel = pixels_by_artpiece[art_title]
+            pixels_by_color[color] += [
+                (canvas_labware[art_title]
+                ,canvas_labware[art_title].wells('A1').from_center(x=pixel[0], y=pixel[1], z=-2.8).coordinates)]
 
 
 def run_custom_protocol():
