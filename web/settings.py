@@ -42,3 +42,7 @@ class DevConfig(Config):
     """Development configuration."""
     ENV = 'development'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+
+class TestingConfig(Config):
+    ENV = 'testing'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_TEST_URL')

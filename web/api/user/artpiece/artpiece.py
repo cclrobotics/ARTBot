@@ -5,7 +5,9 @@ import io
 import json
 import datetime as dt
 import math
+import re
 from PIL import Image, ImageDraw
+from slugify import slugify
 from flask import current_app
 from web.database.models import ArtpieceModel, SubmissionStatus
 from web.settings import Config
@@ -45,6 +47,20 @@ def _decode_to_image(pixel_art_color_encoding, color_mapping
 
     return (im.tobytes())
 
+def _create_unique_slug(title):
+    slug = slugify(title)
+    search = f'{slug}#%'
+    artpiece_with_slug = (ArtpieceModel.query.filter(
+            ArtpieceModel.slug.like(search))
+            .order_by(ArtpieceModel.submit_date.desc())
+            .first())
+    postfix = 1
+    if artpiece_with_slug is not None:
+        m = re.search(r'\d$', artpiece_with_slug.slug)
+        postfix = int(m.group(0)) + 1
+    return f'{slug}#{postfix}'
+
+
 _Model = ArtpieceModel
 
 class Artpiece():
@@ -59,8 +75,9 @@ class Artpiece():
     def create(cls, user_id, title, art):
         submit_date = dt.datetime.now()
         raw_image = _decode_to_image(art, Config.COLOR_SCHEME)
+        slug = _create_unique_slug(title)
         return cls(
-                _Model(title=title, submit_date=submit_date, art=art
+                _Model(slug=slug, title=title, submit_date=submit_date, art=art
                     , status=SubmissionStatus.submitted, raw_image=raw_image
                     , user_id=user_id, confirmed=False)
                 .save())
@@ -89,7 +106,7 @@ class Artpiece():
 
     def verify_confirmation_token(self, token):
         id = jwt.decode(token, current_app.config['JWT_SECRET_KEY']
-                , algorithm=['HS256'])['confirm_artpiece']
+                , algorithms=['HS256'])['confirm_artpiece']
         if self._model_id != id:
             raise TokenIDMismatchError()
 

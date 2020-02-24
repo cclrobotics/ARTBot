@@ -4,7 +4,7 @@ services:
     artbot:
         build:
             context: .
-            dockerfile: Dockerfile.prod
+            dockerfile: Dockerfile
         command: flask run -h 0.0.0.0
         volumes:
             - .:/usr/src/app
@@ -15,6 +15,7 @@ services:
             - FLASK_APP=web.app:create_app
             - APP_SETTINGS=web.settings.DevConfig
             - DATABASE_URL=postgresql://postgres:postgres@artbot-db:5432/artbot_dev
+            - DATABASE_TEST_URL=postgresql://postgres:postgres@artbot-db:5432/artbot_test
             - MAIL_SERVER=maildev
             - MAIL_PORT=25
             - MAIL_DEFAULT_SENDER=ccl-artbot@gmail.com
