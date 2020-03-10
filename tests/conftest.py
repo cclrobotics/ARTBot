@@ -3,14 +3,14 @@ from flask_migrate import upgrade
 from web.app import create_app
 from web.extensions import db
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def test_app():
     app = create_app()
     app.config.from_object('web.settings.TestingConfig')
     with app.app_context():
         yield app
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def test_database():
     upgrade()
     yield db
