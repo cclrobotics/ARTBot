@@ -18,7 +18,7 @@
 
 	    <hr>
 	    <h4>Mode</h4>
-	    <input type="button" class="draw-mode" value="draw">
+	    <input type="button" class="draw-mode selected-mode" id="draw" value="draw">
 	    <input type="button" class="erase-mode" value="erase">
 	    <p><em>or double-click to erase</em></p>
 	    <hr>
@@ -52,9 +52,9 @@
 	</div>
 	<table class="pixel-canvas">
 	    {% for ly in range(canvas_size.y) %}
-	    <tr>
+		<tr id="Y{{ ly }}">
 		{% for lx in range(canvas_size.x) %}
-		<td></td>
+		<td id="X{{ lx }}"></td>
 		{% endfor %}
 	    </tr>
 	    {% endfor %}

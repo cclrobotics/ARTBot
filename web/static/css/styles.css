@@ -109,6 +109,19 @@ hr.section-break:before {
   margin-top: 0.1em;
 }
 
+.submit-button:disabled {
+	box-shadow: none;
+	background: rgba(255, 255, 255, 0);
+}
+
+.selected-mode {
+	background: linear-gradient(#f9f9f9 5%, #c5ddb5 100%);
+}
+
+.has-error {
+	border: 3px solid rgba(255, 0, 0, 0.30);
+}
+
 .color-picker {
 	border: 1px solid #dcdcdc;
   -webkit-appearance: none;
@@ -118,6 +131,8 @@ hr.section-break:before {
   width: 20px;
   height: 20px;
   cursor: pointer;
+  display: inline-block;
+  margin: 5px;
 }
 
 .color-picker::-webkit-color-swatch {
@@ -143,6 +158,10 @@ hr.section-break:before {
   padding-bottom: 1.5em;
   width: 200px;
   background-color : white;
+}
+
+.inputs>input[type=email], .inputs>input[type=text] {
+	width: 100%
 }
 
 /* Part of two-column layout implementation */
@@ -227,7 +246,7 @@ hr.section-break:before {
   color: black;
   background-color: #dcdcdc;
   border-radius: 7px;
-	border: 1px solid #dcdcdc;
+  border: 1px solid #dcdcdc;
   width: 100%;
   -webkit-animation-name: slideIn;
   -webkit-animation-duration: 0.4s;
