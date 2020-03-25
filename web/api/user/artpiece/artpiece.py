@@ -10,24 +10,11 @@ from PIL import Image, ImageDraw
 from slugify import slugify
 from flask import current_app
 from web.database.models import ArtpieceModel, SubmissionStatus
-from web.settings import Config
-
+from web.api.user.colors import get_available_color_mapping
 
 _CartesianCoordinates = namedtuple('CartesianCoordinates', ['x', 'y'])
 Canvas = _CartesianCoordinates
 DEFAULT_CANVAS = Canvas(39, 26)
-
-def has_matching_color_scheme(pixel_art_color_encoding, allowed_color_scheme):
-    for color in pixel_art_color_encoding:
-        if color not in allowed_color_scheme:
-            return False
-    return True
-
-def has_pixels_within_canvas(pixels, canvas_size=DEFAULT_CANVAS):
-    for y, x in pixels:
-        if x > canvas_size.x or y > canvas_size.y: #check for negative values?
-            return False
-    return True
 
 def _decode_to_image(pixel_art_color_encoding, color_mapping
     , canvas_size=DEFAULT_CANVAS, scale=200):
@@ -40,8 +27,9 @@ def _decode_to_image(pixel_art_color_encoding, color_mapping
     draw = ImageDraw.Draw(im)
 
     for color in pixel_art_color_encoding:
+        # pixels are given as [y,x]
         for pixel_y, pixel_x in pixel_art_color_encoding[color]:
-            origin = (pixel_size[0] * pixel_x, pixel_size[1] * pixel_y) #pixels are given (y,x)
+            origin = (pixel_size[0] * pixel_x, pixel_size[1] * pixel_y)
             far_corner = (pixel_size[0] + origin[0], pixel_size[1] + origin[1])
             draw.rectangle([origin, far_corner], fill=color_mapping[color])
 
@@ -74,7 +62,7 @@ class Artpiece():
     @classmethod
     def create(cls, user_id, title, art):
         submit_date = dt.datetime.now()
-        raw_image = _decode_to_image(art, Config.COLOR_SCHEME)
+        raw_image = _decode_to_image(art, get_available_color_mapping())
         slug = _create_unique_slug(title)
         return cls(
                 _Model(slug=slug, title=title, submit_date=submit_date, art=art
