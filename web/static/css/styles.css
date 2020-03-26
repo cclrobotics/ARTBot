@@ -196,7 +196,7 @@ hr.section-break:before {
     border: 3px solid #000000;
 }
 
-/* 
+/*
 * Slideshow styles
 *
 */
@@ -211,6 +211,7 @@ hr.section-break:before {
   max-height: 100vh;
   transform: translate(calc(var(--i, 0)/var(--n)*-100%));
 }
+
 .slideshow img {
   width: 100%;
   width: calc(100%/var(--n));
@@ -218,8 +219,8 @@ hr.section-break:before {
   pointer-events: none;
 }
 
-/* 
-* Modal styles  
+/*
+* Modal styles
 *
 */
 .modal {
@@ -301,7 +302,7 @@ hr.section-break:before {
 
 /* Add Animation */
 @-webkit-keyframes slideIn {
-  from {bottom: -300px; opacity: 0} 
+  from {bottom: -300px; opacity: 0}
   to {bottom: 0; opacity: 1}
 }
 
@@ -311,11 +312,11 @@ hr.section-break:before {
 }
 
 @-webkit-keyframes fadeIn {
-  from {opacity: 0} 
+  from {opacity: 0}
   to {opacity: 1}
 }
 
 @keyframes fadeIn {
-  from {opacity: 0} 
+  from {opacity: 0}
   to {opacity: 1}
 }
