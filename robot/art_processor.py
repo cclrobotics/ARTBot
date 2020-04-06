@@ -5,7 +5,7 @@ from datetime import datetime
 import os, argparse
 from contextlib import contextmanager
 
-from web.database.models import ArtpieceModel, SubmissionStatus
+from web.database.models import (ArtpieceModel, SubmissionStatus, BacterialColorModel)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--notebook'
@@ -15,12 +15,9 @@ parser.add_argument('--notebook'
 NOTEBOOK = parser.parse_args().notebook
 
 APP_DIR = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
-DB_NAME = 'ARTBot.db'
-# Put the db file in project root
-DB_PATH = os.path.join(PROJECT_ROOT, DB_NAME)
-SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///{0}'.format(DB_PATH))
-
+SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+if not SQLALCHEMY_DATABASE_URI:
+    SQLALCHEMY_DATABASE_URI = input('Enter Database Url: ')
 SQL_ENGINE = sa.create_engine(SQLALCHEMY_DATABASE_URI)
 Session = sessionmaker(bind=SQL_ENGINE)
 
@@ -49,7 +46,20 @@ def well_map(well):
     number = well[1] + 1
     return letter + str(number)
 
+
 # BUG: overwrites locations if same title
+def plate_location_map(coord):
+    x_wellspacing = 105 / 38
+    y_wellspacing = 70 / 25
+    x_max_mm = 52.5
+    y_max_mm = 35
+    well_radius = 35
+
+    x = (x_wellspacing * coord[1] - x_max_mm) / well_radius
+    y = (y_wellspacing * -coord[0] + y_max_mm) / well_radius
+
+    return x, y
+
 def add_canvas_locations(template_string, artpieces):
     # write where canvas plates are to be placed into code
     canvas_locations = dict(zip([artpiece.slug for artpiece in artpieces], get_canvas_slot))
@@ -65,11 +75,15 @@ def add_pixel_locations(template_string, artpieces):
         for color in artpiece.art:
             if color not in pixels_by_color:
                 pixels_by_color[color] = dict()
-            pixels_by_color[color][artpiece.slug] = [well_map(pixel) for pixel in artpiece.art[color]]
+            pixels_by_color[color][artpiece.slug] = [plate_location_map(pixel) for pixel in artpiece.art[color]]
     procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
 
     return procedure
 
+def add_color_map(template_string, colors):
+    color_map = {str(color.id): color.name for color in colors}
+    procedure = template_string.replace('%%COLORS GO HERE%%', str(color_map))
+    return procedure
 
 num_pieces = 0
 while num_pieces not in range(1,10):
@@ -93,24 +107,25 @@ with session_scope() as session:
         for artpiece in artpieces:
             print(f"{artpiece.id}: {artpiece.title}, {artpiece.submit_date}")
 
+        # Get all colors
+        colors = session.query(BacterialColorModel).all()
+
         #Get Python art procedure template
         file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
         with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
             template_string = template_file.read()
 
         procedure, canvas_locations = add_canvas_locations(template_string, artpieces)
-
         procedure = add_pixel_locations(procedure, artpieces)
-
+        procedure = add_color_map(procedure, colors)
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
         unique_file_name = f'ARTISTIC_PROCEDURE_{now}.{file_extension}'
         with open(os.path.join(APP_DIR,'procedures',unique_file_name),'w') as output_file:
             output_file.write(procedure)
 
-        updated_records = session.query(ArtpieceModel).filter(ArtpieceModel.id.in_([artpiece.id for artpiece in artpieces]))
-        for record in updated_records:
-            record.status = SubmissionStatus.processed
+        for artpiece in artpieces:
+            artpiece.status = SubmissionStatus.processed
 
         print(f'Successfully generated artistic procedure into: ARTBot/robot/procedures/{unique_file_name}')
         print('The following slots will be used:')
