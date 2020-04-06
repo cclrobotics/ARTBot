@@ -14,6 +14,7 @@ class SubmissionStatus(Enum):
 class ArtpieceModel(SurrogatePK, Model):
     __tablename__ = 'artpieces'
 
+    slug = Column(db.String(60), nullable=False, unique=True, index=True)
     title = Column(db.String(50), nullable=False)
     user_id = Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     submit_date = Column(db.DateTime(), nullable=False)

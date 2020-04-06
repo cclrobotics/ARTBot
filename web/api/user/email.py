@@ -3,8 +3,8 @@ from flask_mail import Message
 from threading import Thread
 
 from web.extensions import (mail, db)
-from web.artpiece import Artpiece
-from web.user import User
+from .artpiece import Artpiece
+from .user import User
 from web.database.models import (EmailFailureModel, EmailFailureState)
 
 
@@ -69,8 +69,9 @@ def with_context(app, prepare=lambda : None, cleanup=lambda : None):
 
 def send_confirmation_email_async(artpiece):
     confirmation_url = url_for(
-            'main.confirm_art'
+            'main.art_confirmation'
             , token=artpiece.get_confirmation_token()
+            , id=artpiece.id
             , _external=True)
     Thread(target=with_context(
         current_app._get_current_object(), artpiece.refresh, db.session.remove)

@@ -5,7 +5,9 @@ import io
 import json
 import datetime as dt
 import math
+import re
 from PIL import Image, ImageDraw
+from slugify import slugify
 from flask import current_app
 from web.database.models import ArtpieceModel, SubmissionStatus
 from web.settings import Config
@@ -45,6 +47,20 @@ def _decode_to_image(pixel_art_color_encoding, color_mapping
 
     return (im.tobytes())
 
+def _create_unique_slug(title):
+    slug = slugify(title)
+    search = f'{slug}#%'
+    artpiece_with_slug = (ArtpieceModel.query.filter(
+            ArtpieceModel.slug.like(search))
+            .order_by(ArtpieceModel.submit_date.desc())
+            .first())
+    postfix = 1
+    if artpiece_with_slug is not None:
+        m = re.search(r'\d$', artpiece_with_slug.slug)
+        postfix = int(m.group(0)) + 1
+    return f'{slug}#{postfix}'
+
+
 _Model = ArtpieceModel
 
 class Artpiece():
@@ -59,19 +75,21 @@ class Artpiece():
     def create(cls, user_id, title, art, status=SubmissionStatus.submitted):
         submit_date = dt.datetime.now()
         raw_image = _decode_to_image(art, Config.COLOR_SCHEME)
+        slug = _create_unique_slug(title)
         return cls(
-                _Model(title=title, submit_date=submit_date, art=art
-                    , status=status, raw_image=raw_image
+                _Model(slug=slug, title=title, submit_date=submit_date, art=art
+                    , status=SubmissionStatus.submitted, raw_image=raw_image
                     , user_id=user_id, confirmed=False)
                 .save())
 
     @classmethod
     def get_by_id(cls, id):
-        return cls(_Model.get_by_id(id))
+        model = _Model.get_by_id(id)
+        return None if model is None else cls(_Model.get_by_id(id))
 
     @property
     def creator(self):
-        from .user import User
+        from ..user import User
         return User.get_by_id(self._model.user_id)
 
     def get_image_as_jpg(self):
@@ -84,13 +102,13 @@ class Artpiece():
     def get_confirmation_token(self, expires_in=60*60*72):
         return jwt.encode(
                 {'confirm_artpiece': self._model.id, 'exp': time() + expires_in}
-                , current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+                , current_app.config['JWT_SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
-    @staticmethod
-    def verify_confirmation_token(token):
-        id = jwt.decode(token, current_app.config['SECRET_KEY']
-                , algorithm=['HS256'])['confirm_artpiece']
-        return Artpiece.get_by_id(id)
+    def verify_confirmation_token(self, token):
+        id = jwt.decode(token, current_app.config['JWT_SECRET_KEY']
+                , algorithms=['HS256'])['confirm_artpiece']
+        if self._model_id != id:
+            raise TokenIDMismatchError()
 
     def confirm(self):
         self._model.confirmed = True
@@ -102,6 +120,14 @@ class Artpiece():
     def title(self):
         return self._model.title
 
+    @property
+    def id(self):
+        return self._model_id
+
     @staticmethod
     def total_submission_count_since(date):
         return _Model.query.filter(_Model.submit_date >= date).count()
+
+class TokenIDMismatchError(Exception):
+    """ Artpiece id from token does not match """
+    pass

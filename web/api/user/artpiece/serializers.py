@@ -1,8 +1,7 @@
-from marshmallow import fields, Schema, post_load, ValidationError
+from marshmallow import fields, Schema, pre_load, ValidationError
 from marshmallow.validate import Length, Regexp
-from web.artpiece import Artpiece, has_matching_color_scheme, has_pixels_within_canvas
+from .artpiece import Artpiece, has_matching_color_scheme, has_pixels_within_canvas
 from web.settings import Config
-import web.artpiece as artpiece
 
 COLOR_SCHEME = Config.COLOR_SCHEME
 _ALPHA_NUM_REGEX = r"^[\w\s]+$"
@@ -37,10 +36,12 @@ class ArtpieceSchema(Schema):
                 ]
             )
 
-    @post_load
-    def make_artpiece(self, data, many, **kwargs):
-        data['title'] = data['title'].strip()
-        return data
+    @pre_load
+    def strip_title(self, in_data, **kwargs):
+        title = in_data['title']
+        if title is not None:
+            in_data['title'] = title.strip()
+        return in_data
 
     class meta:
         strict=True

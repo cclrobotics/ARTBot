@@ -20,74 +20,29 @@ class Config(object):
     }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    """JWT settings."""
+    UNSECURE_DEFAULT_JWT_SECRET_KEY = 'invalid-jwt-secret-key'
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET', UNSECURE_DEFAULT_JWT_SECRET_KEY)
+
     """Mail settings."""
     MAIL_SERVER = os.environ.get('MAIL_SERVER', None)
-    MAIL_PORT = os.environ.get('MAIL_PORT', 25)
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 25))
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME', None)
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', None)
-    MAIL_USE_TLS = False
-    MAIL_USE_SSL = True
+    MAIL_USE_TLS = bool(os.environ.get('MAIL_USE_TLS', False))
+    MAIL_USE_SSL = bool(os.environ.get('MAIL_USE_SSL', False))
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', None)
-
-    @classmethod
-    def verbose_config(cls):
-        print('#########################################')
-        print('This is a %s environment' % (cls.ENV))
-        print('The monthly submission limit is set to %d' % (cls.MONTLY_SUBMISSION_LIMIT))
-        print('Expecting database @%s' % (cls.SQLALCHEMY_DATABASE_URI))
-        cls.print_warnings()
-        print('#########################################')
-
-    @classmethod
-    def is_secure_key(cls):
-        return cls.SECRET_KEY != cls.UNSECURE_DEFAULT_SECRET_KEY
-
-    @classmethod
-    def print_warnings(cls):
-        pass
-
-    @classmethod
-    def validate(cls):
-        pass
 
 class ProdConfig(Config):
     """Production configuration."""
     ENV = 'production'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
-    @classmethod
-    def print_warnings(cls):
-        if not cls.is_secure_key():
-            print(("WARNING!\n"
-                    "\tproduction servers should generate a random key\n"
-                    "\texport WEB_SECRET =`python -c 'import os; print(os.urandom(16))'`"
-                    )
-            )
-
-    @classmethod
-    def validate(cls):
-        assert cls.MAIL_SERVER != None, 'A mail server is required'
-        assert cls.MAIL_USERNAME != None, 'A mail username is required'
-        assert cls.MAIL_PASSWORD != None, 'A mail password is required'
-        assert cls.MAIL_DEFAULT_SENDER != None, 'A mail default sender is required'
-
 class DevConfig(Config):
     """Development configuration."""
     ENV = 'development'
-    DB_NAME = 'ARTBot.db'
-    # Put the db file in project root
-    DB_PATH = os.path.join(Config.PROJECT_ROOT, DB_NAME)
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(DB_PATH)
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
-    """Mail settings."""
-    MAIL_SERVER = 'localhost'
-    MAIL_PORT = 1025
-    MAIL_USE_SSL = False
-    MAIL_DEFAULT_SENDER = f'dev@{MAIL_SERVER}'
-
-    @classmethod
-    def print_warnings(cls):
-        print(('Warning! Start local email server using:\n'
-            '\t`python -m smtpd -n -c DebuggingServer localhost:1025`')
-            )
+class TestingConfig(Config):
+    ENV = 'testing'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_TEST_URL')

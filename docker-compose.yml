@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+    artbot:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: flask run -h 0.0.0.0
+        volumes:
+            - .:/usr/src/app
+        ports:
+            - 5001:5000
+        environment:
+            - FLASK_ENV=development
+            - FLASK_APP=web.app:create_app
+            - APP_SETTINGS=web.settings.DevConfig
+            - DATABASE_URL=postgresql://postgres:postgres@artbot-db:5432/artbot_dev
+            - DATABASE_TEST_URL=postgresql://postgres:postgres@artbot-db:5432/artbot_test
+            - MAIL_SERVER=maildev
+            - MAIL_PORT=25
+            - MAIL_DEFAULT_SENDER=ccl-artbot@gmail.com
+        depends_on:
+            - artbot-db
+            - maildev
+
+    artbot-db:
+        build:
+            context: ./db
+            dockerfile: Dockerfile
+        expose:
+            - 5432
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+
+    maildev:
+        image: djfarrelly/maildev
+        ports:
+            - 1080:80
