@@ -1,6 +1,7 @@
 from flask import (Blueprint, request, current_app, jsonify)
 from .core import (validate_and_extract_artpiece_data, create_artpiece,
         has_reached_monthly_submission_limit, guarantee_monthly_submission_limit_not_reached)
+from .core import confirm_artpiece as core_confirm_artpiece
 from ..email import send_confirmation_email_async
 from ..exceptions import InvalidUsage
 from ..colors import (get_available_color_mapping, get_available_colors_as_dicts)
@@ -41,7 +42,7 @@ def receive_art():
 @artpiece_blueprint.route('/artpieces/<int:id>/confirmation/<token>', methods=('PUT', ))
 def confirm_artpiece(id, token):
     artpiece = Artpiece.get_by_id(id)
-    confirmation_status = confirm_artpiece(artpiece, token)
+    confirmation_status = core_confirm_artpiece(artpiece, token)
     if confirmation_status == 'confirmed':
         db.session.commit()
 
