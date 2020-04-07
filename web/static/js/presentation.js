@@ -214,6 +214,7 @@ app.presentation = function(view, model) {
 			if (action.error) {
 				view.warningModal.show(errorsToMessage(action.payload));
 			} else {
+				view.submissionModal.hide();
 				view.successModal.show();
 			}
 			view.submit.enable();

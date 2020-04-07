@@ -301,6 +301,14 @@ app.view = function($, model) {
 		return that;
 	}(DOM.drawSubmit);
 
+	that.submissionModal = function(modal) {
+		let that = {};
+		that.hide = function() {
+			modal.modal('hide');
+		};
+		return that;
+	}(DOM.submissionModal);
+
 	let layout = function(sidebarLeft, sidebarRight, modal) {
 		let modalBody = modal.find('.modal-body');
 		let submissionBoxSidebar = sidebarRight;
