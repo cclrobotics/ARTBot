@@ -3,7 +3,12 @@ var app = app || {};
 app.view = function($, model) {
 	let that = {};
 	const DOM = {
-		limitReached: $('.limit-reached')
+		sidebarLeft: $('#sidebar-left')
+		, sidebarRight : $('#sidebar-right')
+		, submissionModal: $('#submission-modal')
+		, submissionBox: $('#submission-block')
+		, submissionModalBtn: $('#submit-show')
+		, limitReached: $('.limit-reached')
 		, colorContainer: $('#color-container')
 		, drawMode: $('#draw')
 		, eraseMode: $('.erase-mode')
@@ -12,10 +17,15 @@ app.view = function($, model) {
 		, drawSubmit: $('.draw-submit>.submit-button')
 		, quickFill: $('.quick-fill')
 		, pixelCanvas: $('.pixel-canvas')
+		, canvasContainer: $('.canvas-container')
 		, successModal: $('#success-modal')
 		, errorModal: $('#error-modal')
 		, errorBody: $('#error-modal').find('.error-msg')
+		, expand: $('.expand')
 	}
+
+	// Initialise tooltips
+	$('[data-toggle="tooltip"]').tooltip()
 
 	that.canvas = function(canvas) {
 		let that = {};
@@ -112,7 +122,7 @@ app.view = function($, model) {
 
 		that.add = function(id, color) {
 			colorPicker.append(
-				'<div class="color-picker" data-color-id="'
+				'<div class="color-picker rounded-circle" data-color-id="'
 				+id
 				+'" style="background:'+color+';"></div>'
 			);
@@ -121,7 +131,7 @@ app.view = function($, model) {
 			onClick: function(handler) {
 				colorPicker.on('click', function(event) {
 					event.preventDefault();
-					if (event.target.className == 'color-picker') {
+					if (event.target.id != 'color-container') {
 						handler(parseInt(event.target.dataset.colorId));
 					}
 				});
@@ -230,59 +240,46 @@ app.view = function($, model) {
 
 	that.successModal = function(modal) {
 		let that = {};
-		const close = modal.find('.close');
 
 		that.show = function() {
-			modal.css('display', 'block');
-		};
-		that.hide = function() {
-			modal.css('display', 'none');
+			modal.modal();
 		};
 		that.register = {
 			onHide: function(handler) {
-				close.on('click', function(event) {
-					event.preventDefault();
-					handler();
-				});
-				modal.on('click', function(event) {
-					event.preventDefault();
-					if (event.target.id == 'success-modal') {
-						handler();
-					}
-				});
+				modal.on('hide.bs.modal', handler);
 			}
 		};
 		return that;
 	}(DOM.successModal);
 
-	that.errorModal = function(modal) {
+	that.errorOverlay = function(submissionBox) {
+		let error = submissionBox.find('#submission-error');
+		let content = error.find('.content');
+		let submit = $('.draw-submit')
 		let that = {};
-		const body = modal.find('.error-msg');
-		const close = modal.find('.close');
 
 		that.show = function(message) {
-			body.text(message);
-			modal.css('display', 'block');
+			content.text(message);
+			submit.hide();
+			error.show();
 		};
 		that.hide = function() {
-			modal.css('display', 'none');
-		}
-		that.register = {
-			onHide: function(handler) {
-				close.on('click', function(event) {
-					event.preventDefault();
-					handler();
-				});
-				modal.on('click', function(event) {
-					event.preventDefault();
-					if (event.target.id == 'error-modal') {
-						handler();
-					}
-				});
-			}
+			error.hide();
+			submit.show();
 		};
+
 		return that;
-	}(DOM.errorModal);
+	}(DOM.submissionBox);
+
+	that.warningModal = function(modal, content) {
+		let that = {};
+
+		that.show = function(message) {
+			content.text(message);
+			modal.modal();
+		}
+		return that;
+	}(DOM.errorModal, DOM.errorBody);
 
 	that.submit = function(submit) {
 		let that = {};
@@ -303,6 +300,60 @@ app.view = function($, model) {
 		};
 		return that;
 	}(DOM.drawSubmit);
+
+	let layout = function(sidebarLeft, sidebarRight, modal) {
+		let modalBody = modal.find('.modal-body');
+		let submissionBoxSidebar = sidebarRight;
+		let submissionBox = submissionBoxSidebar.find('#submission-block');
+
+		function getWindowSize() {
+			return $(window).width();
+		}
+
+		function getSubmissionBoxContainer() {
+			let size = getWindowSize();
+			let container = sidebarRight;
+			if (size < 992) {
+				container = modalBody;
+			} else if (size < 1200) {
+				container = sidebarLeft;
+			}
+			return container;
+		}
+
+		function switchSubmissionBox(sidebar) {
+			if (sidebar === submissionBoxSidebar) { return; }
+			submissionBox.detach();
+			submissionBox.toggleClass("mt-3");
+			submissionBox.addClass('info-block');
+			if (sidebar === sidebarLeft) {
+				submissionBox.appendTo(sidebar);
+			} else {
+				if (sidebar === modal) {
+					submissionBox.removeClass('info-block');
+				}
+				submissionBox.prependTo(sidebar);
+			}
+			submissionBoxSidebar = sidebar;
+		}
+
+		switchSubmissionBox(getSubmissionBoxContainer());
+
+		$(window).resize(function() {
+			switchSubmissionBox(getSubmissionBoxContainer());
+		});
+
+	}(DOM.sidebarLeft, DOM.sidebarRight, DOM.submissionModal);
+
+	DOM.expand.on('click', function() {
+		DOM.canvasContainer.toggleClass('max-width-98');
+		DOM.sidebarLeft.toggleClass('d-flex');
+		DOM.sidebarLeft.toggleClass('d-none');
+	});
+
+	DOM.submissionModalBtn.on('click', function() {
+		DOM.submissionModal.modal();
+	});
 
 	return that;
 };
