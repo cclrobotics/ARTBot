@@ -1,63 +1,89 @@
-<div class="row">
-    <h3>What is this?</h3>
-    <br>
-    The BioArtBot project lets <b>you</b> make art with biology. Click your mouse 
-    in the grid below to make your drawing and we will print it out with microbial 
-    ink - real living bacteria that produce vivid colors! We'll email a photo of 
-    your living work of art back to you.
+<div class="alert alert-info alert-dismissible fade show text-center pt-3 pr-4" role="alert">
+	<h4><strong>Welcome to the BioArtBot project!</strong></h4>
+	<h5>Here you can make art with biology.</h5>
+	<p><em>Draw something amazing in the grid below and we will print it out with microbial ink 
+	- real living bacteria that produce vivid colors! We'll email a photo of
+	your living work of art back to you.</em></p>
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
 </div>
-<hr>
-<br>
-<div class="row">
-    <div class="column">
-	<div class="inputs">
-	    <h4>Select color</h4>
-	    <div id="color-container"></div>
-	    <input type="button" class="quick-fill" value="fill">
-	    <br>
+<div class="d-flex justify-content-around mt-3">
+	<div id="sidebar-left" class="d-flex flex-column align-content-start ml-2">
+		<div class="info-block p-3 text-center d-block">
+			<p><strong>Select Color</strong></p>
+			<div id="color-container"></div>
+			<br>
+			<button type="button" class="btn btn-light btn-sm quick-fill">
+				<strong>fill</strong>
+			</button>
+			<br>
 
-	    <hr>
-	    <h4>Mode</h4>
-	    <input type="button" class="draw-mode selected-mode" id="draw" value="draw">
-	    <input type="button" class="erase-mode" value="erase">
-	    <p><em>or double-click to erase</em></p>
-	    <hr>
-	    <h4>Art title</h4>
-	    <p><em>Give your art a title</em></p>
-	    <input type="text" id="title" class="draw-mode">
-	    <br>
-
-	    <hr>
-	    <h4>Contact info</h4>
-	    <p><em>Give us an email so we can confirm your submission and let you know when it's ready</em></p>
-	    <input type="email" id="email" class="draw-mode">
-	    <br>
-
-	    <hr>
-	    <h4>Submit drawing</h4>
-	    <form class="draw-submit">
-		<input type="submit" class="submit-button" value="Submit drawing">
-	    </form>
-	    <br>
-
-	    <hr>
-	    <h4>Donate!</h4>
-	    <p><em>Please donate.  It costs money to produce the art and your donation helps Counter Culture Labs continue!</em></p>
-	    {% include 'paypal_form.html' %}
+			<hr>
+			<p><strong>Mode</strong><p>
+			<div class="btn-group" role="group" label="Draw mode">
+				<button type="button" id="draw" class="btn btn-light btn-sm selected-mode">
+					<i class="fas fa-paint-brush"></i>
+				</button>
+				<button type="button" class="btn btn-light btn-sm erase-mode" 
+					data-toggle="tooltip" data-placement="bottom" 
+					title="or double-click to erase">
+					<i class="fas fa-eraser"></i>
+				</button>
+			</div>
+			<button type="submit" id="submit-show" 
+				class="btn submit-button btn-sm d-lg-none mt-2">
+				<strong>Submit</strong>
+			</button>
+		</div>
 	</div>
-    </div>
-    <div class="column">
-	<h1>Draw Art For Robot</h1>
-	<div hidden class="limit-reached">
+	<div class="canvas-container align-self-start text-center mx-3">
+		<div class="position-relative">
+			<div class="overflow-auto">
+				<div class="expand">
+					<i class="fas fa-expand"></i>
+				</div>
+				<table class="pixel-canvas">
+					{% for ly in range(canvas_size.y) %}
+					<tr id="Y{{ ly }}">
+						{% for lx in range(canvas_size.x) %}
+						<td id="X{{ lx }}"></td>
+						{% endfor %}
+					</tr>
+					{% endfor %}
+				</table>
+			</div>
+		</div>
 	</div>
-	<table class="pixel-canvas">
-	    {% for ly in range(canvas_size.y) %}
-		<tr id="Y{{ ly }}">
-		{% for lx in range(canvas_size.x) %}
-		<td id="X{{ lx }}"></td>
-		{% endfor %}
-	    </tr>
-	    {% endfor %}
-	</table>
-    </div>
+	<div id="sidebar-right" class="d-flex flex-column align-content-start mr-2">
+		<div id="submission-block" class="info-block p-3 text-center">
+			<div id="submission-error" class="w-100">
+				<span>
+					<i class="fas fa-times" style="font-size: 2rem; color: Tomato;"></i>
+				</span>
+				<p class="content"></p>
+			</div>
+			<form class="draw-submit">
+				<input type="text" id="title" class="submit-input mb-2 w-100" placeholder="title">
+				<input type="email" id="email" class="submit-input mb-2 w-100" placeholder="email">
+				<button type="submit" class="btn submit-button btn-sm">
+					<strong>Submit drawing</strong>
+				</button>
+			</form>
+		</div>
+		<div class="info-block p-3 mt-3 text-center">
+			<p><strong>Donate!</strong><p>
+			<p><em>Please donate. It costs money to produce the art and your donation helps Counter Culture Labs continue!</em></p>
+			{% include 'paypal_form.html' %}
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="submission-modal" tabindex="-1" role="dialog" 
+	aria-labelledby="submissionModal" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content" style="background-color:rgba(0,0,0,0); border-style: none;">
+			<div class="modal-body"></div>
+		</div>
+	</div>
 </div>

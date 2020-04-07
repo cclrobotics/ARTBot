@@ -7,8 +7,10 @@ app.presentation = function(view, model) {
 	let drawMode = true;
 	let hasEmailError = false;
 	let hasTitleError = false;
+	let hasCanvasError = false;
 	let isSubmitDisabled = false;
 	let isMousedown = false;
+	let origin = null;
 
 	const defaultErrorMessage = 'An unexpected error occurred. Try resubmitting later!';
 
@@ -31,6 +33,11 @@ app.presentation = function(view, model) {
 			+ "submission and you want to withdraw it, send us an email: ccl-artbot@gmail.com"
 	};
 
+	function clearCanvasError() {
+		view.errorOverlay.hide();
+		hasCanvasError = false;
+	}
+
 	function isBlankCanvas() {
 		return model.canvas.isEmpty();
 	}
@@ -46,11 +53,11 @@ app.presentation = function(view, model) {
 		if (selectedColorId == null) { return; }
 		isMousedown = true;
 		if (drawMode) {
+			origin = pixel;
 			view.canvas.set(colormap[selectedColorId].rgba, pixel.x, pixel.y);
 			model.canvas.set(selectedColorId, pixel);
-			if (isSubmitDisabled) {
-				enableSubmit();
-			}
+			if (isSubmitDisabled) { enableSubmit(); }
+			if (hasCanvasError) { clearCanvasError(); }
 		} else {
 			view.canvas.unset(pixel.x, pixel.y);
 			model.canvas.unset(pixel);
@@ -64,6 +71,8 @@ app.presentation = function(view, model) {
 	});
 	view.canvas.register.onMouseover(function(pixel) {
 		if (!isMousedown || selectedColorId == null) { return; }
+		if (pixel.x == origin.x && pixel.y == origin.y) { return; }
+		origin = pixel;
 
 		if (drawMode) {
 			view.canvas.set(colormap[selectedColorId].rgba, pixel.x, pixel.y);
@@ -158,7 +167,8 @@ app.presentation = function(view, model) {
 			return;
 		}
 		if (isBlankCanvas()) {
-			view.errorModal.show(codeToMessage['canvas_empty']);
+			view.errorOverlay.show(codeToMessage['canvas_empty']);
+			hasCanvasError = true;
 			return;
 		}
 		model.canvas.submit(email, title);
@@ -169,12 +179,7 @@ app.presentation = function(view, model) {
 		view.email.reset();
 		view.title.reset();
 		selectDrawMode();
-		view.successModal.hide();
 		model.canvas.reset();
-	});
-
-	view.errorModal.register.onHide(function() {
-		view.errorModal.hide();
 	});
 
 	function createColorMap(colors) {
@@ -207,7 +212,7 @@ app.presentation = function(view, model) {
 		}
 		, 'CANVAS_SUBMIT': function(action) {
 			if (action.error) {
-				view.errorModal.show(errorsToMessage(action.payload));
+				view.warningModal.show(errorsToMessage(action.payload));
 			} else {
 				view.successModal.show();
 			}

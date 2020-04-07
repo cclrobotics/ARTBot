@@ -1,7 +1,67 @@
-{% extends 'base_nav.html' %}
-{% block nav_content %}
-    {% include 'nav_content.html' %}
-{% endblock %}
-{% block mobile_nav_content %}
-    {% include 'nav_content.html' %}
-{% endblock %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+	<a class="navbar-brand" href="#">
+		<img
+			src="/static/img/logo-full-small.png"
+			alt="Counter Culture Labs" />
+	</a>
+	<button
+		class="navbar-toggler ml-auto"
+		type="button"
+		data-toggle="collapse"
+		data-target="#navbarSupportedContent"
+		aria-controls="navbarSupportedContent"
+		aria-expanded="false"
+		aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+
+	<div class="collapse navbar-collapse" id="navbarSupportedContent">
+		<ul class="navbar-nav align-items-center">
+			<li class="nav-item active ml-md-3">
+				<a class="nav-link" href="#">
+					Home<span class="sr-only">(current)</span>
+				</a>
+			</li>
+			<li class="nav-item ml-md-3">
+				<a class="nav-link" target="_blank" rel="noopener"
+					href="https://endeneublog.wordpress.com/2019/10/02/artbot-takes-shape/">
+					About
+				</a>
+			</li>
+			<li class="nav-item ml-md-3">
+				<a class="nav-link" target="_blank" rel="noopener"
+					href="https://www.counterculturelabs.org/info--history.html">
+					About CCL
+				</a>
+			</li>
+		</ul>
+		<ul class="navbar-nav align-items-center ml-auto flex-row justify-content-center">
+			<li class="nav-item ml-md-3">
+				<a class="nav-link p-2" href="https://github.com/cclrobotics/ARTBot"
+						  target="_blank" rel="noopener">
+					<i class="fab fa-github-alt fa-lg"></i>
+				</a>
+			</li>
+			<li class="nav-item ml-md-3">
+				<a class="nav-link p-2"
+					href="https://www.youtube.com/channel/UCRUJB_S3yMINT7hvwFord6Q"
+					target="_blank" rel="noopener">
+					<i class="fab fa-youtube fa-lg"></i>
+				</a>
+			</li>
+			<li class="nav-item ml-md-3">
+				<a class="nav-link p-2" href="http://meetu.ps/c/19GTP/xF77c/d"
+					target="_blank" rel="noopener">
+					<i class="fab fa-meetup fa-lg"></i>
+				</a>
+			</li>
+			<li class="nav-item ml-md-3">
+				<a class="nav-link p-2"
+				   href="https://trello.com/b/FKrqcKTU/cll-liquid-handling-robot"
+				   target="_blank" rel="noopener">
+					<i class="fab fa-trello fa-lg"></i>
+				</a>
+			</li>
+		</ul>
+	</div>
+</nav>
