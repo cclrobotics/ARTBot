@@ -1,39 +1,30 @@
 body {
   text-align: center;
-  font-family: Arial;
   background-color: #ececec;
   overflow-x: hidden;
 }
 
 * {
-  font-family: Arial;
   color: grey;
 }
 
 section {
-  margin-top: 40px;
+  margin-top: 0px;
   margin-bottom: 70px;
 }
 
-/* Styles title */
-h1 {
-  font-size: 2em;
+.canvas-container {
+	max-width: 60vw;
 }
 
-/* First margin value is top, second is right and left sides, third is bottom */
-h4 {
-  margin: 1em 0 0.75em;
-  text-align: left;
+.canvas-container .expand {
+	position: absolute;
+	top: -0.5rem;
+	right: -0.5rem;
 }
 
-h1, h2, h3, h4, h5 {
-  text-transform: uppercase;
-}
-
-/* Applies to italicized text */
-em {
-  font-size: 13px;
-  color: #bfbfbf;
+.canvas-container .fa-expand:hover {
+	font-size: 1.5rem;
 }
 
 table,
@@ -43,7 +34,102 @@ td {
 }
 
 .pixel-canvas {
-  background-color : white;
+	background-color : white;
+	width: 390px;
+	height: 260px;
+}
+
+#sidebar-left {
+	max-width: 300px;
+}
+
+#sidebar-right {
+	max-width: 300px;
+	display: none !important;
+}
+
+.color-picker {
+	border: 1px solid #dcdcdc;
+	-webkit-appearance: none;
+	padding: 0;
+	border: none;
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+	display: inline-block;
+	margin: 5px;
+}
+
+.color-picker:hover {
+	width: 25px;
+	height: 25px;
+}
+
+.max-width-98 {
+	max-width: 98% !important;
+}
+
+.youtube-video {
+	width: 100vw;
+	height: 55vw;
+}
+
+@media screen and (min-width: 576px) {
+	.pixel-canvas {
+		width: 585px;
+		height: 390px;
+	}
+	.youtube-video {
+		width: 576px;
+		height: calc(0.55*576px);
+	}
+}
+
+@media screen and (min-width: 768px) {
+	.pixel-canvas {
+		width: 780px;
+		height: 520px;
+	}
+	.canvas-container {
+		max-width: 72vw;
+	}
+}
+
+@media screen and (min-width: 992px) {
+	.canvas-container {
+		max-width: 65vw;
+	}
+}
+
+@media screen and (min-width: 1200px) {
+	.pixel-canvas {
+		width: 975px;
+		height: 650px;
+	}
+	#sidebar-left {
+		max-width: 350px;
+	}
+	#sidebar-right {
+		max-width: 350px;
+		display: block !important;
+	}
+	.color-picker {
+		width: 25px;
+		height: 25px;
+	}
+	.color-picker:hover {
+		width: 30px;
+		height: 30px;
+	}
+	.canvas-container {
+		max-width: 60vw;
+	}
+}
+
+@media screen and (min-width: 1622px) {
+	.canvas-container .expand {
+		display: none;
+	}
 }
 
 /* 'border-collapse' CSS property specifies whether a table's cells have shared or separate borders; 'collapse' value causes cells to have shared borders */
@@ -51,13 +137,8 @@ table {
   border-collapse: collapse;
 }
 
-tr {
-  height: 20px;
-}
-
 td {
-  min-width: 20px;
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 /* Styles height and width input boxes */
@@ -92,77 +173,36 @@ hr.section-break:before {
 }
 
 /* Styles buttons, including a change of displayed mouse cursor to inform user he/she is hovering over something clickable */
-.submit-button, .quick-fill, .erase-mode, .draw-mode {
-  box-shadow: inset 0px 1px 0 0 #fff;
+.submit-button, .quick-fill, .erase-mode, .draw-mode, .submit-input {
+	box-shadow: inset 0px 1px 0 0 #fff;
 	background: linear-gradient(#f9f9f9 5%, #e9e9e9 100%);
-  /* creates rounded edges (more pixels -> more rounded) */
+	/* creates rounded edges (more pixels -> more rounded) */
 	border-radius: 7px;
 	border: 1px solid #dcdcdc;
-	font-weight: bold;
-  /* Padding is space between element's content and border. First value sets top and bottom padding; second value sets right and left */
-	padding: 6px 20px;
-  margin-right: 6px;
-  margin-bottom: 6px;
+	padding: 4px 15px;
 	text-decoration: none;
 	/* text-shadow: 0 1px #fff; */
-  cursor: pointer;
-  margin-top: 0.1em;
+	cursor: pointer;
 }
 
-.color-picker {
-	border: 1px solid #dcdcdc;
-  -webkit-appearance: none;
-  padding: 0;
-  border: none;
-  border-radius: 10px;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
+.submit-button:disabled {
+	box-shadow: none;
+	background: rgba(255, 255, 255, 0);
 }
 
-.color-picker::-webkit-color-swatch {
-  border: none;
-  border-radius: 10px;
-  padding: 0;
+.selected-mode {
+	background: linear-gradient(#f9f9f9 5%, #c5ddb5 100%);
 }
-.color-picker::-webkit-color-swatch-wrapper {
-  border: none;
-  border-radius: 10px;
-  padding: 0;
+
+.has-error {
+	border: 3px solid rgba(255, 0, 0, 0.30);
 }
 
 /* Styles content to left of grid */
-.inputs {
-  text-align: left;
-  margin-left: 2em;
-  border-radius: 7px;
-  border: 1px solid #dcdcdc;
-  padding-left: 2em;
-  padding-right: 2em;
-  padding-top: 0.5em;
-  padding-bottom: 1.5em;
-  width: 200px;
-  background-color : white;
-}
-
-/* Part of two-column layout implementation */
-.column {
-  float: left;
-  width: 25%;
-}
-
-/* Ensures title ('Pixel Art Maker') is centered above grid */
-.column:last-of-type {
-  width: auto;
-}
-
-/* Part of two-column layout implementation. :after' is a pseudo element, affecting display of generated content */
-.row:after {
-  /* You can't style generated content without defining what that content should be. If content not needed, just add extra 'invisible element' to style, and style that. Without this, default value of content: none is assumed, meaning there is nothing for style to be applied to */
-  content: "";
-  display: table;
-  /* Cleared elements are pushed below the corresponding floated elements; 'clear: both' pushes element below all floated elements */
-  clear: both;
+.info-block {
+	border-radius: 15px;
+	border: 1px solid #dcdcdc;
+	background-color : white;
 }
 
 #color-container {
@@ -177,126 +217,36 @@ hr.section-break:before {
     border: 3px solid #000000;
 }
 
-/* 
+/*
 * Slideshow styles
 *
 */
-.slideshow {
-  --n: 1;
-  display: flex;
-  align-items: center;
-  overflow-y: hidden;
-  width: 100%;
-  width: calc(var(--n)*100%);
-  height: 50vw;
-  max-height: 100vh;
-  transform: translate(calc(var(--i, 0)/var(--n)*-100%));
-}
-.slideshow img {
-  width: 100%;
-  width: calc(100%/var(--n));
-  user-select: none;
-  pointer-events: none;
+#cclSlideshow {
+	min-height: 100px;
+	height: 85vh;
+	max-height: calc(0.562*100vw);
+	min-width: calc(1.779*100px);
+	width: calc(1.779*85vh);
+	max-width: 100%;
 }
 
-/* 
-* Modal styles  
-*
-*/
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-  -webkit-animation-name: fadeIn; /* Fade in the background */
-  -webkit-animation-duration: 0.4s;
-  animation-name: fadeIn;
-  animation-duration: 0.4s
+.navbar-brand img {
+	width: 170px;
 }
 
-/* Modal Content */
-.modal-content {
-  position: fixed;
-  bottom: 0;
-  color: black;
-  background-color: #dcdcdc;
-  border-radius: 7px;
-	border: 1px solid #dcdcdc;
-  width: 100%;
-  -webkit-animation-name: slideIn;
-  -webkit-animation-duration: 0.4s;
-  animation-name: slideIn;
-  animation-duration: 0.4s
+@media screen and (min-aspect-ratio: 1) {
+	#cclSlideshow {
+		max-height: 1019px;
+		max-width: 1813px;
+	}
 }
 
-/* The Close Button */
-.close {
-  float: right;
-  font: gray;
-  font-size: 28px;
-  font-weight: bold;
-  box-shadow: inset 0px 1px 0 0 #fff;
-	color: linear-gradient(#f9f9f9 5%, #e9e9e9 100%);
+@media screen and (max-width: 1813px) {
+	.navbar-brand img {
+		width: 150px;
+	}
 }
 
-.close:hover,
-.close:focus {
-  color: #000;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.modal-header {
-  padding: 2px 16px;
-  background-color: white;
-  color: gray;
-}
-
-.modal-header > h2 {
-  color: gray;
-  background-color: white;
-}
-
-.modal-body {padding: 2px 16px;}
-
-.modal-footer {
-  padding: 2px 16px;
-  background-color: white;
-  color: gray;
-}
-
-.limit-reached {
-    color: red;
-    max-width: 780px;
-}
-
-#error-content {
-  border: 3px solid red;
-}
-
-/* Add Animation */
-@-webkit-keyframes slideIn {
-  from {bottom: -300px; opacity: 0} 
-  to {bottom: 0; opacity: 1}
-}
-
-@keyframes slideIn {
-  from {bottom: -300px; opacity: 0}
-  to {bottom: 0; opacity: 1}
-}
-
-@-webkit-keyframes fadeIn {
-  from {opacity: 0} 
-  to {opacity: 1}
-}
-
-@keyframes fadeIn {
-  from {opacity: 0} 
-  to {opacity: 1}
+#submission-error {
+	display: none;
 }

@@ -1,44 +1,34 @@
-from marshmallow import fields, Schema, pre_load, ValidationError
-from marshmallow.validate import Length, Regexp
-from .artpiece import Artpiece, has_matching_color_scheme, has_pixels_within_canvas
-from web.settings import Config
-
-COLOR_SCHEME = Config.COLOR_SCHEME
-_ALPHA_NUM_REGEX = r"^[\w\s]+$"
-
-def validate_color_scheme(pixel_art_color_encoding):
-    if not has_matching_color_scheme(pixel_art_color_encoding, COLOR_SCHEME.keys()):
-        raise ValidationError('Invalid color scheme')
-
-def validate_pixels(pixel_art_color_encoding):
-    for color in pixel_art_color_encoding:
-        if not has_pixels_within_canvas(pixel_art_color_encoding[color]):
-            raise ValidationError('pixel out-of-bounds')
+from marshmallow import (fields, Schema, pre_load, validates)
+from marshmallow.validate import (Length, Regexp)
+from .validators import (validate_art_content_length, validate_color_keys, validate_pixels,
+        validate_title)
 
 class ArtpieceSchema(Schema):
-    title = fields.Str(
-            required=True
-            , validate=[
-                Length(1, 50, error="Art must be named! Resubmit with an awesome title.")
-                , Regexp(_ALPHA_NUM_REGEX
-                    , error="Title is limited to alpha-numeric characters only")
-                ]
-            )
+    title = fields.Str(missing=None)
     email = fields.Email(required=True, load_only=True)
     art = fields.Dict(
-            required=True
+            missing=None
             , keys=fields.Str()
             , values=fields.List(fields.Tuple((fields.Int(), fields.Int())))
-            , validate=[
-                validate_color_scheme
-                , validate_pixels
-                , Length(1, error="Looks like you forgot to draw something...")
-                ]
             )
+
+    def __init__(self, valid_color_keys):
+        Schema.__init__(self)
+        self._valid_color_keys = valid_color_keys
+
+    @validates('title')
+    def _validate_title_field(self, title):
+        validate_title(title)
+
+    @validates('art')
+    def _validate_art_field(self, art):
+        validate_art_content_length(art)
+        validate_color_keys(art, self._valid_color_keys)
+        validate_pixels(art)
 
     @pre_load
     def strip_title(self, in_data, **kwargs):
-        title = in_data['title']
+        title = in_data['title'] if in_data else None
         if title is not None:
             in_data['title'] = title.strip()
         return in_data

@@ -1,12 +1,11 @@
 from flask import (Blueprint, request, current_app, jsonify)
-from marshmallow import ValidationError
-from jwt import (ExpiredSignatureError, PyJWTError)
-from .serializers import ArtpieceSchema
-from ..utilities import has_reached_monthly_submission_limit
+from .core import (validate_and_extract_artpiece_data, create_artpiece,
+        has_reached_monthly_submission_limit, guarantee_monthly_submission_limit_not_reached)
+from .core import confirm_artpiece as core_confirm_artpiece
 from ..email import send_confirmation_email_async
 from ..exceptions import InvalidUsage
-from ..user import User
-from .artpiece import (Artpiece, TokenIDMismatchError)
+from ..colors import (get_available_color_mapping, get_available_colors_as_dicts)
+from .artpiece import Artpiece
 from web.extensions import db
 
 artpiece_blueprint = Blueprint('artpiece', __name__)
@@ -20,50 +19,31 @@ def get_artpieces_meta():
                 {
                     'submission_limit_exceeded': has_reached_monthly_submission_limit(
                         monthly_limit)
+                    , 'bacterial_colors': get_available_colors_as_dicts()
                 }
                 , 'data': None
             }), 200
 
 @artpiece_blueprint.route('/artpieces', methods=('POST', ))
 def receive_art():
-    if has_reached_monthly_submission_limit(current_app.config['MONTLY_SUBMISSION_LIMIT']):
-        raise InvalidUsage.reached_monthly_submission_limit()
+    monthly_limit = current_app.config['MONTLY_SUBMISSION_LIMIT']
+    guarantee_monthly_submission_limit_not_reached(monthly_limit)
 
-    try:
-        data = ArtpieceSchema().load(request.get_json())
-    except ValidationError as err:
-        raise InvalidUsage.from_validation_error(err)
+    email, title, art = validate_and_extract_artpiece_data(request.get_json()
+            , get_available_color_mapping().keys())
 
-    user = User.get_by_email(data['email']) or User.from_email(data['email'])
-    if user.has_active_submission():
-        raise InvalidUsage.reached_user_limit()
-
-    artpiece = user.create_artpiece(data['title'], data['art'])
+    artpiece = create_artpiece(email, title, art)
     db.session.commit()
 
     send_confirmation_email_async(artpiece)
 
     return jsonify({'data': None}), 201
 
-
 @artpiece_blueprint.route('/artpieces/<int:id>/confirmation/<token>', methods=('PUT', ))
 def confirm_artpiece(id, token):
     artpiece = Artpiece.get_by_id(id)
-    if artpiece is None:
-        raise InvalidUsage.resource_not_found()
-
-    try:
-        artpiece.verify_confirmation_token(token)
-    except ExpiredSignatureError:
-        raise InvalidUsage.confirmation_token_expired()
-    except (PyJWTError, TokenIDMismatchError):
-        raise InvalidUsage.invalid_confirmation_token()
-
-    if artpiece.is_confirmed():
-        status = 'already_confirmed'
-    else:
-        status = 'confirmed'
-        artpiece.confirm()
+    confirmation_status = core_confirm_artpiece(artpiece, token)
+    if confirmation_status == 'confirmed':
         db.session.commit()
 
-    return jsonify({'data': {'confirmation': {'status': status}}}), 200
+    return jsonify({'data': {'confirmation': {'status': confirmation_status}}}), 200

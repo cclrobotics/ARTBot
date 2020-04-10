@@ -1,5 +1,6 @@
 #models.py - Defines the database tables used in the website.
 import datetime as dt
+from collections import namedtuple
 from enum import Enum
 from .database import (Model, SurrogatePK, db, Column,
                               reference_col, relationship, deferred, composite)
@@ -36,6 +37,24 @@ class UserModel(SurrogatePK, Model):
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.email)
+
+RGBA = namedtuple('RGBA', ['r','g','b','a'])
+
+class BacterialColorModel(SurrogatePK, Model):
+    __tablename__ = 'bacterial_colors'
+
+    name = Column(db.String(20), unique=True, nullable=False)
+    red = Column(db.SmallInteger(), nullable=False)
+    green = Column(db.SmallInteger(), nullable=False)
+    blue = Column(db.SmallInteger(), nullable=False)
+    opacity = Column(db.SmallInteger(), nullable=False)
+    biobrick_id = Column(db.String(30), nullable=False)
+    in_use = Column(db.Boolean(), nullable=False)
+
+    rgba = composite(RGBA, red, green, blue, opacity)
+
+    def __repr__(self):
+        return '<%r: (%r,%r,%r,%r)>' % (self.name, self.red, self.green, self.blue, self.opacity)
 
 class EmailFailureState(Enum):
     submission_confirmation = 's_confirmation'

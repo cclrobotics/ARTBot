@@ -15,88 +15,67 @@
     </section>
     <hr class="section-break">
 
-    <!-- join us section -->
-    <section>
-	{% include 'join_us.html' %}
-    </section>
-    <hr class="section-break">
-
     <!-- youtube section -->
     <section>
-	<div class="">
-	    <div class="">
-		<h2>Watch Us</h2>
-		<iframe
-		    width="560"
-		    height="315"
-		    src="https://www.youtube.com/embed/playlist?list=PLIhn42HNYoMhWYj7aEIN8FOzgLqbZvj0j"
-		    frameborder="0"
-		    allow="autoplay; encrypted-media"
-		    allowfullscreen>
-		</iframe>
-	    </div>
+	<div class="w-100">
+		<div>
+			<h2>Watch Us</h2>
+			<iframe
+				src="https://www.youtube.com/embed/playlist?list=PLIhn42HNYoMhWYj7aEIN8FOzgLqbZvj0j"
+				class="youtube-video"
+				frameborder="0"
+				allow="autoplay; encrypted-media"
+				allowfullscreen>
+			</iframe>
+		</div>
 	</div>
     </section>
     <hr class="section-break">
 
-    <!--  donate section -->
-    <section>
-	<div>
-	    <div>
-		<h2>Donate</h2>
-		<h3>
-		    <em>
-			Please donate. It costs money to produce the art and your donation
-			helps Counter Culture Labs continue!
-		    </em>
-		</h3>
-		<br>
-		{% include 'paypal_form.html' %}
-	    </div>
+	<!-- Modal -->
+	<div class="modal fade" id="success-modal" tabindex="-1" role="dialog" 
+		aria-labelledby="successModal" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header" style="background-color:rgba(30,130,76,0.3);">
+					<h5 class="modal-title">Success</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p><b>One more step</b>: We're sending a confirmation email.
+					Click the link there to confirm your art design
+					</p>
+					<p><em>If you haven't, please consider donating. It costs money to produce
+					the art and your donation helps Counter Culture Labs continue!
+					</em></p>
+					{% include 'paypal_form.html' %}
+				</div>
+				<div class="modal-footer">
+					Thank you!
+				</div>
+			</div>
+		</div>
 	</div>
-    </section>
 
-    <!-- success modal -->
-    <div id="success-modal" class="modal">
-
-	<!-- modal content -->
-	<div class="modal-content">
-	    <div class="modal-header">
-		<span class="close">&times;</span>
-		<h2>Success</h2>
-	    </div>
-	    <div class="modal-body">
-		<p><b>One more step</b>: We're sending a confirmation email. 
-		Click the link there to confirm your art design
-		</p>
-		<p><em>If you haven't, please consider donating. It costs money to produce
-		    the art and your donation helps Counter Culture Labs continue!
-		</em></p>
-		{% include 'paypal_form.html' %}
-	    </div>
-	    <div class="modal-footer">
-		<h3>Thank you!</h3>
-	    </div>
+	<div class="modal fade" id="error-modal" tabindex="-1" role="dialog" aria-labelledby="errorModal" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header py-0" style="background-color:rgba(241, 130, 141,1)">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span style="font-size: 3rem;" aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p class="error-msg pt-2"></p>
+				</div>
+			</div>
+		</div>
 	</div>
-    </div>
 
-    <!-- error modal -->
-    <div id="error-modal" class="modal">
-
-	<!-- modal content -->
-	<div id="error-content" class="modal-content">
-	    <div class="modal-header">
-		<span class="close">&times;</span>
-		<h2>Error</h2>
-	    </div>
-	    <div class="modal-body">
-		<p class="response-text"></p>
-	    </div>
-	    <div class="modal-footer">
-		<h3>Please try again later!</h3>
-	    </div>
-	</div>
-    </div>
-
-    <script src="/static/js/main.js"></script>
+    <script src="/static/js/view.js"></script>
+    <script src="/static/js/presentation.js"></script>
+    <script src="/static/js/model.js"></script>
+    <script src="/static/js/app.js"></script>
 {% endblock %}
