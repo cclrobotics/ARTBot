@@ -30,7 +30,7 @@ the OT2 Jupyter server.
 If this is your first time running a procedure generated this way on your robot, you will need to first upload the file
 _custom_artbot_labware_, found in the _robot_ directory. This file defines a few unique pieces of labware that we will
 use. You only need to do this once. See _lab_guide_ for more information. You may need to buy different labware, or
-change the definition work with what you have.
+change the definitions to work with what you have.
 
 The generated script is ready to upload directly to the OT2 using the [Opentrons app](www.opentrons.com).
 Just follow the prompts on the app.
@@ -39,6 +39,5 @@ Just follow the prompts on the app.
 
 For the most part, you can calibrate as you normally would, but there is a trick to calibrating the
 "canvas" labware - i.e. the tray holding the agar that the robot will draw on. Best practice we have found is:
-1. When you are asked to move the pipette tip to position "A1" on this tray, position it about 10mm down from the top
-edge and 15mm right of the left edge.
+1. When you are asked to move the pipette tip to position "A1" on this tray, position it rouhgly at the center of the omni tray. There's a ~10mm tolerance if you're not quite center, but beyond that and the robot will end up trying to print outside of the plate.
 2. Leave the cover on the tray when calibrating and move the pipetter just that the tip just touches the top of the lid.
