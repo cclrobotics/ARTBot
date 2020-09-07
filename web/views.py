@@ -2,6 +2,7 @@
 
 from flask import (render_template, Blueprint, current_app, request)
 from .api.user.artpiece import DEFAULT_CANVAS
+from .settings import ANNOUNCEMENT
 
 main = Blueprint('main', __name__)
 
@@ -9,7 +10,7 @@ main = Blueprint('main', __name__)
 @main.route('/', methods=('GET', ))
 @main.route('/index', methods=('GET', ))
 def index():
-    return render_template('main.html', canvas_size=DEFAULT_CANVAS)
+    return render_template('main.html', canvas_size=DEFAULT_CANVAS, announcement=ANNOUNCEMENT)
 
 
 @main.route('/art_confirmation', methods=('GET', ))
