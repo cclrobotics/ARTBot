@@ -4,6 +4,9 @@
 	<p><em>Draw something amazing in the grid below and we will print it out with microbial ink 
 	- real living bacteria that produce vivid colors! We'll email a photo of
 	your living work of art back to you.</em></p>
+	{% if announcement %}
+	<p><b>{{announcement}}</b></p>
+	{% endif %}
 	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
 	</button>
