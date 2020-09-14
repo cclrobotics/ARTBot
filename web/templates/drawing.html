@@ -4,6 +4,9 @@
 	<p><em>Draw something amazing in the grid below and we will print it out with microbial ink 
 	- real living bacteria that produce vivid colors! We'll email a photo of
 	your living work of art back to you.</em></p>
+	{% if announcement %}
+	<p><b>{{announcement}}</b></p>
+	{% endif %}
 	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
 	</button>
@@ -22,7 +25,7 @@
 			<hr>
 			<p><strong>Mode</strong><p>
 			<div class="btn-group" role="group" label="Draw mode">
-				<button type="button" id="draw" class="btn btn-light btn-sm selected-mode">
+				<button type="button" id="draw" class="btn btn-light btn-sm draw-mode selected-mode">
 					<i class="fas fa-paint-brush"></i>
 				</button>
 				<button type="button" class="btn btn-light btn-sm erase-mode" 
@@ -31,6 +34,7 @@
 					<i class="fas fa-eraser"></i>
 				</button>
 			</div>
+			<br>
 			<button type="submit" id="submit-show" 
 				class="btn submit-button btn-sm d-lg-none mt-2">
 				<strong>Submit</strong>

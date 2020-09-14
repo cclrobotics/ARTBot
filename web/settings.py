@@ -2,6 +2,8 @@
 
 import os
 
+ANNOUNCEMENT = os.environ.get('ANNOUNCEMENT', None)
+
 class Config(object):
     """Base configuration."""
     ENV = 'default'
