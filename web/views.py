@@ -2,6 +2,7 @@
 
 from flask import (render_template, Blueprint, current_app, request)
 from .api.user.artpiece import DEFAULT_CANVAS
+from .api.user.utilities import get_gallery_images
 from .settings import ANNOUNCEMENT
 
 main = Blueprint('main', __name__)
@@ -10,7 +11,8 @@ main = Blueprint('main', __name__)
 @main.route('/', methods=('GET', ))
 @main.route('/index', methods=('GET', ))
 def index():
-    return render_template('main.html', canvas_size=DEFAULT_CANVAS, announcement=ANNOUNCEMENT)
+    img_list = get_gallery_images()
+    return render_template('main.html', canvas_size=DEFAULT_CANVAS, announcement=ANNOUNCEMENT, img_list=img_list)
 
 
 @main.route('/art_confirmation', methods=('GET', ))
