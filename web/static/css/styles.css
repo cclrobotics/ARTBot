@@ -230,6 +230,10 @@ hr.section-break:before {
 	max-width: 100%;
 }
 
+.carousel-item img {
+	margin: auto;
+}
+
 .navbar-brand img {
 	width: 170px;
 }
