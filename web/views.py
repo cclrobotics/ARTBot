@@ -11,9 +11,12 @@ main = Blueprint('main', __name__)
 @main.route('/', methods=('GET', ))
 @main.route('/index', methods=('GET', ))
 def index():
-    img_list = get_gallery_images()
-    return render_template('main.html', canvas_size=DEFAULT_CANVAS, announcement=ANNOUNCEMENT, img_list=img_list)
+    return render_template('main.html', canvas_size=DEFAULT_CANVAS, announcement=ANNOUNCEMENT)
 
+@main.route('/about',methods=('GET',))
+def about():
+    img_list = get_gallery_images()
+    return render_template('about.html', img_list=img_list)
 
 @main.route('/art_confirmation', methods=('GET', ))
 def art_confirmation():

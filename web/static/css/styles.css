@@ -13,6 +13,21 @@ section {
   margin-bottom: 70px;
 }
 
+section.longform-text {
+	text-align: left;
+	margin-left: 15%;
+	margin-right: 15%;
+	margin-top: 20px;
+}
+
+.caption-overlay{
+	font-size: 1rem;
+	position: relative;
+	display: inline-block;
+	padding-top: 10px;
+	padding-bottom: 300px;
+}
+
 .canvas-container {
 	max-width: 60vw;
 }

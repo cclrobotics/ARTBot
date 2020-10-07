@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block nav %}
+    {% include 'nav.html' %}
+{% endblock %}
+{% block body %}
+    <!-- slideshow section -->
+    <section>
+        <p><h2>BioArtBot Gallery</h2></p>
+	    {% include 'slideshow.html' %}
+    </section>
+    <hr class="section-break">
+
+    <!-- about text section -->
+    <section class='longform-text'>
+        {% include 'about_text.html' %}
+    </section>
+    {% include 'paypal_form.html' %}
+    <hr class="section-break">
+
+    <!-- youtube section -->
+    <section>
+        <div class="w-100">
+            <div>
+                <h2>Watch Us</h2>
+                <iframe
+                    src="https://www.youtube.com/embed/playlist?list=PLIhn42HNYoMhWYj7aEIN8FOzgLqbZvj0j"
+                    class="youtube-video"
+                    frameborder="0"
+                    allow="autoplay; encrypted-media"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </section>
+
+    <script src="/static/js/view.js"></script>
+    <script src="/static/js/presentation.js"></script>
+    <script src="/static/js/model.js"></script>
+    <script src="/static/js/app.js"></script>
+{% endblock %}

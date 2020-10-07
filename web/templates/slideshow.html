@@ -6,6 +6,7 @@
 					src="{{ img_list[0][0] }}"
 					class="d-block h-100"
 					alt="{{ img_list[0][1] }}">
+				<div class="caption-overlay">{{ img_list[0][1] }}</div>
 			</div>
 			{% for img in img_list[1:] %}
 			<div class="carousel-item">
@@ -13,6 +14,7 @@
 					src="{{ img[0] }}"
 					class="d-block h-100"
 					alt="{{ img[1] }}">
+				<div class="caption-overlay">{{ img[1] }}</div>
 			</div>
 			{% endfor %}
 		</div>
