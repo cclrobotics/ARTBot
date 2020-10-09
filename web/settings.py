@@ -13,6 +13,7 @@ class Config(object):
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
     MONTLY_SUBMISSION_LIMIT = int(os.environ.get('WEB_MONTHLY_SUBMISSION_LIMIT', 27))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    CACHE_TYPE = 'simple'
 
     """JWT settings."""
     UNSECURE_DEFAULT_JWT_SECRET_KEY = 'invalid-jwt-secret-key'

@@ -1,6 +1,7 @@
 #views.py - Maps URLs to backend functions, then returns the results to the appropriate view
 
 from flask import (render_template, Blueprint, current_app, request)
+from web.extensions import cache
 from .api.user.artpiece import DEFAULT_CANVAS
 from .api.user.utilities import get_gallery_images
 from .settings import ANNOUNCEMENT
@@ -10,13 +11,15 @@ main = Blueprint('main', __name__)
 #Home page
 @main.route('/', methods=('GET', ))
 @main.route('/index', methods=('GET', ))
+@cache.cached(timeout=60)
 def index():
-    return render_template('main.html', canvas_size=DEFAULT_CANVAS, announcement=ANNOUNCEMENT)
+    return render_template('main.html', canvas_size=DEFAULT_CANVAS, announcement=ANNOUNCEMENT, home_tag=' active', about_tag='')
 
 @main.route('/about',methods=('GET',))
+@cache.cached(timeout=60)
 def about():
     img_list = get_gallery_images()
-    return render_template('about.html', img_list=img_list)
+    return render_template('about.html', img_list=img_list, home_tag='', about_tag=' active')
 
 @main.route('/art_confirmation', methods=('GET', ))
 def art_confirmation():
