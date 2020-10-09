@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template
 from flask_migrate import upgrade
 from sqlalchemy.exc import DBAPIError
-from web.extensions import db, migrate, mail
+from web.extensions import db, migrate, mail, cache
 from web.views import main
 from web.api.user.artpiece.endpoints import artpiece_blueprint
 from web.api.user.exceptions import InvalidUsage
@@ -28,6 +28,7 @@ def register_extensions(app):
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
+    cache.init_app(app)
 
 def register_blueprints(app):
     """Register Flask blueprints."""

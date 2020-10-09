@@ -13,6 +13,21 @@ section {
   margin-bottom: 70px;
 }
 
+section.longform-text {
+	text-align: left;
+	margin-left: 15%;
+	margin-right: 15%;
+	margin-top: 20px;
+}
+
+.image-caption{
+	font-size: 1rem;
+	position: relative;
+	display: inline-block;
+	padding-top: 10px;
+	padding-bottom: 300px;
+}
+
 .canvas-container {
 	max-width: 60vw;
 }
@@ -228,6 +243,10 @@ hr.section-break:before {
 	min-width: calc(1.779*100px);
 	width: calc(1.779*85vh);
 	max-width: 100%;
+}
+
+.carousel-item img {
+	margin: auto;
 }
 
 .navbar-brand img {
