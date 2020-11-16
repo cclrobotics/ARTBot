@@ -2,17 +2,15 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 import string
 from datetime import datetime
-import os, argparse
+import os
 from contextlib import contextmanager
 
 from web.database.models import (ArtpieceModel, SubmissionStatus, BacterialColorModel)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--notebook'
-                    ,action='store_true'
-                    ,help='Set this flag to output to a Jupyter Notebook instead of a .py file'
-                    )
-NOTEBOOK = parser.parse_args().notebook
+from .processor_args import args
+
+NOTEBOOK = args.pop('notebook')
+LABWARE = args #assume unused args are all labware
 
 APP_DIR = os.path.abspath(os.path.dirname(__file__))
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
@@ -60,13 +58,20 @@ def plate_location_map(coord):
 
     return x, y
 
+def add_labware(template_string, labware):
+    # replace labware placeholders with the proper Opentrons labware name, as specified in the arguments
+    labware['tiprack'] = 'tiprack-200ul' if 'P300' in labware['pipette'] else 'tiprack-10ul'
+    
+    procedure = template_string.replace('%%PALETTE GOES HERE%%', labware['palette'])
+    procedure = procedure.replace('%%PIPETTE GOES HERE%%', labware['pipette'])
+    procedure = procedure.replace('%%TIPRACK GOES HERE%%', labware['tiprack'])
+    return procedure
+
 def add_canvas_locations(template_string, artpieces):
     # write where canvas plates are to be placed into code
     canvas_locations = dict(zip([artpiece.slug for artpiece in artpieces], get_canvas_slot))
     procedure = template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
-
     return procedure, canvas_locations
-
 
 def add_pixel_locations(template_string, artpieces):
     # write where to draw pixels on each plate into code. Listed by color to reduce contamination
@@ -77,7 +82,6 @@ def add_pixel_locations(template_string, artpieces):
                 pixels_by_color[color] = dict()
             pixels_by_color[color][artpiece.slug] = [plate_location_map(pixel) for pixel in artpiece.art[color]]
     procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
-
     return procedure
 
 def add_color_map(template_string, colors):
@@ -115,7 +119,8 @@ with session_scope() as session:
         with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
             template_string = template_file.read()
 
-        procedure, canvas_locations = add_canvas_locations(template_string, artpieces)
+        procedure = add_labware(template_string, LABWARE)
+        procedure, canvas_locations = add_canvas_locations(procedure, artpieces)
         procedure = add_pixel_locations(procedure, artpieces)
         procedure = add_color_map(procedure, colors)
 
