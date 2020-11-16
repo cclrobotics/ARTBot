@@ -70,12 +70,12 @@ def plate_location_map(coord):
 
     return x, y
 
-def add_labware(template_string, **kwargs):
+def add_labware(template_string, pipette, palette):
     # replace labware placeholders with the proper Opentrons labware name, as specified in the arguments
     tiprack = 'tiprack-200ul' if 'P300' in pipette else 'tiprack-10ul'
     
     procedure = template_string.replace('%%PALETTE GOES HERE%%', palette)
-    procedure = procedure.replace('%%PIPETTE GOES HERE%%', pipette])
+    procedure = procedure.replace('%%PIPETTE GOES HERE%%', pipette)
     procedure = procedure.replace('%%TIPRACK GOES HERE%%', tiprack)
     return procedure
 
