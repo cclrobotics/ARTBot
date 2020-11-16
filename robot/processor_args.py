@@ -15,7 +15,4 @@ parser.add_argument('--pipette', '-pi'
                     ,help='Optional argument to specify the pipette type. Use Opentrons standard names.'
                     )
 
-args = parser.parse_args()
-
-NOTEBOOK = args.notebook
-LABWARE = {'palette':args.palette,'pipette':args.pipette}
+args = vars(parser.parse_args())
