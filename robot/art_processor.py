@@ -70,13 +70,13 @@ def plate_location_map(coord):
 
     return x, y
 
-def add_labware(template_string, pipette, palette):
+def add_labware(template_string, labware):
     # replace labware placeholders with the proper Opentrons labware name, as specified in the arguments
-    tiprack = 'tiprack-200ul' if 'P300' in pipette else 'tiprack-10ul'
+    labware['tiprack'] = 'tiprack-200ul' if 'P300' in labware['pipette'] else 'tiprack-10ul'
     
-    procedure = template_string.replace('%%PALETTE GOES HERE%%', palette)
-    procedure = procedure.replace('%%PIPETTE GOES HERE%%', pipette)
-    procedure = procedure.replace('%%TIPRACK GOES HERE%%', tiprack)
+    procedure = template_string.replace('%%PALETTE GOES HERE%%', labware['palette'])
+    procedure = procedure.replace('%%PIPETTE GOES HERE%%', labware['pipette'])
+    procedure = procedure.replace('%%TIPRACK GOES HERE%%', labware['tiprack'])
     return procedure
 
 def add_canvas_locations(template_string, artpieces):
@@ -131,7 +131,7 @@ with session_scope() as session:
         with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
             template_string = template_file.read()
 
-        procedure = add_labware(template_string, **LABWARE)
+        procedure = add_labware(template_string, LABWARE)
         procedure, canvas_locations = add_canvas_locations(procedure, artpieces)
         procedure = add_pixel_locations(procedure, artpieces)
         procedure = add_color_map(procedure, colors)
