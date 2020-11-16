@@ -42,7 +42,7 @@ def distribute_to_agar(self, vol, source, destination, disposal_vol):
 p200rack = labware.load('tiprack-200ul', 10)
 
 # a 6-well plate for all of the colors in our pallette
-palette = labware.load('nunc_8_wellplate_flat', 11)
+palette = labware.load('%%PALETTE GOES HERE%%', 11)
 
 pixels_by_color_by_artpiece = %%PIXELS GO HERE%%
 canvas_locations = %%CANVAS LOCATIONS GO HERE%%

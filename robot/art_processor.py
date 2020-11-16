@@ -60,13 +60,16 @@ def plate_location_map(coord):
 
     return x, y
 
+def add_labware(template_string, palette):
+    # replace labware placeholders with the proper Opentrons labware name, as specified in the arguments
+    procedure = template_string.replace('%%PALETTE GOES HERE%%', palette)
+    return procedure
+
 def add_canvas_locations(template_string, artpieces):
     # write where canvas plates are to be placed into code
     canvas_locations = dict(zip([artpiece.slug for artpiece in artpieces], get_canvas_slot))
     procedure = template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
-
     return procedure, canvas_locations
-
 
 def add_pixel_locations(template_string, artpieces):
     # write where to draw pixels on each plate into code. Listed by color to reduce contamination
@@ -77,7 +80,6 @@ def add_pixel_locations(template_string, artpieces):
                 pixels_by_color[color] = dict()
             pixels_by_color[color][artpiece.slug] = [plate_location_map(pixel) for pixel in artpiece.art[color]]
     procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
-
     return procedure
 
 def add_color_map(template_string, colors):
@@ -115,7 +117,8 @@ with session_scope() as session:
         with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
             template_string = template_file.read()
 
-        procedure, canvas_locations = add_canvas_locations(template_string, artpieces)
+        procedure = add_labware(template_string, PALETTE)
+        procedure, canvas_locations = add_canvas_locations(procedure, artpieces)
         procedure = add_pixel_locations(procedure, artpieces)
         procedure = add_color_map(procedure, colors)
 
