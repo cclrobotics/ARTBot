@@ -10,7 +10,7 @@ from web.database.models import (ArtpieceModel, SubmissionStatus, BacterialColor
 from .processor_args import args
 
 NOTEBOOK = args.pop('notebook')
-LABWARE = vars(args) #assume unused args are all labware
+LABWARE = args #assume unused args are all labware
 
 APP_DIR = os.path.abspath(os.path.dirname(__file__))
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
