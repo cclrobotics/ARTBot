@@ -12,7 +12,17 @@ parser.add_argument('--notebook'
                     ,action='store_true'
                     ,help='Set this flag to output to a Jupyter Notebook instead of a .py file'
                     )
-NOTEBOOK = parser.parse_args().notebook
+parser.add_argument('--palette', '-pa'
+                    ,default='nunc_8_wellplate_flat'
+                    ,help='Optional argument to specify the kind of labware to use as the palette plate. Use Opentrons standard names.'
+                    )
+parser.add_argument('--pipette', '-pi'
+                    ,default='P10_Single'
+                    ,help='Optional argument to specify the pipette type. Use Opentrons standard names.'
+                    )
+args = parser.parse_args()
+NOTEBOOK = args.notebook
+LABWARE = {'palette':args.palette,'pipette':args.pipette}
 
 APP_DIR = os.path.abspath(os.path.dirname(__file__))
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
@@ -60,9 +70,13 @@ def plate_location_map(coord):
 
     return x, y
 
-def add_labware(template_string, palette):
+def add_labware(template_string, **kwargs):
     # replace labware placeholders with the proper Opentrons labware name, as specified in the arguments
+    tiprack = 'tiprack-200ul' if 'P300' in pipette else 'tiprack-10ul'
+    
     procedure = template_string.replace('%%PALETTE GOES HERE%%', palette)
+    procedure = procedure.replace('%%PIPETTE GOES HERE%%', pipette])
+    procedure = procedure.replace('%%TIPRACK GOES HERE%%', tiprack)
     return procedure
 
 def add_canvas_locations(template_string, artpieces):
@@ -117,7 +131,7 @@ with session_scope() as session:
         with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
             template_string = template_file.read()
 
-        procedure = add_labware(template_string, PALETTE)
+        procedure = add_labware(template_string, **LABWARE)
         procedure, canvas_locations = add_canvas_locations(procedure, artpieces)
         procedure = add_pixel_locations(procedure, artpieces)
         procedure = add_color_map(procedure, colors)
