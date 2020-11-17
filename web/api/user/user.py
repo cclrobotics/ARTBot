@@ -1,5 +1,5 @@
 import datetime as dt
-from web.database.models import (UserModel, ArtpieceModel, SubmissionStatus)
+from web.database.models import (UserModel, UserRole, ArtpieceModel, SubmissionStatus)
 
 
 _Model = UserModel
@@ -9,12 +9,12 @@ class User():
         self._model = model
 
     @classmethod
-    def _create(cls, email, created_at):
-        return cls(_Model(email=email, created_at=created_at).save())
+    def _create(cls, email, created_at, role):
+        return cls(_Model(email=email, created_at=created_at, role=role).save())
 
     @classmethod
     def from_email(cls, email):
-        return cls._create(email, dt.datetime.now())
+        return cls._create(email, dt.datetime.now(), list(UserRole)[0])
 
     @classmethod
     def get_by_email(cls, email):
@@ -37,3 +37,7 @@ class User():
     @property
     def email(self):
         return self._model.email
+
+    @property
+    def role(self):
+        return self._model.role

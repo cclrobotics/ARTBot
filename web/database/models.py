@@ -28,11 +28,19 @@ class ArtpieceModel(SurrogatePK, Model):
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.title)
 
+class UserRole(Enum):
+    artist = 'Artist'
+    printer = 'Printer'
+    admin = 'Admin'
+
 class UserModel(SurrogatePK, Model):
     __tablename__ = 'users'
 
     email = Column(db.String(50), nullable=False, index=True, unique=True)
     created_at = Column(db.DateTime(), nullable=False)
+    role = Column(
+            db.Enum(UserRole, values_callable=lambda x: [e.value for e in x])
+            , nullable=False, name='role', default='Artist')
     artpieces = relationship('ArtpieceModel', backref='user', lazy='dynamic')
 
     def __repr__(self):

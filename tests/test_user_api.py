@@ -13,6 +13,8 @@ def setup_app(test_app, test_database, clear_database):
 VALID_EMAIL = 'valid@mail.com'
 VALID_TITLE = 'valid title'
 VALID_ART = {'1': [[0,0]], '2': [[1,1]], '3': [[2,2]]}
+INITIAL_ROLE = 'Artist'
+
 
 def create_artpiece_data(email=VALID_EMAIL, title=VALID_TITLE, art=VALID_ART):
     return {'email': email, 'title': title, 'art': art}
@@ -25,6 +27,7 @@ def test_create_artpiece_by_new_user():
     artpiece = core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART)
     assert artpiece.title == VALID_TITLE
     assert artpiece.creator.email == VALID_EMAIL
+    assert artpiece.creator.role.value == INITIAL_ROLE
 
 @pytest.mark.usefixtures("setup_app")
 def test_monthly_submission_limit_exceeded():
