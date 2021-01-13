@@ -4,14 +4,6 @@ from .artpiece import Artpiece
 from web.extensions import cache
 import random
 
-#function to pull image off of database
-def pull_picture(id):
-    # handle invalid id
-    artpiece = Artpiece.get_by_id(id)
-    image = Image.frombytes("RGBX", (616, 414), artpiece.raw_image)
-    image.show()
-    return image
-
 @cache.memoize(timeout=3600)
 def get_image_description(image_path):
     with Image.open(image_path) as image:

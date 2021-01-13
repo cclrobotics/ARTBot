@@ -21,6 +21,10 @@ def about():
     img_list = get_gallery_images()
     return render_template('about.html', img_list=img_list, home_tag='', about_tag=' active')
 
+@main.route('/print', methods=('GET', ))
+def print():
+    return render_template('print.html')
+
 @main.route('/art_confirmation', methods=('GET', ))
 def art_confirmation():
     args = request.args

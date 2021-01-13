@@ -1,0 +1,26 @@
+<style>
+    td {
+    border: silver 1px dotted;
+    width: 200px;
+    text-align: center;
+    }
+
+    tr {
+        text-align: center;
+    }
+</style>
+
+<div id=grid style="display:block"></div>
+
+<br>
+<button>Download Print Protocol</button>
+
+<script src="/static/js/manage_art.js"></script>
+
+<!--I think it should be a modal that hits an API endpoint that send the json of the database, then constructs the table from that in Javascript
+    (I wonder if this there's a more code-efficient way of constructing that table) The reason to do it in a modal, at least, is that it allows
+    the data to be reloaded without reloading the page - so you could get subsets of data pretty easily, such as "Jobs" or "recently printed"
+
+    You will also need some endpoints for updating the db-->
+
+<!-- Next: Where does the JS go to build the table?-->

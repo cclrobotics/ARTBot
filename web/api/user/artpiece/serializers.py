@@ -12,8 +12,8 @@ class ArtpieceSchema(Schema):
             , values=fields.List(fields.Tuple((fields.Int(), fields.Int())))
             )
 
-    def __init__(self, valid_color_keys):
-        Schema.__init__(self)
+    def __init__(self, valid_color_keys, many=False):
+        Schema.__init__(self, many=many)
         self._valid_color_keys = valid_color_keys
 
     @validates('title')
@@ -35,3 +35,19 @@ class ArtpieceSchema(Schema):
 
     class meta:
         strict=True
+
+class PrintableSchema(Schema):
+    id = fields.Int()
+    title = fields.Str(missing=None)
+    user_id = fields.Int()
+    submit_date = fields.DateTime()
+    status = fields.Str()
+    art = fields.Dict(
+            missing=None
+            , keys=fields.Str()
+            , values=fields.List(fields.Tuple((fields.Int(), fields.Int())))
+            )
+    img_uri = fields.Function(lambda obj: '/artpieces/image/' + str(obj.id))
+
+    class Meta:
+        ordered = True
