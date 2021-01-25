@@ -1,11 +1,12 @@
+<link rel="stylesheet" href="/static/css/print-styles.css">
 {% extends 'base.html' %}
 {% block nav %}
     {% include 'nav.html' %}
 {% endblock %}
 {% block body %}
-    <!-- drawing section -->
+    <!-- print management section -->
     <section>
-	{% include 'management_grid.html' %}
+		<div id=grid></div>
     </section>
 
 	<!-- Modal -->
@@ -24,6 +25,7 @@
 		</div>
 	</div>
 
+	<script src="/static/js/manage_art.js"></script>
     <!--<script src="/static/js/print/view.js"></script>
     <script src="/static/js/print/presentation.js"></script>
     <script src="/static/js/print/model.js"></script>

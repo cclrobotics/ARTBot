@@ -26,6 +26,7 @@ function CreateTableFromJSON(printables) {
     for (var i = 0; i < col.length; i++) {
         var th = document.createElement("th");      // TABLE HEADER.
         th.innerHTML = col[i];
+        th.classList.add('print_grid');
         tr.appendChild(th);
     }
 
@@ -43,6 +44,7 @@ function CreateTableFromJSON(printables) {
                     tabCell.innerHTML = '<img src=' + printables[i][col[j]] + '>'
                 }
             }
+            tabCell.classList.add('print_grid');
         }
         var tabCell = tr.insertCell(-1);
         tabCell.innerHTML = '<input type="checkbox" id = ' + printables[i].id + '><label for="' + + printables[i].id + '"> Select to print</label>'
