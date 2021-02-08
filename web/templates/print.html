@@ -6,7 +6,9 @@
 {% block body %}
     <!-- print management section -->
     <section>
-		<div id=grid></div>
+		<div id=board-container>
+			<table class="job-board"></table>
+		</div>
     </section>
 
 	<!-- Modal -->
@@ -25,9 +27,8 @@
 		</div>
 	</div>
 
-	<script src="/static/js/manage_art.js"></script>
-    <!--<script src="/static/js/print/view.js"></script>
+	<script src="/static/js/print/model.js"></script>
+    <script src="/static/js/print/view.js"></script>
     <script src="/static/js/print/presentation.js"></script>
-    <script src="/static/js/print/model.js"></script>
-    <script src="/static/js/app.js"></script>-->
+    <script src="/static/js/print/app.js"></script>
 {% endblock %}

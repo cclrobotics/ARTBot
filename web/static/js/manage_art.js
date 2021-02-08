@@ -18,6 +18,7 @@ function CreateTableFromJSON(printables) {
 
     // CREATE DYNAMIC TABLE.
     var table = document.createElement("table");
+    table.classList.add('job-board');
 
     // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
 
@@ -26,7 +27,7 @@ function CreateTableFromJSON(printables) {
     for (var i = 0; i < col.length; i++) {
         var th = document.createElement("th");      // TABLE HEADER.
         th.innerHTML = col[i];
-        th.classList.add('print_grid');
+        th.classList.add('job-header');
         tr.appendChild(th);
     }
 
@@ -34,6 +35,7 @@ function CreateTableFromJSON(printables) {
     for (var i = 0; i < printables.length; i++) {
 
         tr = table.insertRow(-1);
+        tr.id = 'ID' + printables[i]['id'];
 
         for (var j = 0; j < col.length; j++) {
             var tabCell = tr.insertCell(-1);
@@ -44,7 +46,7 @@ function CreateTableFromJSON(printables) {
                     tabCell.innerHTML = '<img src=' + printables[i][col[j]] + '>'
                 }
             }
-            tabCell.classList.add('print_grid');
+            tabCell.classList.add('job-data');
         }
         var tabCell = tr.insertCell(-1);
         tabCell.innerHTML = '<input type="checkbox" id = ' + printables[i].id + '><label for="' + + printables[i].id + '"> Select to print</label>'

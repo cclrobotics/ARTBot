@@ -1,11 +1,18 @@
-td.print_grid {
+tr.job-data {
     border: silver 1px dotted;
-    width: 200px;
     text-align: center;
     background-color: white;
 }
 
-th.print_grid {
+td.job-data {
+    width: 200px;
+}
+
+img.job-data {
+    margin: 20px;
+}
+
+.job-header {
     text-align: center;
     background-color:deepskyblue;
 }

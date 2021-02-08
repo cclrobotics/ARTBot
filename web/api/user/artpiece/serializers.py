@@ -1,4 +1,4 @@
-from marshmallow import (fields, Schema, pre_load, validates)
+from marshmallow import (fields, Schema, pre_load, post_dump, validates)
 from marshmallow.validate import (Length, Regexp)
 from .validators import (validate_art_content_length, validate_color_keys, validate_pixels,
         validate_title)
