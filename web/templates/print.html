@@ -6,10 +6,38 @@
 {% block body %}
     <!-- print management section -->
     <section>
-		<div id=board-container>
-			<table class="job-board"></table>
+		<div class="d-flex justify-content-around mt-3">
+			<div class="board-container align-self-start text-center mx-3">
+				<div class="position-relative">
+					<div class="overflow-auto">
+						<table class="job-board"></table>
+					</div>
+				</div>
+			</div>
+		
+			<div id="sidebar-right" class="d-flex flex-column align-content-start mr-2">
+				<div id="submission-block" class="info-block p-3 text-center">
+					<div id="submission-error" class="w-100">
+						<span>
+							<i class="fas fa-times" style="font-size: 2rem; color: Tomato;"></i>
+						</span>
+						<p class="content"></p>
+					</div>
+					<form class="print-submit">
+						<button type="submit" class="btn submit-button btn-sm">
+							<strong>Request Print Protocol</strong>
+						</button>
+					</form>
+					<hr>
+					<div id="selected-jobs">
+						<div id="selected-jobs-placeholder">
+							[Click A Row To Select]
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
-    </section>
+	</section>
 
 	<!-- Modal -->
 	<div class="modal fade" id="error-modal" tabindex="-1" role="dialog" aria-labelledby="errorModal" aria-hidden="true">

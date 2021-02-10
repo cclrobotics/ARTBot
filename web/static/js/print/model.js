@@ -94,9 +94,12 @@ app.model = function() {
 		, noneSelected: function() {
 			return jobs.selected.length == 0;
 		}
+		, get_img_url: function(id) {
+			return jobs.data[id].img_uri;
+		}
 		, submit: function(user) { //TODO: Log user as the printer
 			$.ajax({
-				url: 'make_procedure'
+				url: 'procedure_request'
 				, type: 'POST'
 				, data: JSON.stringify({
 					'ids': jobs.selected

@@ -66,3 +66,16 @@ def get_print_jobs():
 def get_artpiece_image(id):
     img_file = Artpiece.get_by_id(id).get_image_as_jpg(size=(223,150))
     return send_file(img_file, mimetype='image/jpg', as_attachment=False)
+
+@artpiece_blueprint.route('/procedure_request', methods=('POST', ))
+def receive_print_request():
+    #First check user validity and key
+
+    #get json and send to procedure generator. Procedure object necessary?
+
+    #return file that was generated
+    my_json = request.get_json() #test
+
+    my_json['received'] = True #test
+
+    return jsonify(my_json), 201

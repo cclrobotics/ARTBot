@@ -11,15 +11,19 @@ app.view = function($, model) {
 		, printSubmit: $('.print-submit>.submit-button')
 		, jobBoard: $('.job-board')
 		, jobHeader: $('.job-header')
-		, boardContainer: $('#board-container')
+		, boardContainer: $('.board-container')
+		, selectedJobList: $('#selected-jobs')
+		, selectedJobsPlaceholder: $('#selected-jobs-placeholder')
 		, successModal: $('#success-modal')
 		, errorModal: $('#error-modal')
 		, errorBody: $('#error-modal').find('.error-msg')
 		, expand: $('.expand')
 	}
 
-	const columnDisplay = {
-		'img_uri': function(val){return '<img class="job-data" src=' + val + '>';}
+	const columnDisplay = { //using arrow functions for readability
+		'img_uri': (val) => '<img class="job-data" src=' + val + '>'
+		,'status': (val) => val.split("SubmissionStatus.")[1]
+		,'submit_date': (val) => val.split("T")[0] + "<br>" + val.split("T")[1].split(".")[0]
 	}
 
 	// Initialise tooltips
@@ -27,7 +31,7 @@ app.view = function($, model) {
 
 	that.board = function(board) {
 		let that = {};
-		const jobs = board.find('tr');
+		const jobs = board.find('tr.job-data');
 
 		function make_element(ele_type, payload, ele_class, ele_id){
 			let opening = '<' + ele_type
@@ -119,6 +123,32 @@ app.view = function($, model) {
 
 		return that;
 	}(DOM.jobBoard);
+
+	that.selectedJobList = function(selectedJobList, selectedJobsPlaceholder) {
+		let that = {};
+
+		that.showPlaceholder = function() {
+			selectedJobsPlaceholder.show();
+		}
+
+		that.addJob = function(job_id, job_url){
+			selectedJobsPlaceholder.hide();
+			selectedJobList.append(
+				`<div id=ID${job_id}>
+					<br>
+					<span class='list-label'> ID ${job_id} | </span>
+					<img class='list-img' src=${job_url}>
+				</div>`
+			)
+		}
+
+		that.removeJob = function(job_id){
+			let to_remove = selectedJobList.find("div#ID" + job_id);
+			to_remove.remove();
+		}
+
+		return that;
+	}(DOM.selectedJobList, DOM.selectedJobsPlaceholder)
 
 	that.successModal = function(modal) {
 		let that = {};

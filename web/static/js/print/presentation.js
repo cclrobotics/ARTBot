@@ -15,6 +15,8 @@ app.presentation = function(view, model) {
 		'joblist_empty': 'Select a job to manage'
 	};
 
+	const emptyJobListMessage = '[Click A Row To Select]';
+
 
 	function isEmptyJobList() {
 		return model.jobs.noneSelected();
@@ -23,11 +25,12 @@ app.presentation = function(view, model) {
 	function enableSubmit() {
 		if (!isEmptyJobList()) {
 			view.submit.enable();
+			view.errorOverlay.hide();
 			isSubmitDisabled = false;
 		}
 	}
 
-	function view_action_by_id(action, id) {
+	function ui_action_by_id(action, id) {
 		if(['select','unselect','hover', 'unhover'].includes(action)){
 			let job = view.board.getJob(id);
 			view.board[action](job);
@@ -37,10 +40,14 @@ app.presentation = function(view, model) {
 	view.board.register.onClick(function(job) {
 		if (model.jobs.isSelected(job)) {
 			model.jobs.unselect(job);
-			view_action_by_id('unselect', job);
+			ui_action_by_id('unselect', job);
+			view.selectedJobList.removeJob(job);
+			if(model.jobs.noneSelected()){view.selectedJobList.showPlaceholder();}
 		} else {
 			model.jobs.select(job);
-			view_action_by_id('select', job);
+			img_url = model.jobs.get_img_url(job);
+			ui_action_by_id('select', job);
+			view.selectedJobList.addJob(job, img_url);
 			if (isSubmitDisabled) { enableSubmit(); }
 		}
 	});
