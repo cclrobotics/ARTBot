@@ -99,7 +99,7 @@ def add_color_map(template_string, colors):
     procedure = template_string.replace('%%COLORS GO HERE%%', str(color_map))
     return procedure
 
-def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI, num_pieces = 9, option_args = None): 
+def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI = None, num_pieces = 9, option_args = None): 
     NOTEBOOK, LABWARE = read_args(option_args)
     APP_DIR, SQLALCHEMY_DATABASE_URI = initiate_environment(SQLALCHEMY_DATABASE_URI)
     Session = initiate_sql(SQLALCHEMY_DATABASE_URI)
@@ -110,7 +110,7 @@ def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI, num_pieces = 9, option
         query_filter = (ArtpieceModel.status == SubmissionStatus.submitted
                        ,ArtpieceModel.confirmed == True
                        )
-        if artpiece_ids: query_filter += (ArtpieceModel.id in artpiece_ids,)
+        if artpiece_ids: query_filter += (ArtpieceModel.id.in_(artpiece_ids),)
 
         artpieces = (session.query(ArtpieceModel)
                 .filter(*query_filter)
@@ -120,6 +120,7 @@ def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI, num_pieces = 9, option
 
         if not artpieces:
             output_msg.append('No new art found. All done.')
+            return output_msg, None
         else:
             output_msg.append(f'Loaded {len(artpieces)} pieces of art')
             for artpiece in artpieces:
@@ -146,7 +147,7 @@ def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI, num_pieces = 9, option
             for artpiece in artpieces:
                 artpiece.status = SubmissionStatus.processed
 
-            output_msg.append(f'Successfully generated artistic procedure into: ARTBot/robot/procedures/{unique_file_name}')
+            output_msg.append('Successfully generated artistic procedure')
             output_msg.append('The following slots will be used:')
             output_msg.append('\n'.join([f'Slot {str(canvas_locations[key])}: "{key}"' for key in canvas_locations]))
-    return output_msg, f'ARTBot/robot/procedures/{unique_file_name}'
+    return output_msg, ['ARTBot/robot/procedures/',unique_file_name]

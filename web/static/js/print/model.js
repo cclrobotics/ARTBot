@@ -43,6 +43,16 @@ app.model = function() {
 			}
 		}
 
+		that.reset = function() {
+			selected.length = 0;
+		}
+
+		that.clear = function() {
+			for(key in data){
+				delete data[key];
+			}
+		}
+
 		that.selected = selected;
 
 		that.data = data;
@@ -58,6 +68,7 @@ app.model = function() {
 				url: 'print_jobs'
 				, type: 'GET'
 				, dataType: 'json'
+				, cache: 'false'
 			})
 			.done(function(data, textStatus, jqXHR) {
 				jobs.load(JSON.parse(data.data));
@@ -87,6 +98,12 @@ app.model = function() {
 		}
 		, unselect: function(id) {
 			jobs.unselect(id);
+		}
+		, reset: function() {
+			jobs.reset();
+		}
+		, clear: function() {
+			jobs.clear();
 		}
 		, isSelected(id) {
 			return jobs.selected.includes(id);

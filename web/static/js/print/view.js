@@ -89,6 +89,10 @@ app.view = function($, model) {
 			}
 		};
 
+		that.clear = function() {
+			board.html("");
+		}
+
 		that.getJob = function(id) {
 			return board.find('tr#ID'+id);
 		};
@@ -147,6 +151,13 @@ app.view = function($, model) {
 			to_remove.remove();
 		}
 
+		that.clear = function(){
+			selectedJobsPlaceholder.detach();
+			selectedJobList.html("");
+			selectedJobList.prepend(selectedJobsPlaceholder);
+			selectedJobsPlaceholder.show();
+		}
+
 		return that;
 	}(DOM.selectedJobList, DOM.selectedJobsPlaceholder)
 
@@ -156,6 +167,14 @@ app.view = function($, model) {
 		that.show = function() {
 			modal.modal();
 		};
+
+		that.update = function(msg,link) {
+			let msg_space = modal.find("p#output-messages");
+			msg_space.html(msg.join('<br>'));
+
+			modal.on('click', '#procedure-link', function(){document.location=link});
+		};
+
 		that.register = {
 			onHide: function(handler) {
 				modal.on('hide.bs.modal', handler);

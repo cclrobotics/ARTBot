@@ -66,8 +66,11 @@ app.presentation = function(view, model) {
 	});
 
 	view.successModal.register.onHide(function() {
-		view.board.reset();
+		view.board.clear();
+		view.selectedJobList.clear();
+		model.jobs.clear();
 		model.jobs.reset();
+		model.jobs.get();
 	});
 
 	function createJobBoard(printables) {
@@ -109,6 +112,7 @@ app.presentation = function(view, model) {
 			if (action.error) {
 				view.warningModal.show(errorsToMessage(action.payload));
 			} else {
+				view.successModal.update(action.payload.msg, action.payload.procedure_uri)
 				view.submissionModal.hide();
 				view.successModal.show();
 			}

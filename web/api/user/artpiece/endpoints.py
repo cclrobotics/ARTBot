@@ -8,6 +8,7 @@ from ..colors import (get_available_color_mapping, get_available_colors_as_dicts
 from .artpiece import Artpiece
 from .serializers import ArtpieceSchema, PrintableSchema
 from web.extensions import db
+from robot.art_processor import make_procedure
 
 import base64
 
@@ -67,15 +68,29 @@ def get_artpiece_image(id):
     img_file = Artpiece.get_by_id(id).get_image_as_jpg(size=(223,150))
     return send_file(img_file, mimetype='image/jpg', as_attachment=False)
 
+@artpiece_blueprint.route('/procedures/<string:id>', methods=('GET', ))
+def get_procedure_file(id):
+    #TODO Require a token in additon to the unique_id
+    
+    procedure_file = f'/usr/src/app/robot/procedures/ARTISTIC_PROCEDURE_{id}'
+
+    return send_file(procedure_file, mimetype='text/plain', as_attachment=True)
+
 @artpiece_blueprint.route('/procedure_request', methods=('POST', ))
 def receive_print_request():
-    #First check user validity and key
+    #TODO First check user validity and key
 
-    #get json and send to procedure generator. Procedure object necessary?
+    artpiece_ids = request.get_json()['ids']
 
-    #return file that was generated
-    my_json = request.get_json() #test
+    msg, procedure_loc = make_procedure(artpiece_ids)
 
-    my_json['received'] = True #test
+    if procedure_loc:
+        unique_id = procedure_loc[1].split('_')[-1]
+        procedure_uri = f'/procedures/{unique_id}'
+    else:
+        procedure_uri = None
+        #set an error to return to client here
+    
+    #TODO send an access token with the uri
 
-    return jsonify(my_json), 201
+    return jsonify({'msg':msg, 'procedure_uri':procedure_uri}), 201
