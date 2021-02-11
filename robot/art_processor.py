@@ -7,20 +7,30 @@ from contextlib import contextmanager
 
 from web.database.models import (ArtpieceModel, SubmissionStatus, BacterialColorModel)
 
-from .processor_args import args
+def read_args(args):
+    if not args: args = {'notebook':False
+                        ,'palette':'nunc_8_wellplate_flat'
+                        ,'pipette':'P10_Single'
+                        }
+    NOTEBOOK = args.pop('notebook')
+    LABWARE = args #assume unused args are all labware
+    return NOTEBOOK, LABWARE
 
-NOTEBOOK = args.pop('notebook')
-LABWARE = args #assume unused args are all labware
+def initiate_environment(SQLALCHEMY_DATABASE_URI = None):
+    APP_DIR = os.path.abspath(os.path.dirname(__file__))
+    if not SQLALCHEMY_DATABASE_URI:
+        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+        if not SQLALCHEMY_DATABASE_URI:
+            raise Exception('Database URI expected in env vars or passed explcitly')
+    return APP_DIR, SQLALCHEMY_DATABASE_URI
 
-APP_DIR = os.path.abspath(os.path.dirname(__file__))
-SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-if not SQLALCHEMY_DATABASE_URI:
-    SQLALCHEMY_DATABASE_URI = input('Enter Database Url: ')
-SQL_ENGINE = sa.create_engine(SQLALCHEMY_DATABASE_URI)
-Session = sessionmaker(bind=SQL_ENGINE)
+def initiate_sql(SQLALCHEMY_DATABASE_URI):
+    SQL_ENGINE = sa.create_engine(SQLALCHEMY_DATABASE_URI)
+    Session = sessionmaker(bind=SQL_ENGINE)
+    return Session
 
 @contextmanager
-def session_scope():
+def session_scope(Session):
     """Provide transactional scope around a series of operations."""
     session = Session()
     try:
@@ -89,49 +99,54 @@ def add_color_map(template_string, colors):
     procedure = template_string.replace('%%COLORS GO HERE%%', str(color_map))
     return procedure
 
-num_pieces = 0
-while num_pieces not in range(1,10):
-    try:
-        num_pieces = int(input("How much art? (1-9) "))
-    except:
-        num_pieces = 0
+def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI, num_pieces = 9, option_args = None): 
+    NOTEBOOK, LABWARE = read_args(option_args)
+    APP_DIR, SQLALCHEMY_DATABASE_URI = initiate_environment(SQLALCHEMY_DATABASE_URI)
+    Session = initiate_sql(SQLALCHEMY_DATABASE_URI)
 
-with session_scope() as session:
-    artpieces = (session.query(ArtpieceModel).filter(
-            ArtpieceModel.status == SubmissionStatus.submitted
-            , ArtpieceModel.confirmed == True)
-            .order_by(ArtpieceModel.submit_date.asc())
-            .limit(num_pieces)
-            .all())
+    with session_scope(Session) as session:
+        output_msg = []
+        
+        query_filter = (ArtpieceModel.status == SubmissionStatus.submitted
+                       ,ArtpieceModel.confirmed == True
+                       )
+        if artpiece_ids: query_filter += (ArtpieceModel.id in artpiece_ids,)
 
-    if not artpieces:
-        print('No new art found. All done.')
-    else:
-        print(f'Loaded {len(artpieces)} pieces of art')
-        for artpiece in artpieces:
-            print(f"{artpiece.id}: {artpiece.title}, {artpiece.submit_date}")
+        artpieces = (session.query(ArtpieceModel)
+                .filter(*query_filter)
+                .order_by(ArtpieceModel.submit_date.asc())
+                .limit(num_pieces)
+                .all())
 
-        # Get all colors
-        colors = session.query(BacterialColorModel).all()
+        if not artpieces:
+            output_msg.append('No new art found. All done.')
+        else:
+            output_msg.append(f'Loaded {len(artpieces)} pieces of art')
+            for artpiece in artpieces:
+                output_msg.append(f"{artpiece.id}: {artpiece.title}, {artpiece.submit_date}")
 
-        #Get Python art procedure template
-        file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
-        with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
-            template_string = template_file.read()
+            # Get all colors
+            colors = session.query(BacterialColorModel).all()
 
-        procedure = add_labware(template_string, LABWARE)
-        procedure, canvas_locations = add_canvas_locations(procedure, artpieces)
-        procedure = add_pixel_locations(procedure, artpieces)
-        procedure = add_color_map(procedure, colors)
+            #Get Python art procedure template
+            file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
+            with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
+                template_string = template_file.read()
 
-        now = datetime.now().strftime("%Y%m%d-%H%M%S")
-        unique_file_name = f'ARTISTIC_PROCEDURE_{now}.{file_extension}'
-        with open(os.path.join(APP_DIR,'procedures',unique_file_name),'w') as output_file:
-            output_file.write(procedure)
+            procedure = add_labware(template_string, LABWARE)
+            procedure, canvas_locations = add_canvas_locations(procedure, artpieces)
+            procedure = add_pixel_locations(procedure, artpieces)
+            procedure = add_color_map(procedure, colors)
 
-        for artpiece in artpieces:
-            artpiece.status = SubmissionStatus.processed
+            now = datetime.now().strftime("%Y%m%d-%H%M%S")
+            unique_file_name = f'ARTISTIC_PROCEDURE_{now}.{file_extension}'
+            with open(os.path.join(APP_DIR,'procedures',unique_file_name),'w') as output_file:
+                output_file.write(procedure)
 
-        print(f'Successfully generated artistic procedure into: ARTBot/robot/procedures/{unique_file_name}')
-        print('The following slots will be used:')
-        print('\n'.join([f'Slot {str(canvas_locations[key])}: "{key}"' for key in canvas_locations]))
+            for artpiece in artpieces:
+                artpiece.status = SubmissionStatus.processed
+
+            output_msg.append(f'Successfully generated artistic procedure into: ARTBot/robot/procedures/{unique_file_name}')
+            output_msg.append('The following slots will be used:')
+            output_msg.append('\n'.join([f'Slot {str(canvas_locations[key])}: "{key}"' for key in canvas_locations]))
+    return output_msg, f'ARTBot/robot/procedures/{unique_file_name}'
