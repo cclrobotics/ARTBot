@@ -1,10 +1,11 @@
 import os
 from PIL import Image
 from .artpiece import Artpiece
-from web.extensions import cache
+from web.extensions import cache, jwt
 import random
 
 from flask_jwt_extended import jwt_required, create_access_token, get_current_user
+from functools import wraps
 
 @cache.memoize(timeout=3600)
 def get_image_description(image_path):
