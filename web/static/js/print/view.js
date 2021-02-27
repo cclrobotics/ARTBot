@@ -17,6 +17,9 @@ app.view = function($, model) {
 		, successModal: $('#success-modal')
 		, errorModal: $('#error-modal')
 		, errorBody: $('#error-modal').find('.error-msg')
+		, loginModal: $('#login-modal')
+		, loginMsg: $('#login-msg')
+		, loginForm: $('#login-form')
 		, expand: $('.expand')
 	}
 
@@ -211,6 +214,51 @@ app.view = function($, model) {
 		}
 		return that;
 	}(DOM.errorModal, DOM.errorBody);
+
+	that.login = function(modal, msg, form) {
+		let that = {};
+
+		let user_input = form.find('#login-username')
+		let password_input = form.find('#login-password')
+
+		that.show = function() {
+			modal.modal({'backdrop':'static'});
+		}
+
+		that.hide = function() {
+			modal.modal('hide');
+		}
+
+		that.fail = function(message) {
+			msg.text(message);
+			user_input.addClass('has-error');
+			password_input.addClass('has-error');
+		}
+
+		that.reset = function(message) {
+			user_input.removeClass('has-error');
+			password_input.removeClass('has-error');
+		}
+
+		that.register = {
+			onSubmit: function(handler) {
+				form.on('submit', function(event) {
+					event.preventDefault();
+					handler(user_input[0].value, password_input[0].value);
+				});
+			}
+			, onChange: function(handler) {
+				user_input.on('change', function(event) {
+					handler();
+				});
+				password_input.on('change', function(event) {
+					handler();
+				});
+			}
+		}
+
+		return that;
+	}(DOM.loginModal, DOM.loginMsg, DOM.loginForm);
 
 	that.submit = function(submit) {
 		let that = {};

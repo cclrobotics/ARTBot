@@ -1,7 +1,6 @@
 import datetime as dt
 from web.database.models import (UserModel, UserRole, ArtpieceModel, SubmissionStatus)
 
-
 _Model = UserModel
 
 class User():
@@ -33,7 +32,7 @@ class User():
     def has_active_submission(self):
         return self._model.artpieces.filter(
                 ArtpieceModel.status == SubmissionStatus.submitted).count() > 0
-
+   
     @property
     def email(self):
         return self._model.email

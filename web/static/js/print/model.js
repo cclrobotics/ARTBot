@@ -60,16 +60,38 @@ app.model = function() {
 		return that;
 	}
 
+	function User() {
+		let that = {};
+		const access_token = {};
+
+		that.set_token = function(token) {
+			access_token['token'] = token;
+		}
+
+		that.get_token = function(token) {
+			return access_token['token'];
+		}
+
+		return that;
+	} 
+
 	let jobs = Jobs();
+	let user = User();
 
 	that.jobs = {
 		get: function() {
-			$.ajax({
+			ajax_params = {
 				url: 'print_jobs'
 				, type: 'GET'
 				, dataType: 'json'
 				, cache: 'false'
-			})
+			}
+			if(user.get_token() != null){
+				ajax_params['headers'] = {
+					Authorization: "Bearer " + user.get_token()
+				}
+			}
+			$.ajax(ajax_params)
 			.done(function(data, textStatus, jqXHR) {
 				jobs.load(JSON.parse(data.data));
 				let job_data = jobs.data
@@ -82,15 +104,16 @@ app.model = function() {
 				});
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
-				jobs.load(JSON.parse(data.data));
-				let job_data = jobs.data
-				subject.notifyObservers({
-					type: 'JOB_DATA'
-					, error: false
-					, payload: {
-						job_data
-					}
-				});
+				if(jqXHR.status==401){
+					subject.notifyObservers({
+						type: 'LOGIN_REQUIRED'
+					})
+				if(jqXHR.status==403){
+					subject.notifyObservers({
+						type: 'NOT_AUTHORIZED'
+					})
+				};
+				};
 			});
 		}
 		, select: function(id) {
@@ -141,6 +164,41 @@ app.model = function() {
 		}
 
 	};
+
+	that.user = {
+		login: function(username, password) {
+			$.ajax({
+				url: 'user/login'
+				, type: 'POST'
+				, data: JSON.stringify({
+					'username': username
+					, 'password': password
+				})
+				, contentType: 'application/json'
+				, dataType: 'json'
+			})
+			.done(function(data, textStatus, jqXHR) {
+				subject.notifyObservers({
+					type: 'LOGIN'
+					, error: false
+					, payload: data
+				});
+			})
+			.fail(function(jqXHR, textStatus, errorThrown) {
+				subject.notifyObservers({
+					type: 'LOGIN_FAIL'
+					, error: true
+					, payload: jqXHR.responseJSON.errors
+				});
+			});
+		}
+		,set_token: function(token){
+			user.set_token(token);
+		}
+		,get_token: function(){
+			return user.access_token;
+		}
+	}
 
 	that.register = function(...args) {
 		args.forEach(elem => {

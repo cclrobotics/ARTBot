@@ -4,6 +4,8 @@ from .artpiece import Artpiece
 from web.extensions import cache
 import random
 
+from flask_jwt_extended import jwt_required, create_access_token, get_current_user
+
 @cache.memoize(timeout=3600)
 def get_image_description(image_path):
     with Image.open(image_path) as image:
@@ -33,3 +35,19 @@ def get_gallery_images():
     random.shuffle(image_metadata)
 
     return image_metadata
+
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    user = jwt_data['sub']
+    return user
+
+def admin_required(level):
+    def outer(func):
+        @wraps(func)
+        def inner(*args, **kwargs):
+            if get_current_user() == 'test':
+                return jsonify({'msg': 'admin access required',
+                                'user': get_current_user()}), 403
+            return func(*args, **kwargs)
+        return inner
+    return outer

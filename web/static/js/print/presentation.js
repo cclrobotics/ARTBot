@@ -17,6 +17,13 @@ app.presentation = function(view, model) {
 
 	const emptyJobListMessage = '[Click A Row To Select]';
 
+	const loginFailMessage = "That didn't work. Server says: "
+
+	const notAuthorizedMessage = "Sorry, we haven't cleared you for printing artpieces "
+								+ "yet. If you've got a robot and you want to join us in "
+								+ "printing bioart just to make people happy, send us an "
+								+ "email at ccl.artbot@gmail.com and we'll get you sorted."
+
 
 	function isEmptyJobList() {
 		return model.jobs.noneSelected();
@@ -52,6 +59,21 @@ app.presentation = function(view, model) {
 		}
 	});
 
+	view.successModal.register.onHide(function() {
+		view.board.clear();
+		view.selectedJobList.clear();
+		model.jobs.clear();
+		model.jobs.reset();
+		model.jobs.get();
+	});
+
+	view.login.register.onSubmit(function(user, password) {
+		model.user.login(user, password)
+	});
+	view.login.register.onChange(function() {
+		view.login.reset();
+	});
+	
 	view.submit.register.onClick(function() {
 		if (!isSubmitDisabled) {
 			isSubmitDisabled = true;
@@ -63,14 +85,6 @@ app.presentation = function(view, model) {
 			return;
 		}
 		model.jobs.submit('TEST_USER'); //TODO: Replace with logged-in user
-	});
-
-	view.successModal.register.onHide(function() {
-		view.board.clear();
-		view.selectedJobList.clear();
-		model.jobs.clear();
-		model.jobs.reset();
-		model.jobs.get();
 	});
 
 	function createJobBoard(printables) {
@@ -105,7 +119,21 @@ app.presentation = function(view, model) {
 	}
 
 	let notificationHandlers = {
-		'JOB_DATA': function(action) {
+		'LOGIN_REQUIRED' : function(action) {
+			view.login.show()
+		}
+		,'LOGIN_FAIL' : function(action) {
+			view.login.fail(loginFailMessage + action.payload)
+		}
+		, 'LOGIN' : function(action) {
+			view.login.hide();
+			model.user.set_token(action.payload.access_token);
+			model.jobs.get();
+		} 
+		, 'NOT_AUTHORIZED' : function(action) {
+			view.warningModal.show(notAuthorizedMessage)
+		}
+		, 'JOB_DATA': function(action) {
 			createJobBoard(action.payload.job_data);
 		}
 		, 'PRINT_REQ_SUBMIT': function(action) {
