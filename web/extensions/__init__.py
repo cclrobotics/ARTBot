@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy, Model
 from flask_mail import Mail
 from flask_caching import Cache
 from flask_jwt_extended import JWTManager
+from .jwt_config import user_lookup_callback
 
 class CRUDMixin(Model):
     """Mixin that adds convenience methods for CRUD (create, read, update, delete) operations."""
@@ -40,3 +41,5 @@ migrate = Migrate()
 mail = Mail()
 cache = Cache()
 jwt = JWTManager()
+
+jwt.user_lookup_loader(user_lookup_callback)

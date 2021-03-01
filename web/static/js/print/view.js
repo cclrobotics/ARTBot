@@ -20,6 +20,7 @@ app.view = function($, model) {
 		, loginModal: $('#login-modal')
 		, loginMsg: $('#login-msg')
 		, loginForm: $('#login-form')
+		, userLabel: $("#user-label")
 		, expand: $('.expand')
 	}
 
@@ -161,6 +162,10 @@ app.view = function($, model) {
 			selectedJobsPlaceholder.show();
 		}
 
+		that.disable = function() {
+			selectedJobList.html("");
+		}
+
 		return that;
 	}(DOM.selectedJobList, DOM.selectedJobsPlaceholder)
 
@@ -260,6 +265,20 @@ app.view = function($, model) {
 		return that;
 	}(DOM.loginModal, DOM.loginMsg, DOM.loginForm);
 
+	that.userLabel = function(label) {
+		let that = {};
+
+		that.update = function(user) {
+			label.html("<b>Logged-in as:</b><br>" + user);
+		};
+
+		that.clear = function() {
+			label.text = null;
+		};
+		
+		return that;
+	}(DOM.userLabel);
+	
 	that.submit = function(submit) {
 		let that = {};
 		that.disable = function() {

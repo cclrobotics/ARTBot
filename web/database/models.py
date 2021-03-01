@@ -3,7 +3,8 @@ import datetime as dt
 from collections import namedtuple
 from enum import Enum
 from .database import (Model, SurrogatePK, db, Column,
-                              reference_col, relationship, deferred, composite)
+                              reference_col, relationship, deferred, composite,
+                              OrderedEnum)
 
 class SubmissionStatus(Enum):
     submitted = 'Submitted'
@@ -28,7 +29,7 @@ class ArtpieceModel(SurrogatePK, Model):
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.title)
 
-class UserRole(Enum):
+class UserRole(OrderedEnum):
     artist = 'Artist'
     printer = 'Printer'
     admin = 'Admin'
@@ -42,6 +43,7 @@ class UserModel(SurrogatePK, Model):
             db.Enum(UserRole, values_callable=lambda x: [e.value for e in x])
             , nullable=False, name='role', default='Artist')
     artpieces = relationship('ArtpieceModel', backref='user', lazy='dynamic')
+    password_hash = Column(db.String(128), nullable=True)
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.email)

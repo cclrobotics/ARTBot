@@ -1,6 +1,6 @@
 from flask import (Blueprint, request, current_app, jsonify, send_file)
 from flask_jwt_extended import jwt_required, create_access_token
-from .exceptions import InvalidUsage
+from .exceptions import InvalidUsage, error_template
 from .user import User
 from web.extensions import db
 
@@ -15,8 +15,10 @@ user_blueprint = Blueprint('user', __name__, url_prefix='/user')
 def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
-    if username != "test" or password != "test":
-        return jsonify({"errors": "Bad username or password"}), 401
 
-    access_token = create_access_token(identity=username)
-    return jsonify(access_token=access_token.decode(), user=username)
+    user = User.get_by_email(username)
+    if user is None or not user.is_password_valid(password):
+        raise InvalidUsage.bad_login()
+
+    access_token = create_access_token(identity=user.id)
+    return jsonify(access_token=access_token.decode(), user=user.email)

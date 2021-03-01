@@ -1,6 +1,6 @@
 from collections import namedtuple
 from time import time
-import jwt
+import jwt as pyjwt #avoiding namespace collisions with flask_jwt_extended. TODO handle this functionality with flask_jwt_extended
 import io
 import json
 import datetime as dt
@@ -105,12 +105,12 @@ class Artpiece():
         return loc
 
     def get_confirmation_token(self, expires_in=60*60*72):
-        return jwt.encode(
+        return pyjwt.encode(
                 {'confirm_artpiece': self._model.id, 'exp': time() + expires_in}
                 , current_app.config['JWT_SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     def verify_confirmation_token(self, token):
-        id = jwt.decode(token, current_app.config['JWT_SECRET_KEY']
+        id = pyjwt.decode(token, current_app.config['JWT_SECRET_KEY']
                 , algorithms=['HS256'])['confirm_artpiece']
         if self._model_id != id:
             raise TokenIDMismatchError()

@@ -127,11 +127,14 @@ app.presentation = function(view, model) {
 		}
 		, 'LOGIN' : function(action) {
 			view.login.hide();
+			view.userLabel.update(action.payload.user);
 			model.user.set_token(action.payload.access_token);
 			model.jobs.get();
 		} 
 		, 'NOT_AUTHORIZED' : function(action) {
-			view.warningModal.show(notAuthorizedMessage)
+			view.warningModal.show(notAuthorizedMessage);
+			view.selectedJobList.disable();
+			view.submit.disable();
 		}
 		, 'JOB_DATA': function(action) {
 			createJobBoard(action.payload.job_data);

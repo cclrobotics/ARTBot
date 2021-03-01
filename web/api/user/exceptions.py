@@ -4,6 +4,8 @@ def error_template(code, title):
     return {'errors': [{'code': code, 'title': title}]}
 
 _NOT_FOUND = error_template('not_found', 'resource not found')
+_BAD_LOGIN = error_template('bad_credentials', 'bad username or password')
+_FORBIDDEN = error_template('forbidden', 'user does not have access')
 
 class InvalidUsage(Exception):
     status_code = 400
@@ -22,6 +24,14 @@ class InvalidUsage(Exception):
     @classmethod
     def resource_not_found(cls):
         return cls(_NOT_FOUND, status_code=404)
+
+    @classmethod
+    def bad_login(cls):
+        return cls(_BAD_LOGIN, status_code=403)
+
+    @classmethod
+    def forbidden(cls):
+        return cls(_FORBIDDEN, status_code=403)
 
     @classmethod
     def from_validation_error(cls, err):

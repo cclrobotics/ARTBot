@@ -108,11 +108,11 @@ app.model = function() {
 					subject.notifyObservers({
 						type: 'LOGIN_REQUIRED'
 					})
+				};
 				if(jqXHR.status==403){
 					subject.notifyObservers({
 						type: 'NOT_AUTHORIZED'
 					})
-				};
 				};
 			});
 		}
