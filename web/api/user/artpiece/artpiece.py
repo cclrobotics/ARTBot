@@ -1,6 +1,5 @@
 from collections import namedtuple
 from time import time
-import jwt as pyjwt #avoiding namespace collisions with flask_jwt_extended. TODO handle this functionality with flask_jwt_extended
 import io
 import json
 import datetime as dt
@@ -9,6 +8,7 @@ import re
 from PIL import Image, ImageDraw
 from slugify import slugify
 from flask import current_app
+from flask_jwt_extended import create_access_token, decode_token
 from web.database.models import ArtpieceModel, SubmissionStatus
 from web.api.user.colors import get_available_color_mapping
 
@@ -105,13 +105,13 @@ class Artpiece():
         return loc
 
     def get_confirmation_token(self, expires_in=60*60*72):
-        return pyjwt.encode(
-                {'confirm_artpiece': self._model.id, 'exp': time() + expires_in}
-                , current_app.config['JWT_SECRET_KEY'], algorithm='HS256').decode('utf-8')
+        return create_access_token(
+                identity = {'confirm_artpiece': self._model.id, 'exp': time() + expires_in},
+                expires_delta = dt.timedelta(seconds = expires_in)
+                )
 
     def verify_confirmation_token(self, token):
-        id = pyjwt.decode(token, current_app.config['JWT_SECRET_KEY']
-                , algorithms=['HS256'])['confirm_artpiece']
+        id = decode_token(token, allow_expired=False)['sub']['confirm_artpiece']
         if self._model_id != id:
             raise TokenIDMismatchError()
 

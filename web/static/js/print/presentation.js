@@ -123,7 +123,7 @@ app.presentation = function(view, model) {
 			view.login.show()
 		}
 		,'LOGIN_FAIL' : function(action) {
-			view.login.fail(loginFailMessage + action.payload)
+			view.login.fail(loginFailMessage + action.payload[0].title)
 		}
 		, 'LOGIN' : function(action) {
 			view.login.hide();

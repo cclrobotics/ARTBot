@@ -17,8 +17,11 @@ def login():
     password = request.json.get("password", None)
 
     user = User.get_by_email(username)
-    if user is None or not user.is_password_valid(password):
+    if user is None or password == "" or not user.is_password_valid(password):
         raise InvalidUsage.bad_login()
+
+    if user.password_needs_rehash():
+        user.set_password(password)
 
     access_token = create_access_token(identity=user.id)
     return jsonify(access_token=access_token.decode(), user=user.email)
