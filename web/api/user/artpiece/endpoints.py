@@ -77,9 +77,6 @@ def get_artpiece_image(id):
 @jwt_required()
 @access_level_required(UserRole.printer)
 def get_procedure_file(id):
-    #TODO Require a token in additon to the unique_id
-    #TODO Check that artpieces weren't yet printed - lock DB during transaction and then check. Handle conditional in 
-    #TODO Clear image files from filesystem
     
     procedure_file = f'/usr/src/app/robot/procedures/ARTISTIC_PROCEDURE_{id}'
 
@@ -89,7 +86,6 @@ def get_procedure_file(id):
 @jwt_required()
 @access_level_required(UserRole.printer)
 def receive_print_request():
-    #TODO First check user validity and key
 
     artpiece_ids = request.get_json()['ids']
 
@@ -102,6 +98,4 @@ def receive_print_request():
         procedure_uri = None
         raise InvalidUsage.resource_not_found()
     
-    #TODO send an access token with the uri
-
     return jsonify({'msg':msg, 'procedure_uri':procedure_uri}), 201

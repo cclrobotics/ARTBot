@@ -84,7 +84,7 @@ app.presentation = function(view, model) {
 			hasJobBoardError = true;
 			return;
 		}
-		model.jobs.submit('TEST_USER'); //TODO: Replace with logged-in user
+		model.jobs.submit();
 	});
 
 	function createJobBoard(printables) {
