@@ -2,7 +2,7 @@ FROM python:3.8-alpine
 
 RUN apk update && \
 	apk add --virtual build-deps gcc python3-dev musl-dev zlib-dev jpeg-dev && \
-	apk add postgresql-dev libffi-dev
+	apk add postgresql-dev libffi-dev curl
 
 # set environment variables
 ENV APP_HOME=/usr/src/app
