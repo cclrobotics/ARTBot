@@ -37,9 +37,6 @@ class User():
     def set_password(self, password):
         self._model.password_hash = argon2.password_hasher.hash(password)
 
-    def get_password(self, password):
-        return argon2.password_hasher.hash(password)
-
     def is_password_valid(self, password):
         try:
             argon2.password_hasher.verify(self.password_hash, password)

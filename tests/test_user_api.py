@@ -14,6 +14,7 @@ VALID_EMAIL = 'valid@mail.com'
 VALID_TITLE = 'valid title'
 VALID_ART = {'1': [[0,0]], '2': [[1,1]], '3': [[2,2]]}
 INITIAL_ROLE = 'Artist'
+INITIAL_PASSWORD_HASH = None
 
 
 def create_artpiece_data(email=VALID_EMAIL, title=VALID_TITLE, art=VALID_ART):
@@ -28,6 +29,15 @@ def test_create_artpiece_by_new_user():
     assert artpiece.title == VALID_TITLE
     assert artpiece.creator.email == VALID_EMAIL
     assert artpiece.creator.role.value == INITIAL_ROLE
+    assert artpiece.creator.password_hash is INITIAL_PASSWORD_HASH
+
+@pytest.mark.usefixtures("setup_app")
+@pytest.mark.parametrize('password', ['test', 'te st', '', 'rH79ffS3iNbY', 'I2E#$D1l0Sr#'])
+def test_add_user_password(password):
+    artpiece = core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART)
+    user = User.get_by_email(VALID_EMAIL)
+    user.set_password(password)
+    assert user.is_password_valid(password)
 
 @pytest.mark.usefixtures("setup_app")
 def test_monthly_submission_limit_exceeded():
