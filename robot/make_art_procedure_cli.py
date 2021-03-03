@@ -21,4 +21,4 @@ msg, file_loc = make_procedure(None
                               )
 
 print('\n'.join(msg))
-pritn(f'Procedure location: {file_loc[0]}/{file_loc[1]}')
+print(f'Procedure location: {file_loc[0]}/{file_loc[1]}')

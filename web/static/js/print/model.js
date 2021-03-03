@@ -62,15 +62,42 @@ app.model = function() {
 
 	function User() {
 		let that = {};
-		const access_token = {};
+		const info = {};
 
-		that.set_token = function(token) {
-			access_token['token'] = token;
+		function get_cookie(name) {
+			const value = `; ${document.cookie}`;
+			const parts = value.split(`; ${name}=`);
+			if (parts.length === 2) return parts.pop().split(';').shift();
 		}
 
-		that.get_token = function(token) {
-			return access_token['token'];
+		function load_name() {
+			info['name'] = get_cookie("username");
+			subject.notifyObservers({
+				type: 'UPDATE_USER'
+				, payload: {'name': info['name']}
+			});
+			return info['name']
 		}
+
+		that.load_name = function() {
+			return load_name()
+		}
+
+		that.set_name = function(name) {
+			document.cookie = "username=" + name;
+			return load_name()
+		}
+
+		that.clear_name = function() {
+			document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+			return load_name()
+		}
+
+		that.get_csrf_token = function(name) {
+			return get_cookie("csrf_access_token")
+		}
+
+		that.name = info['name']
 
 		return that;
 	} 
@@ -80,18 +107,12 @@ app.model = function() {
 
 	that.jobs = {
 		get: function() {
-			ajax_params = {
+			$.ajax({
 				url: 'print_jobs'
 				, type: 'GET'
 				, dataType: 'json'
 				, cache: 'false'
-			}
-			if(user.get_token() != null){
-				ajax_params['headers'] = {
-					Authorization: "Bearer " + user.get_token()
-				}
-			}
-			$.ajax(ajax_params)
+			})
 			.done(function(data, textStatus, jqXHR) {
 				jobs.load(JSON.parse(data.data));
 				let job_data = jobs.data
@@ -137,7 +158,7 @@ app.model = function() {
 		, get_img_url: function(id) {
 			return jobs.data[id].img_uri;
 		}
-		, submit: function(user) { //TODO: Log user as the printer
+		, submit: function() {
 			$.ajax({
 				url: 'procedure_request'
 				, type: 'POST'
@@ -146,6 +167,9 @@ app.model = function() {
 				})
 				, contentType: 'application/json'
 				, dataType: 'json'
+				, headers: {
+					'X-CSRF-TOKEN': user.get_csrf_token()
+				}
 			})
 			.done(function(data, textStatus, jqXHR) {
 				subject.notifyObservers({
@@ -156,7 +180,7 @@ app.model = function() {
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
 				subject.notifyObservers({
-					type: 'PRINT_REQ_SUBMIT'
+					type: 'LOGIN_REQUIRED'
 					, error: true
 					, payload: jqXHR.responseJSON.errors
 				});
@@ -192,11 +216,14 @@ app.model = function() {
 				});
 			});
 		}
-		,set_token: function(token){
-			user.set_token(token);
+		,set_name: function(name){
+			user.set_name(name);
 		}
-		,get_token: function(){
-			return user.access_token;
+		,clear_name: function(){
+			user.clear_name();
+		}
+		,load_name: function(){
+			user.load_name();
 		}
 	}
 

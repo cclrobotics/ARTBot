@@ -127,10 +127,12 @@ app.presentation = function(view, model) {
 		}
 		, 'LOGIN' : function(action) {
 			view.login.hide();
-			view.userLabel.update(action.payload.user);
-			model.user.set_token(action.payload.access_token);
+			model.user.set_name(action.payload.user);
 			model.jobs.get();
 		} 
+		, 'UPDATE_USER' : function(action) {
+			view.userLabel.update(action.payload.name);
+		}
 		, 'NOT_AUTHORIZED' : function(action) {
 			view.warningModal.show(notAuthorizedMessage);
 			view.selectedJobList.disable();
