@@ -1,16 +1,29 @@
 import os
 from PIL import Image
-from .artpiece import Artpiece
-from web.extensions import cache
 import random
+from functools import wraps
+from flask import jsonify
+from flask_jwt_extended import get_current_user
+from .artpiece import Artpiece
+from .exceptions import InvalidUsage
+from web.extensions import cache
 
-#function to pull image off of database
-def pull_picture(id):
-    # handle invalid id
-    artpiece = Artpiece.get_by_id(id)
-    image = Image.frombytes("RGBX", (616, 414), artpiece.raw_image)
-    image.show()
-    return image
+
+#decorator to require admin_acccess for a route
+def access_level_required(level):
+    try:
+        def outer(func):
+            @wraps(func)
+            def inner(*args, **kwargs):
+                if get_current_user().role < level:
+                    raise InvalidUsage.forbidden()
+                return func(*args, **kwargs)
+            return inner
+    except TypeError:
+        raise TypeError("Specify an access level to use access_level_required decorator")
+
+    return outer
+
 
 @cache.memoize(timeout=3600)
 def get_image_description(image_path):

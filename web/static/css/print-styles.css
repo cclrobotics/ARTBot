@@ -1,0 +1,38 @@
+.board-container {
+	max-width: 80vw;
+}
+
+tr.job-data {
+    border: silver 1px dotted;
+    text-align: center;
+    background-color: rgb(250, 250, 250);
+}
+
+td.job-data {
+    width: 200px;
+}
+
+img.job-data {
+    margin: 20px;
+    border: black 1px solid;
+}
+
+.job-header {
+    text-align: center;
+    background-color:rgb(121, 221, 255);
+}
+
+.list-img {
+    width: 100px;
+    border: black 1px dotted;
+    opacity: 0.5;
+}
+
+.list-label {
+    font-size: large;
+    font-weight: bold;
+}
+
+#output-messages {
+    text-align: left;
+}

@@ -1,5 +1,6 @@
 """Database module, including the SQLAlchemy database object and DB-related utilities."""
 from sqlalchemy.orm import relationship, deferred, composite
+from enum import Enum
 
 from web.extensions import db
 
@@ -42,3 +43,30 @@ def reference_col(tablename, nullable=False, pk_name='id', **kwargs):
     return Column(
         db.ForeignKey('{0}.{1}'.format(tablename, pk_name)),
         nullable=nullable, **kwargs)
+
+
+class OrderedEnum(Enum):
+    @classmethod
+    def _order(cls):
+        return {item:num for num, item in enumerate(list(cls))}
+
+    @property
+    def _val_position(self):
+        return self._order()[self]
+
+    def __ge__(self, other):
+        if self.__class__ is other.__class__:
+            return self._val_position >= other._val_position
+        return NotImplemented
+    def __gt__(self, other):
+        if self.__class__ is other.__class__:
+            return self._val_position > other._val_position
+        return NotImplemented
+    def __le__(self, other):
+        if self.__class__ is other.__class__:
+            return self._val_position <= other._val_position
+        return NotImplemented
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self._val_position < other._val_position
+        return NotImplemented

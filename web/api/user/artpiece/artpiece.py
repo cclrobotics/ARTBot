@@ -1,6 +1,5 @@
 from collections import namedtuple
 from time import time
-import jwt
 import io
 import json
 import datetime as dt
@@ -9,6 +8,7 @@ import re
 from PIL import Image, ImageDraw
 from slugify import slugify
 from flask import current_app
+from flask_jwt_extended import create_access_token, decode_token
 from web.database.models import ArtpieceModel, SubmissionStatus
 from web.api.user.colors import get_available_color_mapping
 
@@ -75,26 +75,43 @@ class Artpiece():
         model = _Model.get_by_id(id)
         return None if model is None else cls(_Model.get_by_id(id))
 
+    @classmethod
+    def get_printable(cls):
+        model = (
+            _Model.query.filter(
+            ArtpieceModel.status == SubmissionStatus.submitted
+            , ArtpieceModel.confirmed == True)
+            .order_by(ArtpieceModel.submit_date.asc())
+            .all())
+        return model
+
     @property
     def creator(self):
         from ..user import User
         return User.get_by_id(self._model.user_id)
 
-    def get_image_as_jpg(self):
-        image = Image.frombytes('RGBX', (616, 414), self._model.raw_image)
+    def get_image_as_jpg(self, size=(616,414)):
+        image = Image.frombytes('RGBX', (616,414), self._model.raw_image)
+        if size != (616,414): image = image.resize(size)
         with io.BytesIO() as output:
             image.save(output, format='JPEG')
             image_file = output.getvalue()
-        return image_file
+        #FIX: (1) This ignores IO stream above
+        #     (2) saves to file system without cleaning up after itself
+        #     (3) uses hard-coded file location, because I can't get relative reference working
+        #     (4) Returns a file URI instead of bytes
+        loc = '/usr/src/app/web/static/img/art_designs/' + str(self._model.id) + '.jpg'
+        image.save(loc, format='JPEG')
+        return loc
 
     def get_confirmation_token(self, expires_in=60*60*72):
-        return jwt.encode(
-                {'confirm_artpiece': self._model.id, 'exp': time() + expires_in}
-                , current_app.config['JWT_SECRET_KEY'], algorithm='HS256').decode('utf-8')
+        return create_access_token(
+                identity = {'confirm_artpiece': self._model.id, 'exp': time() + expires_in},
+                expires_delta = dt.timedelta(seconds = expires_in)
+                )
 
     def verify_confirmation_token(self, token):
-        id = jwt.decode(token, current_app.config['JWT_SECRET_KEY']
-                , algorithms=['HS256'])['confirm_artpiece']
+        id = decode_token(token, allow_expired=False)['sub']['confirm_artpiece']
         if self._model_id != id:
             raise TokenIDMismatchError()
 
