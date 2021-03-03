@@ -17,6 +17,7 @@ app.view = function($, model) {
 		, successModal: $('#success-modal')
 		, errorModal: $('#error-modal')
 		, errorBody: $('#error-modal').find('.error-msg')
+		, loginChangeBtn: $('#change-login')
 		, loginModal: $('#login-modal')
 		, loginMsg: $('#login-msg')
 		, loginForm: $('#login-form')
@@ -278,6 +279,21 @@ app.view = function($, model) {
 		
 		return that;
 	}(DOM.userLabel);
+	
+	that.changeLogin = function(changeLogin) {
+		let that = {};
+
+		that.register = {
+			onClick: function(handler) {
+				changeLogin.on('click', function(event) {
+					event.preventDefault();
+					changeLogin.blur();
+					handler();
+				});
+			}
+		};
+		return that;
+	}(DOM.loginChangeBtn)
 	
 	that.submit = function(submit) {
 		let that = {};

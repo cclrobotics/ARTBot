@@ -67,6 +67,10 @@ app.presentation = function(view, model) {
 		model.jobs.get();
 	});
 
+	view.changeLogin.register.onClick(function(){
+		view.login.show();
+	});
+
 	view.login.register.onSubmit(function(user, password) {
 		model.user.login(user, password)
 	});
@@ -129,6 +133,7 @@ app.presentation = function(view, model) {
 			view.login.hide();
 			model.user.set_name(action.payload.user);
 			model.jobs.get();
+			view.submit.enable();
 		} 
 		, 'UPDATE_USER' : function(action) {
 			view.userLabel.update(action.payload.name);
@@ -137,6 +142,8 @@ app.presentation = function(view, model) {
 			view.warningModal.show(notAuthorizedMessage);
 			view.selectedJobList.disable();
 			view.submit.disable();
+			view.board.clear();
+			model.jobs.clear();
 		}
 		, 'JOB_DATA': function(action) {
 			createJobBoard(action.payload.job_data);
