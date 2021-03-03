@@ -4,3 +4,4 @@
 *.vscode
 pyvenv.cfg
 /robot/procedures
+/web/static/img/art_designs
