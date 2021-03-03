@@ -1,0 +1,93 @@
+<link rel="stylesheet" href="/static/css/print-styles.css">
+{% extends 'base.html' %}
+{% block nav %}
+    {% include 'nav.html' %}
+{% endblock %}
+{% block body %}
+    <!-- print management section -->
+    <section>
+		<div class="d-flex justify-content-around mt-3">
+			<div class="board-container align-self-start text-center mx-3">
+				<div class="position-relative">
+					<div class="overflow-auto">
+						<table class="job-board"></table>
+					</div>
+				</div>
+			</div>
+		
+			<div id="sidebar-right" class="d-flex flex-column align-content-start mr-2">
+				<div id="submission-block" class="info-block p-3 text-center">
+					<div id="user-label">Not Logged In</div>
+					<form class="login-button"></form>
+						<button type="submit" id="change-login" class="btn btn-sm btn-secondary">
+							Change Login
+						</button>
+					</form>
+					<hr>
+					<div id="submission-error" class="w-100">
+						<span>
+							<i class="fas fa-times" style="font-size: 2rem; color: Tomato;"></i>
+						</span>
+						<p class="content"></p>
+					</div>
+					<form class="print-submit">
+						<button type="submit" class="btn submit-button btn-sm">
+							<strong>Request Print Protocol</strong>
+						</button>
+					</form>
+					<hr>
+					<div id="selected-jobs">
+						<div id="selected-jobs-placeholder">
+							[Click A Row To Select]
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Modal -->
+	<div class="modal fade" id="success-modal" tabindex="-1" role="dialog" 
+		aria-labelledby="successModal" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header" style="background-color:rgba(30,130,76,0.3);">
+					<h5 class="modal-title">Success</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p><b>Sucessfully made your procedure!</b> Here are the output messages from
+					procedure generation:</p>
+					<p id='output-messages'>[None]</p>
+				</div>
+				<div class="modal-footer">
+					<button id="procedure-link" type="button">Click To Download Your Procedure</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="error-modal" tabindex="-1" role="dialog" aria-labelledby="errorModal" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header py-0" style="background-color:rgba(241, 130, 141,1)">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span style="font-size: 3rem;" aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p class="error-msg pt-2"></p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% include 'login.html' %}
+
+	<script src="/static/js/print/model.js"></script>
+    <script src="/static/js/print/view.js"></script>
+    <script src="/static/js/print/presentation.js"></script>
+    <script src="/static/js/print/app.js"></script>
+{% endblock %}

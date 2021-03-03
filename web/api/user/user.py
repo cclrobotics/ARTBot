@@ -1,6 +1,6 @@
 import datetime as dt
-from web.database.models import (UserModel, ArtpieceModel, SubmissionStatus)
-
+from web.database.models import (UserModel, UserRole, ArtpieceModel, SubmissionStatus)
+from web.extensions import argon2
 
 _Model = UserModel
 
@@ -9,12 +9,12 @@ class User():
         self._model = model
 
     @classmethod
-    def _create(cls, email, created_at):
-        return cls(_Model(email=email, created_at=created_at).save())
+    def _create(cls, email, created_at, role):
+        return cls(_Model(email=email, created_at=created_at, role=role).save())
 
     @classmethod
     def from_email(cls, email):
-        return cls._create(email, dt.datetime.now())
+        return cls._create(email, dt.datetime.now(), list(UserRole)[0])
 
     @classmethod
     def get_by_email(cls, email):
@@ -33,7 +33,32 @@ class User():
     def has_active_submission(self):
         return self._model.artpieces.filter(
                 ArtpieceModel.status == SubmissionStatus.submitted).count() > 0
+    
+    def set_password(self, password):
+        self._model.password_hash = argon2.password_hasher.hash(password)
 
+    def is_password_valid(self, password):
+        try:
+            argon2.password_hasher.verify(self.password_hash, password)
+        except argon2.exceptions.VerificationError:
+            return False
+        return True
+
+    def password_needs_rehash(self):
+        return argon2.password_hasher.check_needs_rehash(self.password_hash)
+    
+    @property
+    def password_hash(self):
+        return self._model.password_hash
+   
+    @property
+    def id(self):
+        return self._model.id
+    
     @property
     def email(self):
         return self._model.email
+
+    @property
+    def role(self):
+        return self._model.role

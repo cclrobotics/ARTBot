@@ -39,10 +39,10 @@ def distribute_to_agar(self, vol, source, destination, disposal_vol):
     self.drop_tip()
 
 # a tip rack for our pipette
-p200rack = labware.load('tiprack-200ul', 10)
+tiprack = labware.load('%%TIPRACK GOES HERE%%', 10)
 
-# a 6-well plate for all of the colors in our pallette
-palette = labware.load('nunc_8_wellplate_flat', 11)
+# a plate for all of the colors in our pallette
+palette = labware.load('%%PALETTE GOES HERE%%', 11)
 
 pixels_by_color_by_artpiece = %%PIXELS GO HERE%%
 canvas_locations = %%CANVAS LOCATIONS GO HERE%%
@@ -84,13 +84,13 @@ for color in pixels_by_color_by_artpiece:
 
 def run_custom_protocol():
 
-    p300 = instruments.P300_Single(
+    pipette = instruments.%%PIPETTE GOES HERE%%(
             mount='left',
-            tip_racks=[p200rack]
+            tip_racks=[tiprack]
     )
 
     for color in pixels_by_color:
-        distribute_to_agar(p300, 0.1, palette_colors[color], pixels_by_color[color], disposal_vol=4)
+        distribute_to_agar(pipette, 0.1, palette_colors[color], pixels_by_color[color], disposal_vol=4)
 
 run_custom_protocol()
 

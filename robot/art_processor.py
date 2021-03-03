@@ -2,27 +2,35 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 import string
 from datetime import datetime
-import os, argparse
+import os
 from contextlib import contextmanager
 
 from web.database.models import (ArtpieceModel, SubmissionStatus, BacterialColorModel)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--notebook'
-                    ,action='store_true'
-                    ,help='Set this flag to output to a Jupyter Notebook instead of a .py file'
-                    )
-NOTEBOOK = parser.parse_args().notebook
+def read_args(args):
+    if not args: args = {'notebook':False
+                        ,'palette':'nunc_8_wellplate_flat'
+                        ,'pipette':'P10_Single'
+                        }
+    NOTEBOOK = args.pop('notebook')
+    LABWARE = args #assume unused args are all labware
+    return NOTEBOOK, LABWARE
 
-APP_DIR = os.path.abspath(os.path.dirname(__file__))
-SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-if not SQLALCHEMY_DATABASE_URI:
-    SQLALCHEMY_DATABASE_URI = input('Enter Database Url: ')
-SQL_ENGINE = sa.create_engine(SQLALCHEMY_DATABASE_URI)
-Session = sessionmaker(bind=SQL_ENGINE)
+def initiate_environment(SQLALCHEMY_DATABASE_URI = None):
+    APP_DIR = os.path.abspath(os.path.dirname(__file__))
+    if not SQLALCHEMY_DATABASE_URI:
+        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+        if not SQLALCHEMY_DATABASE_URI:
+            raise Exception('Database URI expected in env vars or passed explcitly')
+    return APP_DIR, SQLALCHEMY_DATABASE_URI
+
+def initiate_sql(SQLALCHEMY_DATABASE_URI):
+    SQL_ENGINE = sa.create_engine(SQLALCHEMY_DATABASE_URI)
+    Session = sessionmaker(bind=SQL_ENGINE)
+    return Session
 
 @contextmanager
-def session_scope():
+def session_scope(Session):
     """Provide transactional scope around a series of operations."""
     session = Session()
     try:
@@ -60,13 +68,20 @@ def plate_location_map(coord):
 
     return x, y
 
+def add_labware(template_string, labware):
+    # replace labware placeholders with the proper Opentrons labware name, as specified in the arguments
+    labware['tiprack'] = 'tiprack-200ul' if 'P300' in labware['pipette'] else 'tiprack-10ul'
+    
+    procedure = template_string.replace('%%PALETTE GOES HERE%%', labware['palette'])
+    procedure = procedure.replace('%%PIPETTE GOES HERE%%', labware['pipette'])
+    procedure = procedure.replace('%%TIPRACK GOES HERE%%', labware['tiprack'])
+    return procedure
+
 def add_canvas_locations(template_string, artpieces):
     # write where canvas plates are to be placed into code
     canvas_locations = dict(zip([artpiece.slug for artpiece in artpieces], get_canvas_slot))
     procedure = template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
-
     return procedure, canvas_locations
-
 
 def add_pixel_locations(template_string, artpieces):
     # write where to draw pixels on each plate into code. Listed by color to reduce contamination
@@ -77,7 +92,6 @@ def add_pixel_locations(template_string, artpieces):
                 pixels_by_color[color] = dict()
             pixels_by_color[color][artpiece.slug] = [plate_location_map(pixel) for pixel in artpiece.art[color]]
     procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
-
     return procedure
 
 def add_color_map(template_string, colors):
@@ -85,48 +99,55 @@ def add_color_map(template_string, colors):
     procedure = template_string.replace('%%COLORS GO HERE%%', str(color_map))
     return procedure
 
-num_pieces = 0
-while num_pieces not in range(1,10):
-    try:
-        num_pieces = int(input("How much art? (1-9) "))
-    except:
-        num_pieces = 0
+def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI = None, num_pieces = 9, option_args = None): 
+    NOTEBOOK, LABWARE = read_args(option_args)
+    APP_DIR, SQLALCHEMY_DATABASE_URI = initiate_environment(SQLALCHEMY_DATABASE_URI)
+    Session = initiate_sql(SQLALCHEMY_DATABASE_URI)
 
-with session_scope() as session:
-    artpieces = (session.query(ArtpieceModel).filter(
-            ArtpieceModel.status == SubmissionStatus.submitted
-            , ArtpieceModel.confirmed == True)
-            .order_by(ArtpieceModel.submit_date.asc())
-            .limit(num_pieces)
-            .all())
+    with session_scope(Session) as session:
+        output_msg = []
+        
+        query_filter = (ArtpieceModel.status == SubmissionStatus.submitted
+                       ,ArtpieceModel.confirmed == True
+                       )
+        if artpiece_ids: query_filter += (ArtpieceModel.id.in_(artpiece_ids),)
 
-    if not artpieces:
-        print('No new art found. All done.')
-    else:
-        print(f'Loaded {len(artpieces)} pieces of art')
-        for artpiece in artpieces:
-            print(f"{artpiece.id}: {artpiece.title}, {artpiece.submit_date}")
+        artpieces = (session.query(ArtpieceModel)
+                .filter(*query_filter)
+                .order_by(ArtpieceModel.submit_date.asc())
+                .limit(num_pieces)
+                .all())
 
-        # Get all colors
-        colors = session.query(BacterialColorModel).all()
+        if not artpieces:
+            output_msg.append('No new art found. All done.')
+            return output_msg, None
+        else:
+            output_msg.append(f'Loaded {len(artpieces)} pieces of art')
+            for artpiece in artpieces:
+                output_msg.append(f"{artpiece.id}: {artpiece.title}, {artpiece.submit_date}")
 
-        #Get Python art procedure template
-        file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
-        with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
-            template_string = template_file.read()
+            # Get all colors
+            colors = session.query(BacterialColorModel).all()
 
-        procedure, canvas_locations = add_canvas_locations(template_string, artpieces)
-        procedure = add_pixel_locations(procedure, artpieces)
-        procedure = add_color_map(procedure, colors)
+            #Get Python art procedure template
+            file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
+            with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
+                template_string = template_file.read()
 
-        now = datetime.now().strftime("%Y%m%d-%H%M%S")
-        unique_file_name = f'ARTISTIC_PROCEDURE_{now}.{file_extension}'
-        with open(os.path.join(APP_DIR,'procedures',unique_file_name),'w') as output_file:
-            output_file.write(procedure)
+            procedure = add_labware(template_string, LABWARE)
+            procedure, canvas_locations = add_canvas_locations(procedure, artpieces)
+            procedure = add_pixel_locations(procedure, artpieces)
+            procedure = add_color_map(procedure, colors)
 
-        for artpiece in artpieces:
-            artpiece.status = SubmissionStatus.processed
+            now = datetime.now().strftime("%Y%m%d-%H%M%S")
+            unique_file_name = f'ARTISTIC_PROCEDURE_{now}.{file_extension}'
+            with open(os.path.join(APP_DIR,'procedures',unique_file_name),'w') as output_file:
+                output_file.write(procedure)
 
-        print(f'Successfully generated artistic procedure into: ARTBot/robot/procedures/{unique_file_name}')
-        print('The following slots will be used:')
-        print('\n'.join([f'Slot {str(canvas_locations[key])}: "{key}"' for key in canvas_locations]))
+            for artpiece in artpieces:
+                artpiece.status = SubmissionStatus.processed
+
+            output_msg.append('Successfully generated artistic procedure')
+            output_msg.append('The following slots will be used:')
+            output_msg.append('\n'.join([f'Slot {str(canvas_locations[key])}: "{key}"' for key in canvas_locations]))
+    return output_msg, ['ARTBot/robot/procedures/',unique_file_name]
