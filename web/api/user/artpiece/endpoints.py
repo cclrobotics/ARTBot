@@ -11,7 +11,7 @@ from .artpiece import Artpiece
 from .serializers import ArtpieceSchema, PrintableSchema
 from web.extensions import db
 from web.database.models import UserRole
-from robot.art_processor import make_procedure
+from web.robot.art_processor import make_procedure
 
 import base64
 
@@ -78,7 +78,7 @@ def get_artpiece_image(id):
 @access_level_required(UserRole.printer)
 def get_procedure_file(id):
     
-    procedure_file = f'/usr/src/app/robot/procedures/ARTISTIC_PROCEDURE_{id}'
+    procedure_file = f'/usr/src/app/web/robot/procedures/ARTISTIC_PROCEDURE_{id}'
 
     return send_file(procedure_file, mimetype='text/plain', as_attachment=True)
 
