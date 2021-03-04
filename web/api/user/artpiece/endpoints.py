@@ -1,3 +1,4 @@
+import os
 from flask import (Blueprint, request, current_app, jsonify, send_file)
 from flask_jwt_extended import jwt_required
 from .core import (validate_and_extract_artpiece_data, create_artpiece,
@@ -70,7 +71,7 @@ def get_print_jobs():
 
 @artpiece_blueprint.route('/artpieces/image/<int:id>', methods=('GET', ))
 def get_artpiece_image(id):
-    img_file = Artpiece.get_by_id(id).get_image_as_jpg(size=(223,150))
+    img_file = Artpiece.get_by_id(id).get_image_in_filepath(size=(223,150))
     return send_file(img_file, mimetype='image/jpg', as_attachment=False)
 
 @artpiece_blueprint.route('/procedures/<string:id>', methods=('GET', ))
@@ -78,7 +79,7 @@ def get_artpiece_image(id):
 @access_level_required(UserRole.printer)
 def get_procedure_file(id):
     
-    procedure_file = f'/usr/src/app/web/robot/procedures/ARTISTIC_PROCEDURE_{id}'
+    procedure_file = f'{os.getcwd()}/web/robot/procedures/ARTISTIC_PROCEDURE_{id}'
 
     return send_file(procedure_file, mimetype='text/plain', as_attachment=True)
 

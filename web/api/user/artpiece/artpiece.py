@@ -5,6 +5,7 @@ import json
 import datetime as dt
 import math
 import re
+import os
 from PIL import Image, ImageDraw
 from slugify import slugify
 from flask import current_app
@@ -96,11 +97,18 @@ class Artpiece():
         with io.BytesIO() as output:
             image.save(output, format='JPEG')
             image_file = output.getvalue()
+        return image_file
+
+    def get_image_in_filepath(self, size=(616,414)):
+        image = Image.frombytes('RGBX', (616,414), self._model.raw_image)
+        if size != (616,414): image = image.resize(size)
+        with io.BytesIO() as output:
+            image.save(output, format='JPEG')
+            image_file = output.getvalue()
         #FIX: (1) This ignores IO stream above
         #     (2) saves to file system without cleaning up after itself
-        #     (3) uses hard-coded file location, because I can't get relative reference working
-        #     (4) Returns a file URI instead of bytes
-        loc = '/usr/src/app/web/static/img/art_designs/' + str(self._model.id) + '.jpg'
+        #     (3) Returns a file URI instead of bytes, which would be preferred
+        loc = os.getcwd() + '/web/static/img/art_designs/' + str(self._model.id) + '.jpg'
         image.save(loc, format='JPEG')
         return loc
 
