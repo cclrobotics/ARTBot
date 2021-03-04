@@ -1,0 +1,5 @@
+# This directory supports saving art images to the filesystem
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore
