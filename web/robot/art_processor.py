@@ -9,8 +9,8 @@ from web.database.models import (ArtpieceModel, SubmissionStatus, BacterialColor
 
 def read_args(args):
     if not args: args = {'notebook':False
-                        ,'palette':'nunc_8_wellplate_flat'
-                        ,'pipette':'P10_Single'
+                        ,'palette':'corning_96_wellplate_360ul_flat'
+                        ,'pipette':'p10_single'
                         }
     NOTEBOOK = args.pop('notebook')
     LABWARE = args #assume unused args are all labware
@@ -46,14 +46,13 @@ def session_scope(Session):
 def canvas_slot_generator():
     for slot in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
         yield str(slot)
-get_canvas_slot = canvas_slot_generator()
+
 
 def well_map(well):
     map = dict(zip(range(26), string.ascii_uppercase))
     letter = map[well[0]]
     number = well[1] + 1
     return letter + str(number)
-
 
 # BUG: overwrites locations if same title
 def plate_location_map(coord):
@@ -70,7 +69,7 @@ def plate_location_map(coord):
 
 def add_labware(template_string, labware):
     # replace labware placeholders with the proper Opentrons labware name, as specified in the arguments
-    labware['tiprack'] = 'tiprack-200ul' if 'P300' in labware['pipette'] else 'tiprack-10ul'
+    labware['tiprack'] = 'opentrons_96_tiprack_200ul' if 'P300' in labware['pipette'] else 'opentrons_96_tiprack_10ul'
     
     procedure = template_string.replace('%%PALETTE GOES HERE%%', labware['palette'])
     procedure = procedure.replace('%%PIPETTE GOES HERE%%', labware['pipette'])
@@ -79,6 +78,7 @@ def add_labware(template_string, labware):
 
 def add_canvas_locations(template_string, artpieces):
     # write where canvas plates are to be placed into code
+    get_canvas_slot = canvas_slot_generator()
     canvas_locations = dict(zip([artpiece.slug for artpiece in artpieces], get_canvas_slot))
     procedure = template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
     return procedure, canvas_locations
