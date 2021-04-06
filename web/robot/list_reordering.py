@@ -1,55 +1,40 @@
 import sys
 import math
-import random
 
-class Point():
-    def __init__(self, x, y):
-        self.x = x;
-        self.y = y;
+#Finds the closest point from the given point
+def min_dist_point(start, remaininglist):
 
-    def __eq__(self, other):
-        return (self.x == other.x) & (self.y == other.y)
+    # Initialize minimum distance to max val and null for minimal point
+    min_dist = sys.maxsize
+    min_point = None
 
-
-def minDistance(start, remaininglist):
-
-        # Initilaize minimum distance for next node
-    min = sys.maxsize
-
-        # Search not nearest vertex not in the
-        # shortest path tree
+    # Search for nearest point if distance is smaller than previous
+    #then keep that point
     for v in remaininglist:
-        dist = euclideanDistance(start, v)
-        if dist < min:
-            min = dist
+        dist = euclidean_distance(start, v)
+        if dist < min_dist:
+            min_dist = dist
             min_point = v
 
     return min_point
 
-def euclideanDistance(start, end):
+#Finds Euclidean Distance Given Two Points
+def euclidean_distance(start, end):
     return math.sqrt((start[0] - end[0])**2 +(start[1] - end[1])**2)
 
+#Returns an ordered list from an unordered list
+def reorder(list):
 
-
-    # Funtion that implements Dijkstra's single source
-    # shortest path algorithm for a graph represented
-    # using adjacency matrix representation
-def dijkstra_altered(list):
-
+    #Starts with first item in list.
     current = list[0]
     ordered_list = [current]
     list.remove(current)
+    
+    #Once added to the ordered list, it removes from previous list
     while len(list) != 0:
-        closest = minDistance(current, list)
+        closest = min_dist_point(current, list)
         list.remove(closest)
         ordered_list.append(closest)
         current = closest
-    return ordered_list
 
-test_list = []
-Starter = [1, 1]
-test_list.append(Starter)
-for i in range(0,9):
-    test_list.append([random.randint(1,100), random.randint(1,100)])
-endlist = dijkstra_altered(test_list);
-print("End")
+    return ordered_list
