@@ -1,4 +1,6 @@
 import pytest
+import os
+from flask import current_app
 from flask_migrate import upgrade
 from web.app import create_app
 from web.extensions import db
@@ -26,3 +28,13 @@ def clear_database():
     for table in reversed(meta.sorted_tables):
         db.session.execute(table.delete())
     db.session.commit()
+
+@pytest.fixture(scope='session')
+def test_directory():
+    APP_DIR = current_app.config['APP_DIR']
+    path = os.path.join(APP_DIR,'robot/procedures')
+    existing_files = os.listdir(path)
+    yield path
+    for f in os.listdir(path):
+        if f not in existing_files:
+            os.remove(os.path.join(path, f))

@@ -3,6 +3,8 @@ from sqlalchemy.orm import sessionmaker
 import string
 from datetime import datetime
 import os
+import sys
+import math
 from contextlib import contextmanager
 
 from web.database.models import (ArtpieceModel, SubmissionStatus, BacterialColorModel)
@@ -16,8 +18,9 @@ def read_args(args):
     LABWARE = args #assume unused args are all labware
     return NOTEBOOK, LABWARE
 
-def initiate_environment(SQLALCHEMY_DATABASE_URI = None):
-    APP_DIR = os.path.abspath(os.path.dirname(__file__))
+def initiate_environment(SQLALCHEMY_DATABASE_URI = None, APP_DIR = None):
+    if not APP_DIR:
+        APP_DIR = os.path.abspath(os.path.dirname(__file__))
     if not SQLALCHEMY_DATABASE_URI:
         SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
         if not SQLALCHEMY_DATABASE_URI:
@@ -67,6 +70,45 @@ def plate_location_map(coord):
 
     return x, y
 
+#Finds the closest point from the given point
+def min_dist_point(start, remaininglist):
+
+    # Initialize minimum distance to max val and null for minimal point
+    min_dist = sys.maxsize
+    min_point = None
+
+    # Search for nearest point if distance is smaller than previous
+    #then keep that point
+    for v in remaininglist:
+        dist = euclidean_distance(start, v)
+        if dist < min_dist:
+            min_dist = dist
+            min_point = v
+
+    return min_point
+
+#Finds Euclidean Distance Given Two Points
+def euclidean_distance(start, end):
+    return math.sqrt((start[0] - end[0])**2 +(start[1] - end[1])**2)
+
+#Returns an ordered list from an unordered list
+def optimize_print_order(list):
+
+    #Starts with first item in list.
+    current = list[0]
+    ordered_list = [current]
+    list.remove(current)
+    
+    #Once added to the ordered list, it removes from previous list
+    while len(list) != 0:
+        closest = min_dist_point(current, list)
+        list.remove(closest)
+        ordered_list.append(closest)
+        current = closest
+    
+    return ordered_list
+
+
 def add_labware(template_string, labware):
     # replace labware placeholders with the proper Opentrons labware name, as specified in the arguments
     labware['tiprack'] = 'opentrons_96_tiprack_200ul' if 'P300' in labware['pipette'] else 'opentrons_96_tiprack_10ul'
@@ -88,9 +130,12 @@ def add_pixel_locations(template_string, artpieces):
     pixels_by_color = dict()
     for artpiece in artpieces:
         for color in artpiece.art:
+            pixel_list = optimize_print_order(
+                [plate_location_map(pixel) for pixel in artpiece.art[color]]
+            )
             if color not in pixels_by_color:
                 pixels_by_color[color] = dict()
-            pixels_by_color[color][artpiece.slug] = [plate_location_map(pixel) for pixel in artpiece.art[color]]
+            pixels_by_color[color][artpiece.slug] = pixel_list
     procedure = template_string.replace('%%PIXELS GO HERE%%', str(pixels_by_color))
     return procedure
 
@@ -99,9 +144,9 @@ def add_color_map(template_string, colors):
     procedure = template_string.replace('%%COLORS GO HERE%%', str(color_map))
     return procedure
 
-def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI = None, num_pieces = 9, option_args = None): 
+def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI = None, APP_DIR = None, num_pieces = 9, option_args = None): 
     NOTEBOOK, LABWARE = read_args(option_args)
-    APP_DIR, SQLALCHEMY_DATABASE_URI = initiate_environment(SQLALCHEMY_DATABASE_URI)
+    APP_DIR, SQLALCHEMY_DATABASE_URI = initiate_environment(SQLALCHEMY_DATABASE_URI, APP_DIR)
     Session = initiate_sql(SQLALCHEMY_DATABASE_URI)
 
     with session_scope(Session) as session:
@@ -150,4 +195,4 @@ def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI = None, num_pieces = 9,
             output_msg.append('Successfully generated artistic procedure')
             output_msg.append('The following slots will be used:')
             output_msg.append('\n'.join([f'Slot {str(canvas_locations[key])}: "{key}"' for key in canvas_locations]))
-    return output_msg, ['ARTBot/robot/procedures/',unique_file_name]
+    return output_msg, [os.path.join(APP_DIR,'procedures'),unique_file_name]
