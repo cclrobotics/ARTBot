@@ -13,12 +13,58 @@ metadata = {
     }
 
 
-def distribute_to_agar(pipette, vol, source, destination, disposal_vol):
+def trace_diamond(pipette, point, vol, radius_pct = 2.4):
+    corner_offsets = [(-radius_pct, 0, 0), (0, -radius_pct, 0), (radius_pct, 0, 0), (0, radius_pct, 0)]
+    
+    #close the loop so it makes a full diamond
+    corner_offsets.append(corner_offsets[0])
+    
+    for num, corner_offset in enumerate(corner_offsets):
+        corner = point.move(Point(*corner_offset))
+        pipette.move_to(corner, force_direct = (num!=0))
+        pipette.dispense(vol/4)
+
+def bold_line(pipette, point, prev_point, vol, start_stroke = False):
+    #Moves directly to the next point instead of following an arc
+    #Then writes over itself to reinforce
+    pipette.move_to(point, force_direct=not start_stroke)
+    pipette.dispense(vol)
+    pipette.move_to(prev_point, force_direct=True)
+    pipette.move_to(point, force_direct=True)
+
+def penstroke(pipette, point, vol, stroke_length_max = 6, stroke_angle_max = 0.3490659):
+    pipette.move_to(point, force_direct=False)
+    pipette.dispense(vol)
+
+    stroke_length = random.random() * stroke_length_max
+    stroke_angle = random.random() * stroke_angle_max
+
+    x_offset = stroke_length * math.cos(stroke_angle)
+    y_offset = stroke_length * -math.cos(stroke_angle)
+
+    endpoint = point.move(Point(x_offset, y_offset, 0.1))
+    pipette.move_to(endpoint, force_direct=True)
+
+    
+
+def is_next_to(p1, p2, neighbor_dist = 3.4):
+    p1 = p1.point
+    p2 = p2.point
+
+    dist = math.sqrt((p1[0] - p2[0])**2 +(p1[1] - p2[1])**2)
+
+    return dist <= neighbor_dist
+
+
+
+def distribute_to_agar(pipette, vol, source, destination, disposal_vol, shape=None):
     max_volume = pipette.max_volume
 
     dest = list(destination)  # allows for non-lists
 
+    prev_well = None
     for cnt, well in enumerate(dest):
+        full_pipette = False
         if (cnt + 1) % 150 == 0:
             pipette.drop_tip()
 
@@ -35,10 +81,20 @@ def distribute_to_agar(pipette, vol, source, destination, disposal_vol):
                 asp_vol = remaining_vol + disposal_vol - pipette.current_volume
 
             pipette.aspirate(asp_vol, source)
+            full_pipette = True
+        
+        if shape is None: shape = ''
+        if shape == 'diamond':
+            trace_diamond(pipette, well, vol)
+        elif shape == 'line' and prev_well and is_next_to(well, prev_well):
+            bold_line(pipette, well, prev_well, vol, start_stroke=full_pipette)
+        elif shape == 'penstroke':
+            penstroke(pipette, well, vol)
+        else:
+            pipette.move_to(well)
+            pipette.dispense(vol)
 
-        pipette.move_to(well)
-        pipette.dispense(vol)
-
+        prev_well = well
 
     pipette.drop_tip()
 
