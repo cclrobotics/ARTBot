@@ -11,7 +11,7 @@ from ..utilities import access_level_required
 from .artpiece import Artpiece
 from .serializers import ArtpieceSchema, PrintableSchema
 from web.extensions import db
-from web.database.models import UserRole
+from web.database.models import SuperUserRole
 from web.robot.art_processor import make_procedure
 
 import base64
@@ -61,7 +61,7 @@ def confirm_artpiece(id, token):
 
 @artpiece_blueprint.route('/print_jobs', methods=('GET', ))
 @jwt_required()
-@access_level_required(UserRole.printer)
+@access_level_required(SuperUserRole.printer)
 def get_print_jobs():
     print_jobs = Artpiece.get_printable()
     schema = PrintableSchema(many=True)
@@ -76,7 +76,7 @@ def get_artpiece_image(id):
 
 @artpiece_blueprint.route('/procedures/<string:id>', methods=('GET', ))
 @jwt_required()
-@access_level_required(UserRole.printer)
+@access_level_required(SuperUserRole.printer)
 def get_procedure_file(id):
     
     procedure_file = f'{os.getcwd()}/web/robot/procedures/ARTISTIC_PROCEDURE_{id}'
@@ -85,7 +85,7 @@ def get_procedure_file(id):
 
 @artpiece_blueprint.route('/procedure_request', methods=('POST', ))
 @jwt_required()
-@access_level_required(UserRole.printer)
+@access_level_required(SuperUserRole.printer)
 def receive_print_request():
 
     artpiece_ids = request.get_json()['ids']

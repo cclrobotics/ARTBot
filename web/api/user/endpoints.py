@@ -4,12 +4,10 @@ from flask_jwt_extended import (
         , set_access_cookies, set_refresh_cookies
     )
 from .exceptions import InvalidUsage, error_template
-from .user import User
+from .user import SuperUser
 from web.extensions import db
 
 import base64
-
-from web.database.models import UserModel
 
 
 user_blueprint = Blueprint('user', __name__, url_prefix='/user')
@@ -19,7 +17,7 @@ def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
 
-    user = User.get_by_email(username)
+    user = SuperUser.get_by_email(username)
     
     if user is None or user.password_hash is None or not user.is_password_valid(password):
         raise InvalidUsage.bad_login()
