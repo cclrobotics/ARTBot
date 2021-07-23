@@ -1,10 +1,11 @@
 import pytest
 import json
 from flask import current_app
-from web.api.user.user import User
-from web.api.user.artpiece import (core, exceptions)
+from web.api.user import exceptions as user_exceptions, core as user_core
+from web.api.user.user import User, SuperUser
+from web.api.user.artpiece import (core, exceptions as art_exceptions)
 from web.api.user.exceptions import InvalidUsage
-from web.database.models import ArtpieceModel
+from web.database.models import ArtpieceModel, SuperUserRole
 
 @pytest.fixture(scope="function")
 def setup_app(test_app, test_database, clear_database):
@@ -13,7 +14,9 @@ def setup_app(test_app, test_database, clear_database):
 VALID_EMAIL = 'valid@mail.com'
 VALID_TITLE = 'valid title'
 VALID_ART = {'1': [[0,0]], '2': [[1,1]], '3': [[2,2]]}
+VALID_PASSWORD = 'ThisIsALongAndValidPassword'
 INITIAL_ROLE = 'Artist'
+INITIAL_SUPERUSER_ROLE = 'Printer'
 INITIAL_PASSWORD_HASH = None
 
 
@@ -42,15 +45,15 @@ def test_add_user_password(password):
 @pytest.mark.usefixtures("setup_app")
 def test_monthly_submission_limit_exceeded():
     limit = 0
-    with pytest.raises(exceptions.MonthlySubmissionLimitException):
+    with pytest.raises(art_exceptions.MonthlySubmissionLimitException):
         core.guarantee_monthly_submission_limit_not_reached(limit)
     create_artpiece()
-    with pytest.raises(exceptions.MonthlySubmissionLimitException):
+    with pytest.raises(art_exceptions.MonthlySubmissionLimitException):
         core.guarantee_monthly_submission_limit_not_reached(limit)
 
 @pytest.mark.usefixtures("setup_app")
 def test_create_artpieces_with_same_email():
-    with pytest.raises(exceptions.UserSubmissionLimitException):
+    with pytest.raises(art_exceptions.UserSubmissionLimitException):
         core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART)
         core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART)
 
@@ -65,28 +68,28 @@ def test_create_artpiece_malformed_email(invalid_email):
 @pytest.mark.parametrize('invalid_title', '`,~,!,@,#,$,%,^,&,*,/,\\,, ,  '.split(','))
 def test_create_artpiece_non_alphanumeric_title(invalid_title):
     in_data = create_artpiece_data(title=invalid_title)
-    with pytest.raises(exceptions.InvalidTitleException):
+    with pytest.raises(art_exceptions.InvalidTitleException):
         core.validate_and_extract_artpiece_data(in_data, VALID_ART.keys())
 
 @pytest.mark.usefixtures("setup_app")
 @pytest.mark.parametrize('invalid_art', [{'1': [[100, 0]]}, {'2': [[5, 101]]}])
 def test_create_artpiece_pixel_outofbounds(invalid_art):
     in_data = create_artpiece_data(art=invalid_art)
-    with pytest.raises(exceptions.PixelOutOfBoundsException):
+    with pytest.raises(art_exceptions.PixelOutOfBoundsException):
         core.validate_and_extract_artpiece_data(in_data, invalid_art.keys())
 
 @pytest.mark.usefixtures("setup_app")
 def test_create_artpiece_unavailable_color():
     art_with_invalid_color = {'10': [[5, 5]]}
     in_data = create_artpiece_data(art=art_with_invalid_color)
-    with pytest.raises(exceptions.ColorSchemeException):
+    with pytest.raises(art_exceptions.ColorSchemeException):
         core.validate_and_extract_artpiece_data(in_data, VALID_ART.keys())
 
 @pytest.mark.usefixtures("setup_app")
 @pytest.mark.parametrize('invalid_art', [{}, {'1': []}])
 def test_create_artpiece_with_empty_canvas(invalid_art):
     in_data = create_artpiece_data(art=invalid_art)
-    with pytest.raises(exceptions.BlankCanvasException):
+    with pytest.raises(art_exceptions.BlankCanvasException):
         core.validate_and_extract_artpiece_data(in_data, VALID_ART.keys())
 
 @pytest.mark.usefixtures("setup_app")
@@ -109,7 +112,7 @@ def test_expired_token_confirm_artpiece():
     artpiece = create_artpiece()
     token = artpiece.get_confirmation_token(expires_in=-1)
 
-    with pytest.raises(exceptions.ExpiredConfirmationTokenException):
+    with pytest.raises(art_exceptions.ExpiredConfirmationTokenException):
         core.confirm_artpiece(artpiece, token)
 
 @pytest.mark.usefixtures("setup_app")
@@ -118,11 +121,37 @@ def test_token_id_mismatch_confirm_artpiece():
     artpiece_2 = create_artpiece(email='other@mail.com')
     token_1 = artpiece_1.get_confirmation_token()
 
-    with pytest.raises(exceptions.InvalidConfirmationTokenException):
+    with pytest.raises(art_exceptions.InvalidConfirmationTokenException):
         core.confirm_artpiece(artpiece_2, token_1)
 
 @pytest.mark.usefixtures("setup_app")
 def test_invalid_token_confirm_artpiece():
     artpiece = create_artpiece()
-    with pytest.raises(exceptions.InvalidConfirmationTokenException):
+    with pytest.raises(art_exceptions.InvalidConfirmationTokenException):
         core.confirm_artpiece(artpiece, 'random_invalid_token')
+
+@pytest.mark.usefixtures("setup_app")
+def test_create_new_superuser():
+    id, success = user_core.create_superuser(VALID_EMAIL, VALID_PASSWORD, INITIAL_SUPERUSER_ROLE)
+    assert SuperUser.get_by_email(VALID_EMAIL) is not None
+
+@pytest.mark.usefixtures("setup_app")
+def test_update_superuser_role():
+    id, success = user_core.create_superuser(VALID_EMAIL, VALID_PASSWORD, INITIAL_SUPERUSER_ROLE)
+    user_core.update_superuser_role(VALID_EMAIL, 'Admin')
+    assert SuperUser.get_by_id(id).role == SuperUserRole.admin
+
+@pytest.mark.usefixtures("setup_app")
+def test_update_superuser_password():
+    id, success = user_core.create_superuser(VALID_EMAIL, VALID_PASSWORD, INITIAL_SUPERUSER_ROLE)
+    s_user = SuperUser.get_by_id(id)
+    user_core.update_superuser_password(VALID_EMAIL, 'ThisIsANewValidPassword', s_user.created_at.timestamp())
+    SuperUser.get_by_id(id).is_password_valid('ThisIsANewValidPassword')
+
+@pytest.mark.usefixtures("setup_app")
+def test_delete_superuser():
+    id, success = user_core.create_superuser(VALID_EMAIL, VALID_PASSWORD, INITIAL_SUPERUSER_ROLE)
+    s_user = SuperUser.get_by_id(id)
+    user_core.delete_superuser(id, s_user.created_at.timestamp())
+    assert SuperUser.get_by_email(VALID_EMAIL) is None
+

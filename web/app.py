@@ -50,8 +50,7 @@ def register_errorhandlers(app):
     @app.errorhandler(DBAPIError)
     def handle_db_error(error):
         response = "internal server error"
-        response.status_code = 500
-        return response
+        return response, 500
 
     @app.errorhandler(404)
     def page_not_found(e):

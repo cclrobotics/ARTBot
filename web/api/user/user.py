@@ -16,13 +16,21 @@ class MetaUser():
             raise TypeError('MetaUser class is not meant to be accessed directly')
 
     @classmethod
+    def _Roles(cls):
+        try:
+            return cls._get_roles()
+        except AttributeError:
+            raise TypeError('MetaUser class is not meant to be accessed directly')
+   
+    @classmethod
     def _create(cls, email, created_at, role):
         _Model = cls._Model()
         return cls(_Model(email=email, created_at=created_at, role=role).save())
 
     @classmethod
-    def from_email(cls, email):
-        return cls._create(email, dt.datetime.now(), cls._default_role())
+    def from_email(cls, email, role=None):
+        role = role or cls.default_role()
+        return cls._create(email, dt.datetime.now(), role)
 
     @classmethod
     def get_by_email(cls, email):
@@ -35,6 +43,20 @@ class MetaUser():
         _Model = cls._Model()
         model = _Model.get_by_id(id)
         return cls(model) if model else None
+
+    @classmethod
+    def roles(cls):
+        return [role.value for role in list(cls._Roles())]
+
+    @classmethod
+    def default_role(cls):
+        return cls.roles()[0]
+
+    def delete(self):
+        return self._model.delete(commit=False)
+    
+    def set_role(self, role):
+        return self._model.update(commit=False, role=role)
 
     def set_password(self, password):
         self._model.password_hash = argon2.password_hasher.hash(password)
@@ -68,15 +90,13 @@ class MetaUser():
         return self._model.role
 
 
-_Model = UserModel
-
 class User(MetaUser):
     @classmethod
     def _get_model(cls):
         return UserModel
     @classmethod
-    def _default_role(cls):
-        return list(UserRole)[0]
+    def _get_roles(cls):
+        return UserRole
 
     def create_artpiece(self, title, art):
         from .artpiece import Artpiece
@@ -92,5 +112,9 @@ class SuperUser(MetaUser):
     def _get_model(cls):
         return SuperUserModel
     @classmethod
-    def _default_role(cls):
-        return list(SuperUserRole)[0]
+    def _get_roles(cls):
+        return SuperUserRole
+
+    @property
+    def created_at(self):
+        return self._model.created_at
