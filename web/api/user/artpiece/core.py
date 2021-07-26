@@ -23,7 +23,6 @@ def guarantee_monthly_submission_limit_not_reached(limit):
         raise MonthlySubmissionLimitException()
 
 def validate_and_extract_artpiece_data(json_data, color_keys):
-    print(json_data)
     try:
         data = ArtpieceSchema(color_keys).load(json_data)
     except ValidationError as err:

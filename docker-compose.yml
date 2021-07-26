@@ -19,6 +19,7 @@ services:
             - MAIL_SERVER=maildev
             - MAIL_PORT=25
             - MAIL_DEFAULT_SENDER=ccl-artbot@gmail.com
+            - INITIAL_ADMIN_PASSWORD=TEMP
         depends_on:
             - artbot-db
             - maildev

@@ -31,8 +31,6 @@ class ArtpieceModel(SurrogatePK, Model):
 
 class UserRole(OrderedEnum):
     artist = 'Artist'
-    printer = 'Printer'
-    admin = 'Admin'
 
 class UserModel(SurrogatePK, Model):
     __tablename__ = 'users'
@@ -47,6 +45,24 @@ class UserModel(SurrogatePK, Model):
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.email)
+
+class SuperUserRole(OrderedEnum):
+    printer = 'Printer'
+    admin = 'Admin'
+
+class SuperUserModel(SurrogatePK, Model):
+    __tablename__ = 'super_users'
+
+    email = Column(db.String(50), nullable=False, index=True, unique=True)
+    created_at = Column(db.DateTime(), nullable=False)
+    role = Column(
+            db.Enum(SuperUserRole, values_callable=lambda x: [e.value for e in x])
+            , nullable=False, name='role', default='Printer')
+    password_hash = Column(db.String(128), nullable=True)
+
+    def __repr__(self):
+        return '<%r: %r>' % (self.id, self.email)
+
 
 RGBA = namedtuple('RGBA', ['r','g','b','a'])
 
