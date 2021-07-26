@@ -122,7 +122,7 @@ def upgrade():
                                       "the environment variable INITIAL_ADMIN_PASSWORD "
                                       "as a starting point for managing users"))
             ph = PasswordHasher()
-            session.add(SuperUserModel(email='TEMP',
+            session.add(SuperUserModel(email='ADMIN',
                                        created_at=datetime.now(),
                                        role=SuperUserRole.admin,
                                        password_hash=ph.hash(INITIAL_ADMIN_PASSWORD)))
