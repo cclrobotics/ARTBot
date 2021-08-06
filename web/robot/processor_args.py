@@ -14,5 +14,9 @@ parser.add_argument('--pipette', '-pi'
                     ,default='p10_single'
                     ,help='Optional argument to specify the pipette type. Use Opentrons standard names.'
                     )
+parser.add_argument('--canvas', '-c'
+                    ,default='ccl_artbot_canvas'
+                    ,help='Optional argument to specify the canvas type. Use Opentrons standard names, or the name you saved it with if using custom labware.'
+                    )
 
 args = vars(parser.parse_args())

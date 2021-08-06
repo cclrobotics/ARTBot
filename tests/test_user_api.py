@@ -7,17 +7,10 @@ from web.api.user.artpiece import (core, exceptions as art_exceptions)
 from web.api.user.exceptions import InvalidUsage
 from web.database.models import ArtpieceModel, SuperUserRole
 
-@pytest.fixture(scope="function")
-def setup_app(test_app, test_database, clear_database):
-    yield
-
-VALID_EMAIL = 'valid@mail.com'
-VALID_TITLE = 'valid title'
-VALID_ART = {'1': [[0,0]], '2': [[1,1]], '3': [[2,2]]}
-VALID_PASSWORD = 'ThisIsALongAndValidPassword'
-INITIAL_ROLE = 'Artist'
-INITIAL_SUPERUSER_ROLE = 'Printer'
-INITIAL_PASSWORD_HASH = None
+from .conftest import (VALID_EMAIL, VALID_TITLE, VALID_ART, VALID_PASSWORD,
+                       INITIAL_ROLE, INITIAL_SUPERUSER_ROLE,
+                       INITIAL_PASSWORD_HASH
+                      )
 
 
 def create_artpiece_data(email=VALID_EMAIL, title=VALID_TITLE, art=VALID_ART):

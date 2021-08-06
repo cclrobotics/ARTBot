@@ -117,5 +117,5 @@ class LabObjectPropertyModel(SurrogatePK, Model):
     
 
     def __repr__(self):
-        return '<%r: %r>' % (self.name,
+        return '<%r: %r>' % (self.obj_property,
                             self.property_value_num or self.property_value_str)
