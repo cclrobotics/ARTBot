@@ -196,7 +196,7 @@ def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI = None, APP_DIR = None,
             # Get canvas plate dimensions
             try:
                 canvas = LabObject.load_from_name(LABWARE['canvas'])
-            except:
+            except: #kludgy fix to handle when CLI is used instead of web interface
                 canvas_model = session.query(LabObjectsModel).filter(LabObjectsModel.name==LABWARE['canvas']).one_or_none()
                 property_model = canvas_model.properties.all()
                 canvas = LabObject(canvas_model.name, canvas_model.obj_class, LabObjectPropertyCollection._from_model(property_model))
