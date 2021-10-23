@@ -2,6 +2,9 @@ from marshmallow import (fields, Schema, pre_load, post_dump, validates)
 from marshmallow.validate import (Length, Regexp)
 from .validators import (validate_art_content_length, validate_color_keys, validate_pixels,
         validate_title)
+from ...file_manager import file_manager
+
+_fm = file_manager()
 
 class ArtpieceSchema(Schema):
     title = fields.Str(missing=None)
@@ -47,7 +50,7 @@ class PrintableSchema(Schema):
             , keys=fields.Str()
             , values=fields.List(fields.Tuple((fields.Int(), fields.Int())))
             )
-    img_uri = fields.Function(lambda obj: '/artpieces/image/' + str(obj.id))
+    img_uri = fields.Function(lambda obj: _fm.get_file_url(f'{obj.slug}_{int(obj.submit_date.timestamp()*1000)}.jpg'))
 
     class Meta:
         ordered = True

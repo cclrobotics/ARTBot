@@ -10,31 +10,33 @@ from PIL import Image, ImageDraw
 from slugify import slugify
 from flask import current_app
 from flask_jwt_extended import create_access_token, decode_token
+from web.api.file_manager import file_manager
 from web.database.models import ArtpieceModel, SubmissionStatus
 from web.api.user.colors import get_available_color_mapping
 
 _CartesianCoordinates = namedtuple('CartesianCoordinates', ['x', 'y'])
 Canvas = _CartesianCoordinates
-DEFAULT_CANVAS = Canvas(39, 26)
+DEFAULT_CANVAS = Canvas(26, 26)
 
 def _decode_to_image(pixel_art_color_encoding, color_mapping
     , canvas_size=DEFAULT_CANVAS, scale=200):
-    ratio = (3, 2)
+    ratio = (2, 2)
     pixel_size = (ratio[0] * scale / canvas_size.x
                  , ratio[1] * scale / canvas_size.y)
     total_size = (math.ceil(ratio[0] * scale + pixel_size[0])
                  , math.ceil(ratio[1] * scale + pixel_size[1]))
-    im = Image.new('RGBA',total_size,(255,255,255,1))
+    im = Image.new('RGBX',total_size,(255,255,255,1))
     draw = ImageDraw.Draw(im)
-
     for color in pixel_art_color_encoding:
         # pixels are given as [y,x]
         for pixel_y, pixel_x in pixel_art_color_encoding[color]:
             origin = (pixel_size[0] * pixel_x, pixel_size[1] * pixel_y)
             far_corner = (pixel_size[0] + origin[0], pixel_size[1] + origin[1])
             draw.rectangle([origin, far_corner], fill=color_mapping[color])
-
-    return (im.tobytes())
+    with io.BytesIO() as output:
+        im.save(output, format='JPEG')
+        image_file = output.getvalue()
+    return (image_file)
 
 def _create_unique_slug(title):
     slug = slugify(title)
@@ -51,6 +53,7 @@ def _create_unique_slug(title):
 
 
 _Model = ArtpieceModel
+_fm = file_manager()
 
 class Artpiece():
     def __init__(self, model):
@@ -65,6 +68,7 @@ class Artpiece():
         submit_date = dt.datetime.now()
         raw_image = _decode_to_image(art, get_available_color_mapping())
         slug = _create_unique_slug(title)
+        image_loc = _fm.store_file(io.BytesIO(raw_image), f'{slug}_{int(submit_date.timestamp()*1000)}.jpg')
         return cls(
                 _Model(slug=slug, title=title, submit_date=submit_date, art=art
                     , status=SubmissionStatus.submitted, raw_image=raw_image
@@ -91,25 +95,18 @@ class Artpiece():
         from ..user import User
         return User.get_by_id(self._model.user_id)
 
-    def get_image_as_jpg(self, size=(616,414)):
-        image = Image.frombytes('RGBX', (616,414), self._model.raw_image)
-        if size != (616,414): image = image.resize(size)
+    def get_image_as_jpg(self):
         with io.BytesIO() as output:
-            image.save(output, format='JPEG')
+            key = f'{self._model.slug}_{int(self._model.submit_date.timestamp()*1000)}.jpg'
+            #key = _fm.parse_uri(self._model.image_loc)[-1] #switch to this once image_loc column is implemented
+            _fm.get_file(output, key)
             image_file = output.getvalue()
         return image_file
 
-    def get_image_in_filepath(self, size=(616,414)):
-        image = Image.frombytes('RGBX', (616,414), self._model.raw_image)
-        if size != (616,414): image = image.resize(size)
-        with io.BytesIO() as output:
-            image.save(output, format='JPEG')
-            image_file = output.getvalue()
-        #FIX: (1) This ignores IO stream above
-        #     (2) saves to file system without cleaning up after itself
-        #     (3) Returns a file URI instead of bytes, which would be preferred
-        loc = os.getcwd() + '/web/static/img/art_designs/' + str(self._model.id) + '.jpg'
-        image.save(loc, format='JPEG')
+    def get_image_url(self):
+        key = f'{self._model.slug}_{int(self._model.submit_date.timestamp()*1000)}.jpg'
+        #key = _fm.parse_uri(self._model.image_loc)[-1] #switch to this once image_loc column is implemented
+        loc = _fm.get_file_url(key)
         return loc
 
     def get_confirmation_token(self, expires_in=60*60*72):

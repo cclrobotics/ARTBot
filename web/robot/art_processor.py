@@ -147,7 +147,7 @@ def add_pixel_locations(template_string, artpieces, canvas):
     # write where to draw pixels on each plate into code. Listed by color to reduce contamination
     pixels_by_color = dict()
     for artpiece in artpieces:
-        grid_size = (39, 26) #TODO Drop hardcoding. Store grid size with art
+        grid_size = (26, 26) #TODO Drop hardcoding. Store grid size with art
         for color in artpiece.art:
             pixel_list = optimize_print_order(
                 [plate_location_map(pixel, canvas, grid_size) for pixel in artpiece.art[color]]

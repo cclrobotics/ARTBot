@@ -15,6 +15,7 @@ td.job-data {
 img.job-data {
     margin: 20px;
     border: black 1px solid;
+    height: 100px;
 }
 
 .job-header {

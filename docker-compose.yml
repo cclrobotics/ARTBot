@@ -14,14 +14,20 @@ services:
             - FLASK_ENV=development
             - FLASK_APP=web.app:create_app
             - APP_SETTINGS=web.settings.DevConfig
+            - INITIAL_ADMIN_PASSWORD=TEMP
             - DATABASE_URL=postgresql://postgres:postgres@artbot-db:5432/artbot_dev
             - DATABASE_TEST_URL=postgresql://postgres:postgres@artbot-db:5432/artbot_test
             - MAIL_SERVER=maildev
             - MAIL_PORT=25
             - MAIL_DEFAULT_SENDER=ccl-artbot@gmail.com
-            - INITIAL_ADMIN_PASSWORD=TEMP
+            - AWS_SERVER=localstack
+            - AWS_PORT=4566
+            - AWS_ACCESS_KEY_ID=TEMP
+            - AWS_SECRET_ACCESS_KEY=TEMP
+            - IMAGE_BUCKET=dataimages
         depends_on:
             - artbot-db
+            - localstack
             - maildev
 
     artbot-db:
@@ -33,6 +39,22 @@ services:
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
+
+
+    localstack:
+        image: localstack/localstack
+        ports:
+            - 4566:4566
+        environment:
+            - AWS_DEFAULT_REGION=us-east-1
+            - AWS_ACCESS_KEY_ID=TEMP #Should match above
+            - AWS_SECRET_ACCESS_KEY=TEMP
+            - SERVICES=s3
+            - DEBUG=1
+            - DATA_DIR=/tmp/localstack/data
+        volumes:
+            - "./.localstack:/tmp/localstack"
+            - "./dev_deploy:/docker-entrypoint-initaws.d" #Runs startup scripts
 
     maildev:
         image: djfarrelly/maildev
