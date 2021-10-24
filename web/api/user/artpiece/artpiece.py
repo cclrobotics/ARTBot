@@ -66,12 +66,12 @@ class Artpiece():
     @classmethod
     def create(cls, user_id, title, art):
         submit_date = dt.datetime.now()
-        raw_image = _decode_to_image(art, get_available_color_mapping())
         slug = _create_unique_slug(title)
-        image_loc = _fm.store_file(io.BytesIO(raw_image), f'{slug}_{int(submit_date.timestamp()*1000)}.jpg')
+        image_as_bytes = _decode_to_image(art, get_available_color_mapping())
+        image_uri = _fm.store_file(io.BytesIO(image_as_bytes), f'{slug}_{int(submit_date.timestamp()*1000)}.jpg')
         return cls(
                 _Model(slug=slug, title=title, submit_date=submit_date, art=art
-                    , status=SubmissionStatus.submitted, raw_image=raw_image
+                    , status=SubmissionStatus.submitted, image_uri=image_uri
                     , user_id=user_id, confirmed=False)
                 .save())
 

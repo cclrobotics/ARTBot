@@ -28,6 +28,13 @@ class file_manager():
             return False
         return '/'.join([self.endpoint_url, self.bucket, key])
 
+    def del_file(self, key):
+        try:
+            self.s3.delete_object(Bucket=self.bucket, Key=key)
+        except ClientError as e:
+            return False
+        return True
+
     def get_file(self, file, key):
         try:
             response = self.s3.download_fileobj(self.bucket, key, file)

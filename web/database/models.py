@@ -26,7 +26,8 @@ class ArtpieceModel(SurrogatePK, Model):
             db.Enum(SubmissionStatus, values_callable=lambda x: [e.value for e in x])
             , nullable=False, name='submission_status')
     confirmed = Column(db.Boolean, nullable=False)
-    raw_image = deferred(Column(db.LargeBinary(), nullable=False))
+    #raw_image = deferred(Column(db.LargeBinary(), nullable=False))
+    image_uri = Column(db.String(128), nullable=False)
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.title)
