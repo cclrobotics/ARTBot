@@ -32,6 +32,8 @@ app.model = function() {
 			return nullarray;
 		}
 
+		that.size = size
+
 		that.isColor = function(pixel, color) {
 			if (coloredPixels[pixel.x] == null) {
 				return color == null;
@@ -157,6 +159,7 @@ app.model = function() {
 					'email': email
 					, 'title': title
 					, 'art': canvas.asColorToPixelMap()
+					, 'canvas_size': canvas.size
 				})
 				, contentType: 'application/json'
 				, dataType: 'json'

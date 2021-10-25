@@ -14,6 +14,7 @@ from web.api.lab_objects.lab_objects import LabObject
 VALID_EMAIL = 'valid@mail.com'
 VALID_TITLE = 'valid title'
 VALID_ART = {'1': [[0,0]], '2': [[1,1]], '3': [[2,2]]}
+VALID_CANVAS_SIZE = {'x':26,'y':26}
 VALID_PASSWORD = 'ThisIsALongAndValidPassword'
 INITIAL_ROLE = 'Artist'
 INITIAL_SUPERUSER_ROLE = 'Printer'
@@ -101,8 +102,8 @@ def generate_random_art():
     def random_art(num_colors, xdim, ydim, fill=False):
         art = dict()
         canvas = [[]*ydim]*xdim
-        for x in range(xdim - 1):
-            for y in range(ydim - 1):
+        for x in range(xdim):
+            for y in range(ydim):
                 color = str(randint(fill,num_colors))
                 if color != "0":
                     if color not in art:
@@ -118,11 +119,12 @@ def random_test_art_ids(request, test_database, generate_random_art):
     fill = fill.args[0] if fill else False
     
     art_params = request.param
+    canvas_size = {'x':art_params[1], 'y':art_params[2]}
     num_artpieces = 9
     artpiece_ids = list()
     for i in range(num_artpieces):
         art = generate_random_art(*art_params, fill)
-        artpiece = create_artpiece(VALID_EMAIL + str(i), VALID_TITLE, art)
+        artpiece = create_artpiece(VALID_EMAIL + str(i), VALID_TITLE, art, canvas_size)
         artpiece.confirm()
         artpiece_ids.append(artpiece.id)
     test_database.session.commit()

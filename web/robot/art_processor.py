@@ -14,7 +14,7 @@ def read_args(args):
     if not args: args = {'notebook':False
                         ,'palette':'corning_96_wellplate_360ul_flat'
                         ,'pipette':'p300_single'
-                        ,'canvas': 'ccl_artbot_canvas'
+                        ,'canvas': 'ccl_artbot_canvas_90mm_round'
                         }
     NOTEBOOK = args.pop('notebook')
     LABWARE = args #assume unused args are all labware
@@ -53,31 +53,25 @@ def canvas_slot_generator():
         yield str(slot)
 
 
-def well_map(well):
-    map = dict(zip(range(26), string.ascii_uppercase))
-    letter = map[well[0]]
-    number = well[1] + 1
-    return letter + str(number)
-
-
 # BUG: overwrites locations if same title
 def plate_location_map(coord, plate, grid_size):
     #Note coordinates stored as [y,x]
+    max_grid_postion = {'x':grid_size['x']-1, 'y':grid_size['y']-1}
     if plate.shape == 'round': #inscribe in circle
-        aspect_ratio = grid_size[0] / grid_size[1]
+        aspect_ratio = max_grid_postion['x'] / max_grid_postion['y']
 
         angle = math.atan(aspect_ratio)
         x_max_mm = math.sin(angle) * plate.x_radius_mm
         y_max_mm = math.cos(angle) * plate.y_radius_mm
 
-        wellspacing = x_max_mm * 2 / grid_size[0] #x and y are identical
+        wellspacing = x_max_mm * 2 / max_grid_postion['x'] #x and y are identical
     else:
-        x_wellspacing = plate.x_radius_mm * 2 / grid_size[0]
-        y_wellspacing = plate.y_radius_mm * 2 / grid_size[1]
+        x_wellspacing = plate.x_radius_mm * 2 / grid_size['x']
+        y_wellspacing = plate.y_radius_mm * 2 / grid_size['y']
         wellspacing = min(x_wellspacing, y_wellspacing)
 
-        x_max_mm = wellspacing * grid_size[0] / 2
-        y_max_mm = wellspacing * grid_size[1] / 2
+        x_max_mm = wellspacing * max_grid_postion['x'] / 2
+        y_max_mm = wellspacing * max_grid_postion['y'] / 2
     well_radius = min(plate.x_radius_mm, plate.y_radius_mm)
 
     x = (wellspacing * coord[1] - x_max_mm) / well_radius
@@ -147,7 +141,7 @@ def add_pixel_locations(template_string, artpieces, canvas):
     # write where to draw pixels on each plate into code. Listed by color to reduce contamination
     pixels_by_color = dict()
     for artpiece in artpieces:
-        grid_size = (26, 26) #TODO Drop hardcoding. Store grid size with art
+        grid_size = artpiece.canvas_size
         for color in artpiece.art:
             pixel_list = optimize_print_order(
                 [plate_location_map(pixel, canvas, grid_size) for pixel in artpiece.art[color]]

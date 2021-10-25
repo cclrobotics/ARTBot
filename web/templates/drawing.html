@@ -48,9 +48,9 @@
 					<i class="fas fa-expand"></i>
 				</div>
 				<table class="pixel-canvas">
-					{% for ly in range(canvas_size.y) %}
+					{% for ly in range(canvas_size['y']) %}
 					<tr id="Y{{ ly }}">
-						{% for lx in range(canvas_size.x) %}
+						{% for lx in range(canvas_size['x']) %}
 						<td id="X{{ lx }}"></td>
 						{% endfor %}
 					</tr>

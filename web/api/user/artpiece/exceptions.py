@@ -6,6 +6,7 @@ _USER_LIMIT = error_template('user_limit', 'user limit exceeded')
 _PIXEL_OUT_OF_BOUNDS = error_template('pixel_out_of_bounds', 'pixel out of canvas bounds')
 _INVALID_COLOR_SCHEME = error_template('invalid_color_scheme', 'invalid color scheme')
 _BLANK_CANVAS = error_template('blank_canvas', 'blank canvas')
+_INVALID_CANVAS_SIZE = error_template('bad_canvas_size', 'canvas size is invalid')
 
 _TOKEN_EXPIRATION = error_template('token_expired', 'confirmation token expiration')
 _INVALID_TOKEN = error_template('token_invalid', 'invalid confirmation token')
@@ -33,6 +34,10 @@ class BlankCanvasException(InvalidUsage):
 class InvalidTitleException(InvalidUsage):
     def __init__(self, code, title):
         super().__init__(error_template(code, title))
+
+class InvalidCanvasException(InvalidUsage):
+    def __init__(self):
+        super().__init__(_INVALID_CANVAS_SIZE)
 
 class ExpiredConfirmationTokenException(InvalidUsage):
     def __init__(self):

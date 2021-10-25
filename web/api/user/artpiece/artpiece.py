@@ -14,15 +14,11 @@ from web.api.file_manager import file_manager
 from web.database.models import ArtpieceModel, SubmissionStatus
 from web.api.user.colors import get_available_color_mapping
 
-_CartesianCoordinates = namedtuple('CartesianCoordinates', ['x', 'y'])
-Canvas = _CartesianCoordinates
-DEFAULT_CANVAS = Canvas(26, 26)
-
 def _decode_to_image(pixel_art_color_encoding, color_mapping
-    , canvas_size=DEFAULT_CANVAS, scale=200):
-    ratio = (2, 2)
-    pixel_size = (ratio[0] * scale / canvas_size.x
-                 , ratio[1] * scale / canvas_size.y)
+    , canvas_size, scale=600):
+    ratio = (1, canvas_size['y']/canvas_size['x'])
+    pixel_size = (ratio[0] * scale / canvas_size['x']
+                 , ratio[1] * scale / canvas_size['y'])
     total_size = (math.ceil(ratio[0] * scale + pixel_size[0])
                  , math.ceil(ratio[1] * scale + pixel_size[1]))
     im = Image.new('RGBX',total_size,(255,255,255,1))
@@ -64,15 +60,16 @@ class Artpiece():
         self._model = _Model.get_by_id(self._model_id)
 
     @classmethod
-    def create(cls, user_id, title, art):
+    def create(cls, user_id, title, art, canvas_size):
         submit_date = dt.datetime.now()
         slug = _create_unique_slug(title)
-        image_as_bytes = _decode_to_image(art, get_available_color_mapping())
+        image_as_bytes = _decode_to_image(art, get_available_color_mapping(), canvas_size)
         image_uri = _fm.store_file(io.BytesIO(image_as_bytes), f'{slug}_{int(submit_date.timestamp()*1000)}.jpg')
+        
         return cls(
                 _Model(slug=slug, title=title, submit_date=submit_date, art=art
-                    , status=SubmissionStatus.submitted, image_uri=image_uri
-                    , user_id=user_id, confirmed=False)
+                    , canvas_size=canvas_size, status=SubmissionStatus.submitted
+                    , image_uri=image_uri, user_id=user_id, confirmed=False)
                 .save())
 
     @classmethod

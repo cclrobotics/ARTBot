@@ -22,11 +22,11 @@ class ArtpieceModel(SurrogatePK, Model):
     user_id = Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     submit_date = Column(db.DateTime(), nullable=False)
     art = Column(db.JSON(), nullable=False, name='art_encoding')
+    canvas_size = Column(db.JSON(), nullable=False)
     status = Column(
             db.Enum(SubmissionStatus, values_callable=lambda x: [e.value for e in x])
             , nullable=False, name='submission_status')
     confirmed = Column(db.Boolean, nullable=False)
-    #raw_image = deferred(Column(db.LargeBinary(), nullable=False))
     image_uri = Column(db.String(128), nullable=False)
 
     def __repr__(self):

@@ -27,13 +27,13 @@ def validate_and_extract_artpiece_data(json_data, color_keys):
         data = ArtpieceSchema(color_keys).load(json_data)
     except ValidationError as err:
         raise InvalidUsage.from_validation_error(err)
-    return data['email'], data['title'], data['art']
+    return data['email'], data['title'], data['art'], data['canvas_size']
 
-def create_artpiece(email, title, art):
+def create_artpiece(email, title, art, canvas_size):
     user = User.get_by_email(email) or User.from_email(email)
     if user.has_active_submission():
         raise UserSubmissionLimitException()
-    return user.create_artpiece(title, art)
+    return user.create_artpiece(title, art, canvas_size)
 
 def confirm_artpiece(artpiece, token):
     if artpiece is None:

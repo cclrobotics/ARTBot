@@ -16,17 +16,29 @@ def art_dimensions(canvas_object_in_db, art_from_test_db):
     artpiece = art_from_test_db[0]
     
     canvas = canvas_object_in_db
-
-    #All this to get the grid size. Only works with full canvas.
-    #Rewrite to one line once art reports its own grid size
-    grid_size = [0,0]
-    for color in artpiece.art:
-        for pixel in artpiece.art[color]:
-            if pixel[1] > grid_size[0]: grid_size[0] = pixel[1]
-            if pixel[0] > grid_size[1]: grid_size[1] = pixel[0]
+    grid_size = artpiece.canvas_size
 
     all_plate_positions = list()
     all_pixels = list()
+
+       #DEBUG
+    print(grid_size)
+    if canvas.shape == 'round': #inscribe in circle
+        aspect_ratio = grid_size['x'] / grid_size['y']
+
+        angle = math.atan(aspect_ratio)
+        x_max_mm = math.sin(angle) * canvas.x_radius_mm
+        y_max_mm = math.cos(angle) * canvas.y_radius_mm
+
+        wellspacing = x_max_mm * 2 / grid_size['x'] #x and y are identical
+    else:
+        x_wellspacing = canvas.x_radius_mm * 2 / grid_size['x']
+        y_wellspacing = canvas.y_radius_mm * 2 / grid_size['y']
+        wellspacing = min(x_wellspacing, y_wellspacing)
+    well_radius = min(canvas.x_radius_mm, canvas.y_radius_mm)
+    print(wellspacing/well_radius)
+    #END DEBUG
+
     for color in artpiece.art:
         for pixel in artpiece.art[color]:
             plate_position = plate_location_map(pixel, canvas, grid_size)
@@ -118,9 +130,11 @@ def test_all_points_in_bounds(art_dimensions):
 def test_all_points_scaled_correctly(art_dimensions):
     all_plate_positions, all_pixels, canvas, grid_size = art_dimensions
         
+    max_grid_postion = {'x':grid_size['x']-1, 'y':grid_size['y']-1}
+    
     for plate_position, pixel in zip(all_plate_positions, all_pixels):
-        translated_pixel_x = pixel[1] - (grid_size[0] / 2)
-        translated_pixel_y = -pixel[0] + (grid_size[1] / 2)
+        translated_pixel_x = pixel[1] - (max_grid_postion['x'] / 2)
+        translated_pixel_y = -pixel[0] + (max_grid_postion['y'] / 2)
 
         if translated_pixel_x > 0 and translated_pixel_y > 0: #Can't draw conclusions about scaling if at 0 position
             assert round(plate_position[0] / translated_pixel_x, 5) == round(plate_position[1] / translated_pixel_y, 5)
@@ -130,8 +144,9 @@ def test_all_points_scaled_correctly(art_dimensions):
 @pytest.mark.fill_canvas(True)
 def test_full_plate_used(art_dimensions):
     all_plate_positions, all_pixels, canvas, grid_size = art_dimensions
-    
-    art_aspect_ratio = grid_size[0] / grid_size[1]
+
+    max_grid_postion = {'x':grid_size['x']-1, 'y':grid_size['y']-1}
+    art_aspect_ratio = max_grid_postion['x'] / max_grid_postion['y']
     
     if canvas.shape == 'round':
         angle = math.atan(art_aspect_ratio)
@@ -141,17 +156,16 @@ def test_full_plate_used(art_dimensions):
         canvas_aspect_ratio = canvas.x_radius_mm / canvas.y_radius_mm
         max_plate_position_x = canvas_aspect_ratio if canvas_aspect_ratio > 1 else 1
         max_plate_position_y = 1/canvas_aspect_ratio if canvas_aspect_ratio < 1 else 1
-        wellspacing_x = max_plate_position_x * 2 / grid_size[0]
-        wellspacing_y = max_plate_position_y * 2 / grid_size[1]
+        wellspacing_x = max_plate_position_x * 2 / grid_size['x']
+        wellspacing_y = max_plate_position_y * 2 / grid_size['y']
         wellspacing = min(wellspacing_x, wellspacing_y)
-        max_art_position_x = wellspacing * grid_size[0] / 2
-        max_art_position_y = wellspacing * grid_size[1] / 2
+        max_art_position_x = wellspacing * max_grid_postion['x'] / 2
+        max_art_position_y = wellspacing * max_grid_postion['y'] / 2
     
     max_reached_x, max_reached_y = (0, 0)
     for position in all_plate_positions:
         if position[0] > max_reached_x: max_reached_x = position[0]
         if position[1] > max_reached_y: max_reached_y = position[1]
         
-    assert (round(max_reached_x, 5) == round(max_art_position_x, 5) and
-            round(max_reached_y, 5) == round(max_art_position_y, 5)
-    )
+    assert round(max_reached_x, 5) == round(max_art_position_x, 5)
+    assert round(max_reached_y, 5) == round(max_art_position_y, 5)

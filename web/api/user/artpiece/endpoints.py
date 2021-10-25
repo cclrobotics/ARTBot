@@ -40,10 +40,10 @@ def receive_art():
     monthly_limit = current_app.config['MONTLY_SUBMISSION_LIMIT']
     guarantee_monthly_submission_limit_not_reached(monthly_limit)
 
-    email, title, art = validate_and_extract_artpiece_data(request.get_json()
+    email, title, art, canvas_size = validate_and_extract_artpiece_data(request.get_json()
             , get_available_color_mapping().keys())
 
-    artpiece = create_artpiece(email, title, art)
+    artpiece = create_artpiece(email, title, art, canvas_size) #TODO add canvas size here, then make sure it gets sent to DB and used
     db.session.commit()
 
     send_confirmation_email_async(artpiece)
