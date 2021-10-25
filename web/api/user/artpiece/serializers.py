@@ -1,7 +1,10 @@
-from marshmallow import (fields, Schema, pre_load, post_dump, validates)
+from marshmallow import (fields, Schema, pre_load, post_dump, validates, validates_schema)
 from marshmallow.validate import (Length, Regexp)
 from .validators import (validate_art_content_length, validate_color_keys, validate_pixels,
-        validate_title)
+        validate_title, validate_canvas_size)
+from ...file_manager import file_manager
+
+_fm = file_manager()
 
 class ArtpieceSchema(Schema):
     title = fields.Str(missing=None)
@@ -11,6 +14,7 @@ class ArtpieceSchema(Schema):
             , keys=fields.Str()
             , values=fields.List(fields.Tuple((fields.Int(), fields.Int())))
             )
+    canvas_size = fields.Dict(missing=None, keys=fields.Str(), values=fields.Int())
 
     def __init__(self, valid_color_keys, many=False):
         Schema.__init__(self, many=many)
@@ -24,7 +28,14 @@ class ArtpieceSchema(Schema):
     def _validate_art_field(self, art):
         validate_art_content_length(art)
         validate_color_keys(art, self._valid_color_keys)
-        validate_pixels(art)
+
+    @validates('canvas_size')
+    def _validate_canvas_size(self, canvas_size):
+        validate_canvas_size(canvas_size)
+
+    @validates_schema()
+    def _validate_canvas_size_and_art_combo(self, data, **kwargs):
+        validate_pixels(data['art'], data['canvas_size'])
 
     @pre_load
     def strip_title(self, in_data, **kwargs):
@@ -47,7 +58,7 @@ class PrintableSchema(Schema):
             , keys=fields.Str()
             , values=fields.List(fields.Tuple((fields.Int(), fields.Int())))
             )
-    img_uri = fields.Function(lambda obj: '/artpieces/image/' + str(obj.id))
+    img_uri = fields.Function(lambda obj: _fm.get_file_url(f'{obj.slug}_{int(obj.submit_date.timestamp()*1000)}.jpg'))
 
     class Meta:
         ordered = True

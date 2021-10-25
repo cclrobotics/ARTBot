@@ -7,12 +7,14 @@ import sys
 import math
 from contextlib import contextmanager
 
-from web.database.models import (ArtpieceModel, SubmissionStatus, BacterialColorModel)
+from web.api.lab_objects.lab_objects import LabObject, LabObjectPropertyCollection #TODO Uncomfortable with this dependency
+from web.database.models import (ArtpieceModel, SubmissionStatus, BacterialColorModel, LabObjectsModel)
 
 def read_args(args):
     if not args: args = {'notebook':False
                         ,'palette':'corning_96_wellplate_360ul_flat'
-                        ,'pipette':'p10_single'
+                        ,'pipette':'p300_single'
+                        ,'canvas': 'ccl_artbot_canvas_90mm_round'
                         }
     NOTEBOOK = args.pop('notebook')
     LABWARE = args #assume unused args are all labware
@@ -51,24 +53,33 @@ def canvas_slot_generator():
         yield str(slot)
 
 
-def well_map(well):
-    map = dict(zip(range(26), string.ascii_uppercase))
-    letter = map[well[0]]
-    number = well[1] + 1
-    return letter + str(number)
-
 # BUG: overwrites locations if same title
-def plate_location_map(coord):
-    x_wellspacing = 105 / 38
-    y_wellspacing = 70 / 25
-    x_max_mm = 52.5
-    y_max_mm = 35
-    well_radius = 35
+def plate_location_map(coord, plate, grid_size):
+    #Note coordinates stored as [y,x]
+    max_grid_postion = {'x':grid_size['x']-1, 'y':grid_size['y']-1}
+    if plate.shape == 'round': #inscribe in circle
+        aspect_ratio = max_grid_postion['x'] / max_grid_postion['y']
 
-    x = (x_wellspacing * coord[1] - x_max_mm) / well_radius
-    y = (y_wellspacing * -coord[0] + y_max_mm) / well_radius
+        angle = math.atan(aspect_ratio)
+        x_max_mm = math.sin(angle) * plate.x_radius_mm
+        y_max_mm = math.cos(angle) * plate.y_radius_mm
 
-    return x, y
+        wellspacing = x_max_mm * 2 / max_grid_postion['x'] #x and y are identical
+    else:
+        x_wellspacing = plate.x_radius_mm * 2 / grid_size['x']
+        y_wellspacing = plate.y_radius_mm * 2 / grid_size['y']
+        wellspacing = min(x_wellspacing, y_wellspacing)
+
+        x_max_mm = wellspacing * max_grid_postion['x'] / 2
+        y_max_mm = wellspacing * max_grid_postion['y'] / 2
+    well_radius = min(plate.x_radius_mm, plate.y_radius_mm)
+
+    x = (wellspacing * coord[1] - x_max_mm) / well_radius
+    y = (wellspacing * -coord[0] + y_max_mm) / well_radius
+
+    z = plate.z_touch_position_frac
+
+    return x, y, z
 
 #Finds the closest point from the given point
 def min_dist_point(start, remaininglist):
@@ -114,6 +125,7 @@ def add_labware(template_string, labware):
     labware['tiprack'] = 'opentrons_96_tiprack_200ul' if 'P300' in labware['pipette'] else 'opentrons_96_tiprack_10ul'
     
     procedure = template_string.replace('%%PALETTE GOES HERE%%', labware['palette'])
+    procedure = procedure.replace('%%CANVAS GOES HERE%%', labware['canvas'])
     procedure = procedure.replace('%%PIPETTE GOES HERE%%', labware['pipette'])
     procedure = procedure.replace('%%TIPRACK GOES HERE%%', labware['tiprack'])
     return procedure
@@ -125,13 +137,14 @@ def add_canvas_locations(template_string, artpieces):
     procedure = template_string.replace('%%CANVAS LOCATIONS GO HERE%%', str(canvas_locations))
     return procedure, canvas_locations
 
-def add_pixel_locations(template_string, artpieces):
+def add_pixel_locations(template_string, artpieces, canvas):
     # write where to draw pixels on each plate into code. Listed by color to reduce contamination
     pixels_by_color = dict()
     for artpiece in artpieces:
+        grid_size = artpiece.canvas_size
         for color in artpiece.art:
             pixel_list = optimize_print_order(
-                [plate_location_map(pixel) for pixel in artpiece.art[color]]
+                [plate_location_map(pixel, canvas, grid_size) for pixel in artpiece.art[color]]
             )
             if color not in pixels_by_color:
                 pixels_by_color[color] = dict()
@@ -174,6 +187,14 @@ def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI = None, APP_DIR = None,
             # Get all colors
             colors = session.query(BacterialColorModel).all()
 
+            # Get canvas plate dimensions
+            try:
+                canvas = LabObject.load_from_name(LABWARE['canvas'])
+            except: #kludgy fix to handle when CLI is used instead of web interface
+                canvas_model = session.query(LabObjectsModel).filter(LabObjectsModel.name==LABWARE['canvas']).one_or_none()
+                property_model = canvas_model.properties.all()
+                canvas = LabObject(canvas_model.name, canvas_model.obj_class, LabObjectPropertyCollection._from_model(property_model))
+
             #Get Python art procedure template
             file_extension = 'ipynb' if NOTEBOOK == True else 'py' #Use Jupyter notbook template or .py template
             with open(os.path.join(APP_DIR,f'ART_TEMPLATE.{file_extension}')) as template_file:
@@ -181,7 +202,7 @@ def make_procedure(artpiece_ids, SQLALCHEMY_DATABASE_URI = None, APP_DIR = None,
 
             procedure = add_labware(template_string, LABWARE)
             procedure, canvas_locations = add_canvas_locations(procedure, artpieces)
-            procedure = add_pixel_locations(procedure, artpieces)
+            procedure = add_pixel_locations(procedure, artpieces, canvas)
             procedure = add_color_map(procedure, colors)
 
             now = datetime.now().strftime("%Y%m%d-%H%M%S")

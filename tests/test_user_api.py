@@ -7,28 +7,21 @@ from web.api.user.artpiece import (core, exceptions as art_exceptions)
 from web.api.user.exceptions import InvalidUsage
 from web.database.models import ArtpieceModel, SuperUserRole
 
-@pytest.fixture(scope="function")
-def setup_app(test_app, test_database, clear_database):
-    yield
-
-VALID_EMAIL = 'valid@mail.com'
-VALID_TITLE = 'valid title'
-VALID_ART = {'1': [[0,0]], '2': [[1,1]], '3': [[2,2]]}
-VALID_PASSWORD = 'ThisIsALongAndValidPassword'
-INITIAL_ROLE = 'Artist'
-INITIAL_SUPERUSER_ROLE = 'Printer'
-INITIAL_PASSWORD_HASH = None
+from .conftest import (VALID_EMAIL, VALID_TITLE, VALID_ART, VALID_PASSWORD,
+                       INITIAL_ROLE, INITIAL_SUPERUSER_ROLE,
+                       INITIAL_PASSWORD_HASH, VALID_CANVAS_SIZE
+                      )
 
 
-def create_artpiece_data(email=VALID_EMAIL, title=VALID_TITLE, art=VALID_ART):
-    return {'email': email, 'title': title, 'art': art}
+def create_artpiece_data(email=VALID_EMAIL, title=VALID_TITLE, art=VALID_ART, canvas_size=VALID_CANVAS_SIZE):
+    return {'email': email, 'title': title, 'art': art, 'canvas_size': canvas_size}
 
-def create_artpiece(email=VALID_EMAIL, title=VALID_TITLE, art=VALID_ART):
-    return User.from_email(email).create_artpiece(title, art)
+def create_artpiece(email=VALID_EMAIL, title=VALID_TITLE, art=VALID_ART, canvas_size=VALID_CANVAS_SIZE):
+    return User.from_email(email).create_artpiece(title, art, canvas_size)
 
 @pytest.mark.usefixtures("setup_app")
 def test_create_artpiece_by_new_user():
-    artpiece = core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART)
+    artpiece = core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART, VALID_CANVAS_SIZE)
     assert artpiece.title == VALID_TITLE
     assert artpiece.creator.email == VALID_EMAIL
     assert artpiece.creator.role.value == INITIAL_ROLE
@@ -37,7 +30,7 @@ def test_create_artpiece_by_new_user():
 @pytest.mark.usefixtures("setup_app")
 @pytest.mark.parametrize('password', ['test', 'te st', '', 'rH79ffS3iNbY', 'I2E#$D1l0Sr#'])
 def test_add_user_password(password):
-    artpiece = core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART)
+    artpiece = core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART, VALID_CANVAS_SIZE)
     user = User.get_by_email(VALID_EMAIL)
     user.set_password(password)
     assert user.is_password_valid(password)
@@ -54,8 +47,8 @@ def test_monthly_submission_limit_exceeded():
 @pytest.mark.usefixtures("setup_app")
 def test_create_artpieces_with_same_email():
     with pytest.raises(art_exceptions.UserSubmissionLimitException):
-        core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART)
-        core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART)
+        core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART, VALID_CANVAS_SIZE)
+        core.create_artpiece(VALID_EMAIL, VALID_TITLE, VALID_ART, VALID_CANVAS_SIZE)
 
 @pytest.mark.usefixtures("setup_app")
 @pytest.mark.parametrize('invalid_email', ['malformed@malformation', '@deadbeef', 'evil.universe'])
@@ -72,11 +65,13 @@ def test_create_artpiece_non_alphanumeric_title(invalid_title):
         core.validate_and_extract_artpiece_data(in_data, VALID_ART.keys())
 
 @pytest.mark.usefixtures("setup_app")
-@pytest.mark.parametrize('invalid_art', [{'1': [[100, 0]]}, {'2': [[5, 101]]}])
+@pytest.mark.parametrize('invalid_art', [{'art':{'1': [[100, 0]]},'size':{'x':26,'y':26}},
+                                         {'art':{'2': [[5, 101]]},'size':{'x':26,'y':99}}
+                                        ])
 def test_create_artpiece_pixel_outofbounds(invalid_art):
-    in_data = create_artpiece_data(art=invalid_art)
+    in_data = create_artpiece_data(art=invalid_art['art'], canvas_size=invalid_art['size'])
     with pytest.raises(art_exceptions.PixelOutOfBoundsException):
-        core.validate_and_extract_artpiece_data(in_data, invalid_art.keys())
+        core.validate_and_extract_artpiece_data(in_data, invalid_art['art'].keys())
 
 @pytest.mark.usefixtures("setup_app")
 def test_create_artpiece_unavailable_color():
@@ -90,6 +85,13 @@ def test_create_artpiece_unavailable_color():
 def test_create_artpiece_with_empty_canvas(invalid_art):
     in_data = create_artpiece_data(art=invalid_art)
     with pytest.raises(art_exceptions.BlankCanvasException):
+        core.validate_and_extract_artpiece_data(in_data, VALID_ART.keys())
+
+@pytest.mark.usefixtures("setup_app")
+@pytest.mark.parametrize('invalid_canvas', [{'x':26}, {'x':1000,'y':25}])
+def test_create_artpiece_with_invalid_canvas(invalid_canvas):
+    in_data = create_artpiece_data(canvas_size=invalid_canvas)
+    with pytest.raises(art_exceptions.InvalidCanvasException):
         core.validate_and_extract_artpiece_data(in_data, VALID_ART.keys())
 
 @pytest.mark.usefixtures("setup_app")

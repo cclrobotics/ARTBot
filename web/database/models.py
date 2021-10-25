@@ -2,6 +2,8 @@
 import datetime as dt
 from collections import namedtuple
 from enum import Enum
+
+from sqlalchemy.orm import relation
 from .database import (Model, SurrogatePK, db, Column,
                               reference_col, relationship, deferred, composite,
                               OrderedEnum)
@@ -20,11 +22,12 @@ class ArtpieceModel(SurrogatePK, Model):
     user_id = Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     submit_date = Column(db.DateTime(), nullable=False)
     art = Column(db.JSON(), nullable=False, name='art_encoding')
+    canvas_size = Column(db.JSON(), nullable=False)
     status = Column(
             db.Enum(SubmissionStatus, values_callable=lambda x: [e.value for e in x])
             , nullable=False, name='submission_status')
     confirmed = Column(db.Boolean, nullable=False)
-    raw_image = deferred(Column(db.LargeBinary(), nullable=False))
+    image_uri = Column(db.String(128), nullable=False)
 
     def __repr__(self):
         return '<%r: %r>' % (self.id, self.title)
@@ -93,3 +96,27 @@ class EmailFailureModel(SurrogatePK, Model):
     state = Column(db.Enum(EmailFailureState, values_callable=lambda x: [e.value for e in x])
             , nullable=False, name='failure_state')
     error_msg = Column(db.String(150), nullable=False)
+
+class LabObjectsModel(SurrogatePK, Model):
+    __tablename__ = 'lab_objects'
+
+    name = Column(db.String(50), nullable=False, unique=True, index=True)
+    obj_class = Column(db.String(50), nullable=False)
+    properties = relationship('LabObjectPropertyModel', backref='object', lazy='dynamic')
+
+    def __repr__(self):
+        return '<%r: %r>' % (self.obj_class, self.name)
+
+class LabObjectPropertyModel(SurrogatePK, Model):
+    __tablename__ = 'lab_object_properties'
+
+    object_id = Column(db.Integer, db.ForeignKey('lab_objects.id'))
+    obj_property = Column(db.String(50), nullable=False)
+    obj_property_units = Column(db.String(20), nullable=True)
+    property_value_num = Column(db.Float, nullable = True)
+    property_value_str = Column(db.String(255), nullable=True)
+    
+
+    def __repr__(self):
+        return '<%r: %r>' % (self.obj_property,
+                            self.property_value_num or self.property_value_str)

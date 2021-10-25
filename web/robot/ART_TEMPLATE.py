@@ -77,7 +77,7 @@ def run(protocol: protocol_api.ProtocolContext):
     # plates to create art in
     canvas_labware = dict()
     for art_title in canvas_locations:
-        canvas_labware[art_title] = protocol.load_labware('ccl_artbot_canvas', canvas_locations[art_title])
+        canvas_labware[art_title] = protocol.load_labware('%%CANVAS GOES HERE%%', canvas_locations[art_title])
 
     # wells to dispense each color material to
     pixels_by_color = dict()
@@ -87,7 +87,7 @@ def run(protocol: protocol_api.ProtocolContext):
         for art_title in pixels_by_artpiece:
             pixels_by_color[color] += [
                 Location(
-                    point=canvas_labware[art_title].wells()[0].from_center_cartesian(x=pixel[0], y=pixel[1], z=-0.5),
+                    point=canvas_labware[art_title].wells()[0].from_center_cartesian(x=pixel[0], y=pixel[1], z=pixel[2]),
                     labware=canvas_labware[art_title]
                  )
                 for pixel in pixels_by_artpiece[art_title]
@@ -96,7 +96,7 @@ def run(protocol: protocol_api.ProtocolContext):
                 pixel = pixels_by_artpiece[art_title]
                 pixels_by_color[color] += [
                     Location(
-                        point=canvas_labware[art_title].wells()[0].from_center_cartesian(x=pixel[0], y=pixel[1], z=-0.5),
+                        point=canvas_labware[art_title].wells()[0].from_center_cartesian(x=pixel[0], y=pixel[1], z=pixel[2]),
                         labware=canvas_labware[art_title]
                     )
                 ]

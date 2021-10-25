@@ -3,11 +3,12 @@
 from functools import wraps
 from flask import (render_template, Blueprint, current_app, request)
 from web.extensions import cache, jwt
-from .api.user.artpiece import DEFAULT_CANVAS
 from .api.user.utilities import get_gallery_images
 from .settings import ANNOUNCEMENT
 
 main = Blueprint('main', __name__)
+
+DEFAULT_CANVAS = {'x':26, 'y':26}
 
 #Home page
 @main.route('/', methods=('GET', ))

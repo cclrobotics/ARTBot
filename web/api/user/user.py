@@ -98,9 +98,9 @@ class User(MetaUser):
     def _get_roles(cls):
         return UserRole
 
-    def create_artpiece(self, title, art):
+    def create_artpiece(self, title, art, canvas_size):
         from .artpiece import Artpiece
-        return Artpiece.create(self._model.id, title, art)
+        return Artpiece.create(self._model.id, title, art, canvas_size)
 
     def has_active_submission(self):
         return self._model.artpieces.filter(
