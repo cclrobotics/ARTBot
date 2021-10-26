@@ -19,7 +19,7 @@ app.model = function() {
 	const subject = this.subject();
 
 	// Inefficient constructor | more idiomitic method doesn't allow for private vars
-	function Canvas(size={x: 39, y:26}) {
+	function Canvas(size={x: 26, y:26}) {
 		let that = {};
 		let numOfColoredPixels = 0;
 		let coloredPixels = initNulls(size.x);
@@ -31,6 +31,8 @@ app.model = function() {
 			}
 			return nullarray;
 		}
+
+		that.size = size
 
 		that.isColor = function(pixel, color) {
 			if (coloredPixels[pixel.x] == null) {
@@ -157,6 +159,7 @@ app.model = function() {
 					'email': email
 					, 'title': title
 					, 'art': canvas.asColorToPixelMap()
+					, 'canvas_size': canvas.size
 				})
 				, contentType: 'application/json'
 				, dataType: 'json'

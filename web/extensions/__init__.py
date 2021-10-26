@@ -21,7 +21,7 @@ class CRUDMixin(Model):
         """Update specific fields of a record."""
         for attr, value in kwargs.items():
             setattr(self, attr, value)
-        return self.save()
+        return self.save(commit=commit)
 
     def save(self, commit=False):
         """Save the record."""

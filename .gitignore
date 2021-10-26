@@ -3,4 +3,6 @@
 *.db
 *.vscode
 pyvenv.cfg
-/robot/procedures
+.localstack/*
+/web/robot/procedures/*
+/web/static/img/art_designs/*

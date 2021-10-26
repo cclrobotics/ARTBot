@@ -1,4 +1,5 @@
-from flask import (Blueprint, request, current_app, jsonify, send_file)
+import os
+from flask import (Blueprint, request, current_app, jsonify, send_file, render_template_string)
 from flask_jwt_extended import jwt_required
 from .core import (validate_and_extract_artpiece_data, create_artpiece,
         has_reached_monthly_submission_limit, guarantee_monthly_submission_limit_not_reached)
@@ -10,8 +11,8 @@ from ..utilities import access_level_required
 from .artpiece import Artpiece
 from .serializers import ArtpieceSchema, PrintableSchema
 from web.extensions import db
-from web.database.models import UserRole
-from robot.art_processor import make_procedure
+from web.database.models import SuperUserRole
+from web.robot.art_processor import make_procedure
 
 import base64
 
@@ -39,10 +40,10 @@ def receive_art():
     monthly_limit = current_app.config['MONTLY_SUBMISSION_LIMIT']
     guarantee_monthly_submission_limit_not_reached(monthly_limit)
 
-    email, title, art = validate_and_extract_artpiece_data(request.get_json()
+    email, title, art, canvas_size = validate_and_extract_artpiece_data(request.get_json()
             , get_available_color_mapping().keys())
 
-    artpiece = create_artpiece(email, title, art)
+    artpiece = create_artpiece(email, title, art, canvas_size)
     db.session.commit()
 
     send_confirmation_email_async(artpiece)
@@ -60,7 +61,7 @@ def confirm_artpiece(id, token):
 
 @artpiece_blueprint.route('/print_jobs', methods=('GET', ))
 @jwt_required()
-@access_level_required(UserRole.printer)
+@access_level_required(SuperUserRole.printer)
 def get_print_jobs():
     print_jobs = Artpiece.get_printable()
     schema = PrintableSchema(many=True)
@@ -68,23 +69,18 @@ def get_print_jobs():
 
     return jsonify({'data': serialized})
 
-@artpiece_blueprint.route('/artpieces/image/<int:id>', methods=('GET', ))
-def get_artpiece_image(id):
-    img_file = Artpiece.get_by_id(id).get_image_as_jpg(size=(223,150))
-    return send_file(img_file, mimetype='image/jpg', as_attachment=False)
-
 @artpiece_blueprint.route('/procedures/<string:id>', methods=('GET', ))
 @jwt_required()
-@access_level_required(UserRole.printer)
+@access_level_required(SuperUserRole.printer)
 def get_procedure_file(id):
     
-    procedure_file = f'/usr/src/app/robot/procedures/ARTISTIC_PROCEDURE_{id}'
+    procedure_file = f'{os.getcwd()}/web/robot/procedures/ARTISTIC_PROCEDURE_{id}'
 
     return send_file(procedure_file, mimetype='text/plain', as_attachment=True)
 
 @artpiece_blueprint.route('/procedure_request', methods=('POST', ))
 @jwt_required()
-@access_level_required(UserRole.printer)
+@access_level_required(SuperUserRole.printer)
 def receive_print_request():
 
     artpiece_ids = request.get_json()['ids']
@@ -99,3 +95,4 @@ def receive_print_request():
         raise InvalidUsage.resource_not_found()
     
     return jsonify({'msg':msg, 'procedure_uri':procedure_uri}), 201
+    

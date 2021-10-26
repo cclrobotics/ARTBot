@@ -31,6 +31,14 @@ class Config(object):
     MAIL_USE_SSL = bool(os.environ.get('MAIL_USE_SSL', False))
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', None)
 
+    """Media bucket settings."""
+    AWS_SERVER = os.environ.get('AWS_SERVER', None)
+    AWS_PORT = int(os.environ.get('AWS_PORT', 4566))
+    AWS_DEFAULT_REGION= os.environ.get('AWS_DEFAULT_REGION', None)
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', None)
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', None)
+    IMAGE_BUCKET = os.environ.get('IMAGE_BUCKET', None)
+
 class ProdConfig(Config):
     """Production configuration."""
     ENV = 'production'

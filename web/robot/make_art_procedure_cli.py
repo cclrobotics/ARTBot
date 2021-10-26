@@ -16,6 +16,7 @@ while num_pieces not in range(1,10):
 
 msg, file_loc = make_procedure(None
                               ,SQLALCHEMY_DATABASE_URI
+                              ,None
                               ,num_pieces
                               ,args
                               )
