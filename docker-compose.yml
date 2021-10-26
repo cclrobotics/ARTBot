@@ -22,6 +22,7 @@ services:
             - MAIL_DEFAULT_SENDER=ccl-artbot@gmail.com
             - AWS_SERVER=localstack
             - AWS_PORT=4566
+            - AWS_DEFAULT_REGION=us-east-1
             - AWS_ACCESS_KEY_ID=TEMP
             - AWS_SECRET_ACCESS_KEY=TEMP
             - IMAGE_BUCKET=dataimages

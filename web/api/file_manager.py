@@ -5,10 +5,12 @@ from ..settings import Config
 image_bucket = Config.IMAGE_BUCKET
 
 class file_manager():
-    def __init__(self, bucket=image_bucket, server= Config.AWS_SERVER, port=Config.AWS_PORT):
-        self.endpoint_url = f'http://{server}:{port}'
+    def __init__(self, bucket=image_bucket, server= Config.AWS_SERVER,
+                       port=Config.AWS_PORT, region=Config.AWS_DEFAULT_REGION
+                       ):
+        self.endpoint_url = f'http://{server}:{port}' if server else None
         self.bucket = bucket
-        self.s3 = boto3.client('s3', endpoint_url=self.endpoint_url)
+        self.s3 = boto3.client('s3', endpoint_url=self.endpoint_url, region_name=region)
 
     @classmethod
     def parse_uri(cls, uri:str):
