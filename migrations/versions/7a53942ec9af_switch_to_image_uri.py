@@ -41,6 +41,7 @@ AWS_SERVER = os.environ.get('AWS_SERVER')
 AWS_PORT = int(os.environ.get('AWS_PORT', 4566))
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_DEFAULT_REGION = os.environ.get('AWS_DEFAULT_REGION')
 IMAGE_BUCKET = os.environ.get('IMAGE_BUCKET')
 
 RGBA = namedtuple('RGBA', ['r','g','b','a'])
@@ -53,8 +54,8 @@ color_mapping = {
     }
 
 class file_manager():
-    def __init__(self, bucket=image_bucket, server= Config.AWS_SERVER,
-                       port=Config.AWS_PORT, region=Config.AWS_DEFAULT_REGION
+    def __init__(self, bucket=IMAGE_BUCKET, server= AWS_SERVER,
+                       port=AWS_PORT, region=AWS_DEFAULT_REGION
                        ):
         self.endpoint_url = f'http://{server}:{port}' if server else None
         self.bucket = bucket
