@@ -38,7 +38,7 @@ NOTE: When downgrading, any artpiece larger than 39X26 will throw an error
 """
 
 AWS_SERVER = os.environ.get('AWS_SERVER')
-AWS_PORT = int(os.environ.get('AWS_PORT'))
+AWS_PORT = int(os.environ.get('AWS_PORT', 4566))
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 IMAGE_BUCKET = os.environ.get('IMAGE_BUCKET')
@@ -53,27 +53,29 @@ color_mapping = {
     }
 
 class file_manager():
-    def __init__(self, bucket=IMAGE_BUCKET, server= AWS_SERVER, port=AWS_PORT):
-        self.endpoint_url = f'http://{server}:{port}'
+    def __init__(self, bucket=image_bucket, server= Config.AWS_SERVER,
+                       port=Config.AWS_PORT, region=Config.AWS_DEFAULT_REGION
+                       ):
+        self.endpoint_url = f'http://{server}:{port}' if server else None
         self.bucket = bucket
         try:
-            self.s3 = boto3.client('s3', endpoint_url=self.endpoint_url)
+            self.s3 = boto3.client('s3', endpoint_url=self.endpoint_url, region_name=region)
         except ClientError as e:
             raise ClientError("""Failure connecting to S3 Media Storage.
                 This migration script expects you to set the following environment vars:
-                AWS_SERVER, AWS_PORT, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, IMAGE_BUCKET.
+                AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, IMAGE_BUCKET.
+                AWS_SERVER, AWS_PORT must also be set if not using default Amazon endpoint.
                 \n""" + e)
 
     @classmethod
     def parse_uri(cls, uri:str):
         try:
             uri = uri.split('://')[1]
-            server, uri = uri.split(':')
-            port, bucket = uri.split('/')[0:1]
-            key = '/'.join(uri.split('/')[2:])
+            bucket = uri.split('/')[0]
+            key = '/'.join(uri.split('/')[1:])
         except:
             return 'Malformed URI'
-        return (server, port, bucket, key)
+        return (bucket, key)
 
     def store_file(self, file, key):
         response = self.s3.upload_fileobj(file, self.bucket, key)
@@ -148,7 +150,7 @@ def downgrade():
         artpieces = session.query(ArtpieceModel).all()
         for artpiece in artpieces:
             artpiece.raw_image = decode_to_image(artpiece.art, color_mapping)
-            fm.del_file(fm.parse_uri(artpiece.image_uri)[3])
+            fm.del_file(fm.parse_uri(artpiece.image_uri)[-1])
     
     op.alter_column('artpieces', 'raw_image', nullable=False)
     op.drop_column('artpieces', 'image_uri')

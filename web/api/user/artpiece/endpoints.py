@@ -43,7 +43,7 @@ def receive_art():
     email, title, art, canvas_size = validate_and_extract_artpiece_data(request.get_json()
             , get_available_color_mapping().keys())
 
-    artpiece = create_artpiece(email, title, art, canvas_size) #TODO add canvas size here, then make sure it gets sent to DB and used
+    artpiece = create_artpiece(email, title, art, canvas_size)
     db.session.commit()
 
     send_confirmation_email_async(artpiece)

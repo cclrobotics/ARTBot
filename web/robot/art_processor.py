@@ -7,7 +7,7 @@ import sys
 import math
 from contextlib import contextmanager
 
-from web.api.lab_objects.lab_objects import LabObject, LabObjectPropertyCollection #TODO Uncomfortable with this dependency
+from web.api.lab_objects.lab_objects import LabObject, LabObjectPropertyCollection #Uncomfortable with this dependency
 from web.database.models import (ArtpieceModel, SubmissionStatus, BacterialColorModel, LabObjectsModel)
 
 def read_args(args):

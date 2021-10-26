@@ -94,15 +94,13 @@ class Artpiece():
 
     def get_image_as_jpg(self):
         with io.BytesIO() as output:
-            key = f'{self._model.slug}_{int(self._model.submit_date.timestamp()*1000)}.jpg'
-            #key = _fm.parse_uri(self._model.image_loc)[-1] #switch to this once image_loc column is implemented
+            key = _fm.parse_uri(self._model.image_uri)[-1]
             _fm.get_file(output, key)
             image_file = output.getvalue()
         return image_file
 
     def get_image_url(self):
-        key = f'{self._model.slug}_{int(self._model.submit_date.timestamp()*1000)}.jpg'
-        #key = _fm.parse_uri(self._model.image_loc)[-1] #switch to this once image_loc column is implemented
+        key = _fm.parse_uri(self._model.image_uri)[-1]
         loc = _fm.get_file_url(key)
         return loc
 

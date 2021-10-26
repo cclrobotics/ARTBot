@@ -16,19 +16,18 @@ class file_manager():
     def parse_uri(cls, uri:str):
         try:
             uri = uri.split('://')[1]
-            server, uri = uri.split(':')
-            port, bucket = uri.split('/')[0:1]
-            key = '/'.join(uri.split('/')[2:])
+            bucket = uri.split('/')[0]
+            key = '/'.join(uri.split('/')[1:])
         except:
             return 'Malformed URI'
-        return (server, port, bucket, key)
+        return (bucket, key)
 
     def store_file(self, file, key):
         try:
             response = self.s3.upload_fileobj(file, self.bucket, key)
         except ClientError as e:
             return False
-        return '/'.join([self.endpoint_url, self.bucket, key])
+        return 's3://' + '/'.join([self.bucket, key])
 
     def del_file(self, key):
         try:
