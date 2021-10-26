@@ -79,10 +79,7 @@ class file_manager():
         return (bucket, key)
 
     def store_file(self, file, key):
-        try:
-            response = self.s3.upload_fileobj(file, self.bucket, key)
-        except ClientError as e:
-            return False
+        response = self.s3.upload_fileobj(file, self.bucket, key)
         return 's3://' + '/'.join([self.bucket, key])
 
     def del_file(self, key):
