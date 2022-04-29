@@ -15,17 +15,23 @@ metadata = {
 
 def distribute_to_agar(pipette, vol, source, destination, disposal_vol):
     max_volume = pipette.max_volume
+    needs_new_tip = True
 
     dest = list(destination)  # allows for non-lists
 
     for cnt, well in enumerate(dest):
         if (cnt + 1) % 150 == 0:
-            pipette.drop_tip()
+            needs_new_tip = True
 
         if not pipette.has_tip:
             pipette.pick_up_tip()
 
         if pipette.current_volume < (vol + disposal_vol):
+            if needs_new_tip:
+                if pipette.has_tip: pipette.drop_tip()
+                pipette.pick_up_tip()
+                needs_new_tip = False
+                
             remaining_wells = len(dest) - cnt
             remaining_vol = remaining_wells * vol
 
@@ -101,9 +107,5 @@ def run(protocol: protocol_api.ProtocolContext):
                     )
                 ]
 
-    #This is a quick check that the pipette is calibrated to pick up tip at the bottom row as well as the top
-    pipette.pick_up_tip(tiprack.wells()[7])
-    pipette.return_tip()
-
     for color in pixels_by_color:
-        distribute_to_agar(pipette, 0.1, palette_colors[color], pixels_by_color[color], disposal_vol=1)
+        distribute_to_agar(pipette, 0.4, palette_colors[color], pixels_by_color[color], disposal_vol=2)
